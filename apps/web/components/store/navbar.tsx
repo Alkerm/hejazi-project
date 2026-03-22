@@ -78,28 +78,30 @@ export function Navbar() {
 
   return (
     <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className={`mx-auto flex w-full max-w-6xl items-center px-4 py-3 ${isLoginPage ? 'justify-center' : 'justify-between'}`}>
+      <div
+        className={`mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-4 py-3 ${isLoginPage ? 'justify-center' : 'justify-between'}`}
+      >
         <Link href="/" className="text-xl font-bold text-brand-700">
           Hejazi Cosmetics
         </Link>
 
         {isLoginPage ? null : isAdminSection ? (
-          <nav className="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <nav className="flex max-w-full items-center gap-2 overflow-x-auto pb-1 text-sm font-medium text-slate-700">
             {adminLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded px-3 py-2 font-semibold ${isAdminLinkActive(link.href) ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700'}`}
+                className={`whitespace-nowrap rounded px-3 py-2 font-semibold ${isAdminLinkActive(link.href) ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700'}`}
               >
                 {link.label}
               </Link>
             ))}
-            <Button type="button" variant="secondary" className="px-3 py-1.5" onClick={handleLogout}>
+            <Button type="button" variant="secondary" className="whitespace-nowrap px-3 py-1.5" onClick={handleLogout}>
               Logout
             </Button>
           </nav>
         ) : (
-          <nav className="flex items-center gap-4 text-sm font-medium text-slate-700">
+          <nav className="flex flex-wrap items-center justify-end gap-4 text-sm font-medium text-slate-700">
             {auth.isAuthenticated ? (
               <>
                 {!isProductsRoute && <Link href="/products">Products</Link>}

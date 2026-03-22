@@ -40,7 +40,7 @@ export default function AdminProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-bold">Products</h2>
         <Link href="/admin/products/new">
           <Button>Create Product</Button>
@@ -50,8 +50,8 @@ export default function AdminProductsPage() {
       <div className="rounded border bg-white p-4">
         <div className="space-y-2">
           {products.map((product) => (
-            <div key={product.id} className="flex items-center justify-between border-b pb-2 text-sm">
-              <div>
+            <div key={product.id} className="flex flex-wrap items-start justify-between gap-3 border-b pb-2 text-sm">
+              <div className="min-w-0">
                 <p className="font-semibold">{product.name}</p>
                 <p className="text-slate-600">
                   {product.category.name} | {formatMoney(product.price)} | stock {product.stockQuantity}

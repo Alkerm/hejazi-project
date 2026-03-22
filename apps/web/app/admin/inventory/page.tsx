@@ -45,25 +45,27 @@ export default function AdminInventoryPage() {
           {lowStockItems.length === 0 ? (
             <p className="text-sm text-slate-600">No low-stock products.</p>
           ) : (
-            <>
-              <div className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <span>Product</span>
-                <span className="text-center">Category</span>
-                <span className="text-center">Stock</span>
-              </div>
-              {lowStockItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-sm"
-                >
-                  <span>{item.name}</span>
-                  <span className="text-center">{item.category.name}</span>
-                  <span className="flex justify-center">
-                    <Badge variant="danger">Stock: {item.stockQuantity}</Badge>
-                  </span>
+            <div className="overflow-x-auto">
+              <div className="min-w-[680px]">
+                <div className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <span>Product</span>
+                  <span className="text-center">Category</span>
+                  <span className="text-center">Stock</span>
                 </div>
-              ))}
-            </>
+                {lowStockItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 pt-2 text-sm"
+                  >
+                    <span>{item.name}</span>
+                    <span className="text-center">{item.category.name}</span>
+                    <span className="flex justify-center">
+                      <Badge variant="danger">Stock: {item.stockQuantity}</Badge>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </section>
@@ -74,25 +76,27 @@ export default function AdminInventoryPage() {
           {healthyStockItems.length === 0 ? (
             <p className="text-sm text-slate-600">No healthy-stock products.</p>
           ) : (
-            <>
-              <div className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <span>Product</span>
-                <span className="text-center">Category</span>
-                <span className="text-center">Stock</span>
-              </div>
-              {healthyStockItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-sm"
-                >
-                  <span>{item.name}</span>
-                  <span className="text-center">{item.category.name}</span>
-                  <span className="flex justify-center">
-                    <Badge variant="success">Stock: {item.stockQuantity}</Badge>
-                  </span>
+            <div className="overflow-x-auto">
+              <div className="min-w-[680px]">
+                <div className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <span>Product</span>
+                  <span className="text-center">Category</span>
+                  <span className="text-center">Stock</span>
                 </div>
-              ))}
-            </>
+                {healthyStockItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 pt-2 text-sm"
+                  >
+                    <span>{item.name}</span>
+                    <span className="text-center">{item.category.name}</span>
+                    <span className="flex justify-center">
+                      <Badge variant="success">Stock: {item.stockQuantity}</Badge>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </section>
