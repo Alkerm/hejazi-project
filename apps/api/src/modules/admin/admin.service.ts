@@ -59,6 +59,8 @@ export const getAdminProducts = async (query: {
   pageSize: number;
   search?: string;
   categoryId?: string;
+  minStock?: number;
+  maxStock?: number;
   isActive?: boolean;
 }) => {
   const { skip, take, page, pageSize } = normalizePagination(query);
@@ -67,6 +69,8 @@ export const getAdminProducts = async (query: {
     take,
     search: query.search,
     categoryId: query.categoryId,
+    minStock: query.minStock,
+    maxStock: query.maxStock,
     isActive: query.isActive,
   });
 

@@ -25,7 +25,17 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-bold">My Orders</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-bold">My Orders</h1>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/cart" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+            Cart
+          </Link>
+          <Link href="/products" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+            Back to products
+          </Link>
+        </div>
+      </div>
       {orders.length === 0 ? (
         <p className="rounded border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
           No orders yet.

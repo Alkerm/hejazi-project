@@ -41,11 +41,29 @@ export const setAuthCookie = (reply: FastifyReply, sessionId: string) => {
     maxAge: env.SESSION_TTL_SECONDS,
     domain: env.COOKIE_DOMAIN,
   });
+
+  reply.setCookie(`${env.COOKIE_NAME}_hint`, '1', {
+    path: '/',
+    secure: isProd || env.COOKIE_SAME_SITE === 'none',
+    sameSite: env.COOKIE_SAME_SITE,
+    maxAge: env.SESSION_TTL_SECONDS,
+    domain: env.COOKIE_DOMAIN,
+  });
 };
 
 export const clearAuthCookie = (reply: FastifyReply) => {
   reply.clearCookie(env.COOKIE_NAME, {
     path: '/',
+    sameSite: env.COOKIE_SAME_SITE,
+    secure: isProd || env.COOKIE_SAME_SITE === 'none',
+    httpOnly: true,
+    domain: env.COOKIE_DOMAIN,
+  });
+
+  reply.clearCookie(`${env.COOKIE_NAME}_hint`, {
+    path: '/',
+    sameSite: env.COOKIE_SAME_SITE,
+    secure: isProd || env.COOKIE_SAME_SITE === 'none',
     domain: env.COOKIE_DOMAIN,
   });
 };

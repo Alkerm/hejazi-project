@@ -75,7 +75,7 @@ export const createOrderFromCart = async (
           paymentStatus: 'UNPAID',
           subtotal: new Prisma.Decimal(subtotalRounded),
           total: new Prisma.Decimal(total),
-          currency: payload.currency ?? 'USD',
+          currency: payload.currency ?? 'SAR',
           shippingAddressSnapshot: payload.shippingAddress,
           items: {
             createMany: {

@@ -23,8 +23,18 @@ export const listAdminProductsRepo = (input: {
   take: number;
   search?: string;
   categoryId?: string;
+  minStock?: number;
+  maxStock?: number;
   isActive?: boolean;
 }) => {
+  const stockQuantity: Prisma.IntFilter | undefined =
+    input.minStock !== undefined || input.maxStock !== undefined
+      ? {
+          ...(input.minStock !== undefined ? { gte: input.minStock } : {}),
+          ...(input.maxStock !== undefined ? { lte: input.maxStock } : {}),
+        }
+      : undefined;
+
   const where: Prisma.ProductWhereInput = {
     ...(input.search
       ? {
@@ -35,6 +45,7 @@ export const listAdminProductsRepo = (input: {
         }
       : {}),
     ...(input.categoryId ? { categoryId: input.categoryId } : {}),
+    ...(stockQuantity ? { stockQuantity } : {}),
     ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
   };
 

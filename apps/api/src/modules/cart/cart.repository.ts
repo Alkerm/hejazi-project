@@ -16,9 +16,11 @@ export const getCartByUserId = (userId: string) =>
   });
 
 export const ensureCart = async (userId: string) => {
-  const existing = await prisma.cart.findUnique({ where: { userId } });
-  if (existing) return existing;
-  return prisma.cart.create({ data: { userId } });
+  return prisma.cart.upsert({
+    where: { userId },
+    update: {},
+    create: { userId },
+  });
 };
 
 export const getCartItem = (itemId: string) => prisma.cartItem.findUnique({ where: { id: itemId } });

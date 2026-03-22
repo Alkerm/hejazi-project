@@ -8,7 +8,7 @@ export const createOrderSchema = z.object({
     country: z.string().min(2).max(80),
     postalCode: z.string().min(2).max(20),
   }),
-  currency: z.string().default('USD'),
+  currency: z.string().default('SAR'),
 });
 
 export const orderIdSchema = z.object({

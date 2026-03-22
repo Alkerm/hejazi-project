@@ -4,64 +4,98 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
-import { Pagination } from '@/components/ui/pagination';
 
 export default function AdminInventoryPage() {
-  const [items, setItems] = useState<Product[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [threshold, setThreshold] = useState(5);
-  const [outOfStockCount, setOutOfStockCount] = useState(0);
+  const [lowStockItems, setLowStockItems] = useState<Product[]>([]);
+  const [healthyStockItems, setHealthyStockItems] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api
-      .adminInventoryLowStock(`?threshold=${threshold}&page=${page}&pageSize=12`)
-      .then((res) => {
-        setItems(res.items);
-        setTotalPages(res.meta.totalPages || 1);
-        setOutOfStockCount(res.meta.outOfStockCount);
+    setLoading(true);
+    setError(null);
+
+    Promise.all([
+      api.adminInventoryLowStock('?threshold=9&page=1&pageSize=50'),
+      api.adminProducts('?minStock=10&page=1&pageSize=50&isActive=true'),
+    ])
+      .then(([lowStockRes, healthyStockRes]) => {
+        setLowStockItems(lowStockRes.items);
+        setHealthyStockItems(healthyStockRes.items);
       })
-      .catch(() => null);
-  }, [page, threshold]);
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="space-y-1">
         <h2 className="text-2xl font-bold">Inventory Monitoring</h2>
-        <label className="text-sm">
-          Threshold:{' '}
-          <input
-            className="w-20 rounded border px-2 py-1"
-            type="number"
-            min={1}
-            value={threshold}
-            onChange={(e) => {
-              setPage(1);
-              setThreshold(Number(e.target.value));
-            }}
-          />
-        </label>
+        <p className="text-sm text-slate-600">
+          Products are split into low stock (&lt;10) and healthy stock (&gt;=10), with exact quantities shown.
+        </p>
       </div>
 
-      <p className="text-sm text-slate-600">
-        Out of stock products: <span className="font-semibold">{outOfStockCount}</span>
-      </p>
+      {loading && <p className="text-sm text-slate-600">Loading inventory...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="rounded border bg-white p-4">
-        <div className="space-y-2">
-          {items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between border-b pb-2 text-sm">
-              <span>{item.name}</span>
-              <span>{item.category.name}</span>
-              <Badge variant={item.stockQuantity === 0 ? 'danger' : 'warning'}>
-                Stock: {item.stockQuantity}
-              </Badge>
-            </div>
-          ))}
+      <section className="overflow-hidden rounded-xl border border-red-200 bg-white">
+        <div className="bg-red-600 px-4 py-3 text-sm font-bold text-white">Low Stock Products</div>
+        <div className="space-y-2 p-4">
+          {lowStockItems.length === 0 ? (
+            <p className="text-sm text-slate-600">No low-stock products.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <span>Product</span>
+                <span className="text-center">Category</span>
+                <span className="text-center">Stock</span>
+              </div>
+              {lowStockItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-sm"
+                >
+                  <span>{item.name}</span>
+                  <span className="text-center">{item.category.name}</span>
+                  <span className="flex justify-center">
+                    <Badge variant="danger">Stock: {item.stockQuantity}</Badge>
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
         </div>
-      </div>
+      </section>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <section className="overflow-hidden rounded-xl border border-green-200 bg-white">
+        <div className="bg-green-600 px-4 py-3 text-sm font-bold text-white">Healthy Stock Products</div>
+        <div className="space-y-2 p-4">
+          {healthyStockItems.length === 0 ? (
+            <p className="text-sm text-slate-600">No healthy-stock products.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <span>Product</span>
+                <span className="text-center">Category</span>
+                <span className="text-center">Stock</span>
+              </div>
+              {healthyStockItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-[minmax(0,2fr)_220px_180px] items-center border-b pb-2 text-sm"
+                >
+                  <span>{item.name}</span>
+                  <span className="text-center">{item.category.name}</span>
+                  <span className="flex justify-center">
+                    <Badge variant="success">Stock: {item.stockQuantity}</Badge>
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

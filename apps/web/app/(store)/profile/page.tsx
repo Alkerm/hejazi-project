@@ -1,5 +1,4 @@
 'use client';
-
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -39,108 +38,110 @@ export default function ProfilePage() {
 
   const logout = async () => {
     await api.logout();
-    router.push('/login');
+    router.push('/');
     router.refresh();
   };
 
   if (!profile) return <p>Loading profile...</p>;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
-      <h1 className="text-3xl font-bold">Profile</h1>
+    <div className="space-y-4">
+      <div className="mx-auto max-w-2xl space-y-4">
+        <h1 className="text-3xl font-bold">Profile</h1>
 
-      <form onSubmit={submit} className="grid gap-3 rounded border bg-white p-5 md:grid-cols-2">
-        <Input
-          label="First name"
-          value={profile.firstName}
-          onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-        />
-        <Input
-          label="Last name"
-          value={profile.lastName}
-          onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-        />
-        <Input
-          label="Phone"
-          value={profile.phone ?? ''}
-          onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-        />
-        <Input label="Email" value={profile.email} disabled />
+        <form onSubmit={submit} className="grid gap-3 rounded border bg-white p-5 md:grid-cols-2">
+          <Input
+            label="First name"
+            value={profile.firstName}
+            onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+          />
+          <Input
+            label="Last name"
+            value={profile.lastName}
+            onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+          />
+          <Input
+            label="Phone"
+            value={profile.phone ?? ''}
+            onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+          />
+          <Input label="Email" value={profile.email} disabled />
 
-        <Input
-          label="Address line"
-          value={profile.defaultAddress?.line1 ?? ''}
-          onChange={(e) =>
-            setProfile({
-              ...profile,
-              defaultAddress: {
-                line1: e.target.value,
-                line2: profile.defaultAddress?.line2 ?? null,
-                city: profile.defaultAddress?.city ?? '',
-                country: profile.defaultAddress?.country ?? '',
-                postalCode: profile.defaultAddress?.postalCode ?? '',
-              },
-            })
-          }
-        />
-        <Input
-          label="City"
-          value={profile.defaultAddress?.city ?? ''}
-          onChange={(e) =>
-            setProfile({
-              ...profile,
-              defaultAddress: {
-                line1: profile.defaultAddress?.line1 ?? '',
-                line2: profile.defaultAddress?.line2 ?? null,
-                city: e.target.value,
-                country: profile.defaultAddress?.country ?? '',
-                postalCode: profile.defaultAddress?.postalCode ?? '',
-              },
-            })
-          }
-        />
-        <Input
-          label="Country"
-          value={profile.defaultAddress?.country ?? ''}
-          onChange={(e) =>
-            setProfile({
-              ...profile,
-              defaultAddress: {
-                line1: profile.defaultAddress?.line1 ?? '',
-                line2: profile.defaultAddress?.line2 ?? null,
-                city: profile.defaultAddress?.city ?? '',
-                country: e.target.value,
-                postalCode: profile.defaultAddress?.postalCode ?? '',
-              },
-            })
-          }
-        />
-        <Input
-          label="Postal code"
-          value={profile.defaultAddress?.postalCode ?? ''}
-          onChange={(e) =>
-            setProfile({
-              ...profile,
-              defaultAddress: {
-                line1: profile.defaultAddress?.line1 ?? '',
-                line2: profile.defaultAddress?.line2 ?? null,
-                city: profile.defaultAddress?.city ?? '',
-                country: profile.defaultAddress?.country ?? '',
-                postalCode: e.target.value,
-              },
-            })
-          }
-        />
+          <Input
+            label="Address line"
+            value={profile.defaultAddress?.line1 ?? ''}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                defaultAddress: {
+                  line1: e.target.value,
+                  line2: profile.defaultAddress?.line2 ?? null,
+                  city: profile.defaultAddress?.city ?? '',
+                  country: profile.defaultAddress?.country ?? '',
+                  postalCode: profile.defaultAddress?.postalCode ?? '',
+                },
+              })
+            }
+          />
+          <Input
+            label="City"
+            value={profile.defaultAddress?.city ?? ''}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                defaultAddress: {
+                  line1: profile.defaultAddress?.line1 ?? '',
+                  line2: profile.defaultAddress?.line2 ?? null,
+                  city: e.target.value,
+                  country: profile.defaultAddress?.country ?? '',
+                  postalCode: profile.defaultAddress?.postalCode ?? '',
+                },
+              })
+            }
+          />
+          <Input
+            label="Country"
+            value={profile.defaultAddress?.country ?? ''}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                defaultAddress: {
+                  line1: profile.defaultAddress?.line1 ?? '',
+                  line2: profile.defaultAddress?.line2 ?? null,
+                  city: profile.defaultAddress?.city ?? '',
+                  country: e.target.value,
+                  postalCode: profile.defaultAddress?.postalCode ?? '',
+                },
+              })
+            }
+          />
+          <Input
+            label="Postal code"
+            value={profile.defaultAddress?.postalCode ?? ''}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                defaultAddress: {
+                  line1: profile.defaultAddress?.line1 ?? '',
+                  line2: profile.defaultAddress?.line2 ?? null,
+                  city: profile.defaultAddress?.city ?? '',
+                  country: profile.defaultAddress?.country ?? '',
+                  postalCode: e.target.value,
+                },
+              })
+            }
+          />
 
-        <div className="col-span-full flex gap-3">
-          <Button type="submit">Save profile</Button>
-          <Button type="button" variant="secondary" onClick={logout}>
-            Logout
-          </Button>
-        </div>
-      </form>
+          <div className="col-span-full flex gap-3">
+            <Button type="submit">Save profile</Button>
+            <Button type="button" variant="secondary" onClick={logout}>
+              Logout
+            </Button>
+          </div>
+        </form>
 
-      {message && <p className="text-sm text-slate-700">{message}</p>}
+        {message && <p className="text-sm text-slate-700">{message}</p>}
+      </div>
     </div>
   );
 }

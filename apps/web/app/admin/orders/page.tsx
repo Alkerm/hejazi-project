@@ -52,12 +52,18 @@ export default function AdminOrdersPage() {
 
       <div className="rounded border bg-white p-4">
         <div className="space-y-2">
+          <div className="grid grid-cols-[140px_minmax(0,1fr)_140px_140px_220px] items-center border-b pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <span>Order ID</span>
+            <span>Customer</span>
+            <span>Status</span>
+            <span>Total</span>
+            <span>Date</span>
+          </div>
           {orders.map((order) => (
             <Link key={order.id} href={`/admin/orders/${order.id}`} className="block border-b pb-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span>
-                  #{order.id.slice(-8)} | {order.user?.email}
-                </span>
+              <div className="grid grid-cols-[140px_minmax(0,1fr)_140px_140px_220px] items-center">
+                <span>#{order.id.slice(-8)}</span>
+                <span>{order.user?.email ?? '-'}</span>
                 <span>{order.status}</span>
                 <span>{formatMoney(order.total, order.currency)}</span>
                 <span>{formatDate(order.createdAt)}</span>

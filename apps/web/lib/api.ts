@@ -23,15 +23,24 @@ class HttpError extends Error {
 }
 
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
-    cache: 'no-store',
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(init?.headers ?? {}),
+      },
+      cache: 'no-store',
+    });
+  } catch {
+    throw new HttpError(
+      `Unable to reach API at ${API_BASE}. Start the API server and verify CORS_ORIGIN includes your web origin.`,
+      0,
+    );
+  }
 
   const json = (await response.json()) as ApiEnvelope<T> & {
     error?: { message?: string };

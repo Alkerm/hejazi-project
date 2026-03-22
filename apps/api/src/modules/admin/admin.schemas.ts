@@ -5,6 +5,8 @@ export const adminListProductsQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(50).default(10),
   search: z.string().trim().min(1).max(120).optional(),
   categoryId: z.string().optional(),
+  minStock: z.coerce.number().int().min(0).optional(),
+  maxStock: z.coerce.number().int().min(0).optional(),
   isActive: z
     .enum(['true', 'false'])
     .optional()

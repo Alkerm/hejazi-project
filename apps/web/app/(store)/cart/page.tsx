@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Cart } from '@/lib/types';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { formatMoney } from '@/lib/format';
+import { getStockStatus } from '@/lib/stock';
 import Link from 'next/link';
 
 export default function CartPage() {
@@ -50,7 +52,7 @@ export default function CartPage() {
           country: 'USA',
           postalCode: '90001',
         },
-        currency: 'USD',
+        currency: 'SAR',
       });
       setMessage('Order placed successfully. Payment flow will be added in Phase 3.');
       await load();
@@ -65,37 +67,48 @@ export default function CartPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-bold">Your Cart</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-bold">Your Cart</h1>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/products" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+            Back to products
+          </Link>
+        </div>
+      </div>
       {cart.items.length === 0 ? (
         <p className="rounded border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
           Your cart is empty. <Link href="/products" className="text-brand-700">Browse products</Link>.
         </p>
       ) : (
         <div className="space-y-3">
-          {cart.items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between rounded border bg-white p-4">
-              <div>
-                <p className="font-semibold">{item.product.name}</p>
-                <p className="text-sm text-slate-600">{formatMoney(item.product.price)} each</p>
-                <p className="text-sm text-slate-600">Available stock: {item.product.stockQuantity}</p>
-              </div>
+          {cart.items.map((item) => {
+            const stockStatus = getStockStatus(item.product.stockQuantity);
 
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  value={item.quantity}
-                  min={1}
-                  max={item.product.stockQuantity}
-                  className="w-20 rounded border px-2 py-1"
-                  onChange={(e) => updateQty(item.id, Number(e.target.value))}
-                />
-                <p className="w-20 text-right font-semibold">{formatMoney(item.lineTotal)}</p>
-                <Button variant="danger" onClick={() => removeItem(item.id)}>
-                  Remove
-                </Button>
+            return (
+              <div key={item.id} className="flex items-center justify-between rounded border bg-white p-4">
+                <div>
+                  <p className="font-semibold">{item.product.name}</p>
+                  <p className="text-sm text-slate-600">{formatMoney(item.product.price)} each</p>
+                  <Badge variant={stockStatus.variant}>{stockStatus.label}</Badge>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    value={item.quantity}
+                    min={1}
+                    max={item.product.stockQuantity}
+                    className="w-20 rounded border px-2 py-1"
+                    onChange={(e) => updateQty(item.id, Number(e.target.value))}
+                  />
+                  <p className="w-20 text-right font-semibold">{formatMoney(item.lineTotal)}</p>
+                  <Button variant="danger" onClick={() => removeItem(item.id)}>
+                    Remove
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           <div className="rounded border bg-white p-4 text-right">
             <p className="text-sm text-slate-600">Items: {cart.summary.totalItems}</p>

@@ -32,6 +32,7 @@ export default function RegisterPage() {
         password: form.password,
         phone: form.phone || undefined,
       });
+      document.cookie = 'cosmetics_sid_hint=1; path=/';
       router.push('/products');
       router.refresh();
     } catch (e) {
@@ -57,7 +58,7 @@ export default function RegisterPage() {
       {message && <p className="text-sm text-red-600">{message}</p>}
       <p className="text-sm text-slate-600">
         Already registered?{' '}
-        <Link href="/login" className="font-semibold text-brand-700">
+        <Link href="/" className="font-semibold text-brand-700">
           Sign in
         </Link>
       </p>

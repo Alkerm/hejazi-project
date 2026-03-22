@@ -1,4 +1,4 @@
-﻿-- CreateEnum
+-- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED');
 CREATE TYPE "PaymentStatus" AS ENUM ('UNPAID', 'PENDING', 'PAID', 'FAILED', 'REFUNDED');
@@ -79,7 +79,7 @@ CREATE TABLE "Order" (
   "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'UNPAID',
   "subtotal" DECIMAL(10,2) NOT NULL,
   "total" DECIMAL(10,2) NOT NULL,
-  "currency" TEXT NOT NULL DEFAULT 'USD',
+  "currency" TEXT NOT NULL DEFAULT 'SAR',
   "shippingAddressSnapshot" JSONB NOT NULL,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,

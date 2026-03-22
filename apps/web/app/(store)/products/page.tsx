@@ -50,7 +50,9 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Products</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-bold">Products</h1>
+      </div>
 
       <div className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-4">
         <input

@@ -135,7 +135,7 @@ model Order {
   paymentStatus           PaymentStatus @default(UNPAID)
   subtotal                Decimal       @db.Decimal(10, 2)
   total                   Decimal       @db.Decimal(10, 2)
-  currency                String        @default("USD")
+  currency                String        @default("SAR")
   shippingAddressSnapshot Json
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
