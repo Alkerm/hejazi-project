@@ -1,6 +1,16 @@
-﻿import fs from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
+
+const parseBooleanEnv = (value: unknown) => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true') return true;
+    if (normalized === 'false') return false;
+  }
+  return value;
+};
 
 const loadEnvFile = () => {
   const candidates = [
@@ -40,7 +50,7 @@ const envSchema = z
     PORT: z.coerce.number().int().positive().default(4000),
     DATABASE_URL: z.string().min(1),
     REDIS_URL: z.string().min(1).optional(),
-    USE_IN_MEMORY_STORE: z.coerce.boolean().default(false),
+    USE_IN_MEMORY_STORE: z.preprocess(parseBooleanEnv, z.boolean()).default(false),
     CORS_ORIGIN: z.string().min(1),
     COOKIE_NAME: z.string().default('cosmetics_sid'),
     COOKIE_DOMAIN: z.preprocess(
@@ -58,7 +68,7 @@ const envSchema = z
     LOW_STOCK_THRESHOLD: z.coerce.number().int().positive().default(5),
     GLOBAL_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(150),
     AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20),
-    TRUST_PROXY: z.coerce.boolean().default(false),
+    TRUST_PROXY: z.preprocess(parseBooleanEnv, z.boolean()).default(false),
   })
   .superRefine((data, ctx) => {
     if (!data.USE_IN_MEMORY_STORE && !data.REDIS_URL) {
@@ -90,3 +100,4 @@ export const isProd = env.NODE_ENV === 'production';
 export const corsOrigins = env.CORS_ORIGIN.split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+
