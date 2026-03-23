@@ -9,12 +9,12 @@ import { Button } from '@/components/ui/button';
 
 export function LoginStartCard() {
   const router = useRouter();
-  const [email, setEmail] = useState('customer@cosmetics.local');
-  const [password, setPassword] = useState('Passw0rd!123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-const onSubmit = async (event: FormEvent) => {
+  const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
@@ -35,39 +35,27 @@ const onSubmit = async (event: FormEvent) => {
     <div className="mx-auto max-w-md space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <h1 className="text-2xl font-bold">Sign in to Hejazi Cosmetics</h1>
       <p className="text-sm text-slate-600">Enter your account details to access the store and dashboard features.</p>
-
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          className="flex-1"
-          onClick={() => {
-            setEmail('customer@cosmetics.local');
-            setPassword('Passw0rd!123');
-          }}
-        >
-          Customer Account
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          className="flex-1"
-          onClick={() => {
-            setEmail('admin@cosmetics.local');
-            setPassword('Passw0rd!123');
-          }}
-        >
-          Admin Account
-        </Button>
+      <div className="rounded border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
+        <p className="font-semibold">Demo credentials:</p>
+        <p>Customer: customer@cosmetics.local / Passw0rd!123</p>
+        <p>Admin: admin@cosmetics.local / Passw0rd!123</p>
       </div>
 
       <form className="space-y-3" onSubmit={onSubmit}>
-        <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="example@cosmetics.local"
+          required
+        />
         <Input
           label="Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder="Your password"
           required
         />
         <Button type="submit" disabled={loading} className="w-full">

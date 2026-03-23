@@ -53,7 +53,11 @@ describe('auth.service', () => {
     });
 
     expect(result.sessionId).toBe('sess-1');
-    expect(createUser).toHaveBeenCalled();
+    expect(createUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        role: 'USER',
+      }),
+    );
   });
 
   it('loginUser rejects invalid credentials', async () => {

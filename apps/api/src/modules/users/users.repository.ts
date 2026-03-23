@@ -16,6 +16,16 @@ export const findUserById = (id: string) =>
     },
   });
 
+export const findUserAuthById = (id: string) =>
+  prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      email: true,
+      passwordHash: true,
+    },
+  });
+
 export const createUser = (payload: {
   firstName: string;
   lastName: string;
@@ -38,6 +48,8 @@ export const updateProfile = async (
   payload: {
     firstName: string;
     lastName: string;
+    email?: string;
+    passwordHash?: string;
     phone?: string | null;
     address: {
       line1: string;
@@ -54,6 +66,8 @@ export const updateProfile = async (
       data: {
         firstName: payload.firstName,
         lastName: payload.lastName,
+        ...(payload.email ? { email: payload.email } : {}),
+        ...(payload.passwordHash ? { passwordHash: payload.passwordHash } : {}),
         phone: payload.phone,
       },
     });

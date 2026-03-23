@@ -88,7 +88,10 @@ export const api = {
   updateProfile: (payload: {
     firstName: string;
     lastName: string;
+    email?: string;
     phone?: string | null;
+    currentPassword?: string;
+    newPassword?: string;
     address?: {
       line1: string;
       line2?: string | null;

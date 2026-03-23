@@ -1,5 +1,6 @@
 import { AppError } from '../../utils/app-error';
-import { findUserById, updateProfile } from './users.repository';
+import { comparePassword, hashPassword } from '../../utils/password';
+import { findUserAuthById, findUserByEmail, findUserById, updateProfile } from './users.repository';
 
 const mapProfile = (user: Awaited<ReturnType<typeof findUserById>>) => {
   if (!user) return null;
@@ -27,7 +28,10 @@ export const updateMyProfile = async (
   payload: {
     firstName: string;
     lastName: string;
+    email?: string;
     phone?: string | null;
+    currentPassword?: string;
+    newPassword?: string;
     address?: {
       line1: string;
       line2?: string | null;
@@ -37,9 +41,41 @@ export const updateMyProfile = async (
     } | null;
   },
 ) => {
+  let passwordHash: string | undefined;
+  let normalizedEmail: string | undefined;
+
+  if (payload.email || payload.newPassword) {
+    const authUser = await findUserAuthById(userId);
+    if (!authUser) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    const isCurrentPasswordValid = payload.currentPassword
+      ? await comparePassword(payload.currentPassword, authUser.passwordHash)
+      : false;
+
+    if (!isCurrentPasswordValid) {
+      throw new AppError('Current password is invalid', 401, 'INVALID_CURRENT_PASSWORD');
+    }
+
+    if (payload.email) {
+      normalizedEmail = payload.email.toLowerCase();
+      const existing = await findUserByEmail(normalizedEmail);
+      if (existing && existing.id !== userId) {
+        throw new AppError('Email already in use', 409, 'EMAIL_EXISTS');
+      }
+    }
+
+    if (payload.newPassword) {
+      passwordHash = await hashPassword(payload.newPassword);
+    }
+  }
+
   const profile = await updateProfile(userId, {
     firstName: payload.firstName,
     lastName: payload.lastName,
+    email: normalizedEmail,
+    passwordHash,
     phone: payload.phone,
     address: payload.address ?? null,
   });

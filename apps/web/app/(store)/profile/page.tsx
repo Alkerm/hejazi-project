@@ -10,6 +10,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
     api
@@ -26,11 +28,16 @@ export default function ProfilePage() {
       const next = await api.updateProfile({
         firstName: profile.firstName,
         lastName: profile.lastName,
+        email: profile.email,
         phone: profile.phone,
+        currentPassword: currentPassword || undefined,
+        newPassword: newPassword || undefined,
         address: profile.defaultAddress ?? undefined,
       });
       setProfile(next);
       setMessage('Profile updated');
+      setCurrentPassword('');
+      setNewPassword('');
     } catch (e) {
       setMessage((e as Error).message);
     }
@@ -65,7 +72,26 @@ export default function ProfilePage() {
             value={profile.phone ?? ''}
             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
           />
-          <Input label="Email" value={profile.email} disabled />
+          <Input
+            label="Email"
+            type="email"
+            value={profile.email}
+            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+          />
+          <Input
+            label="Current password (required to change email/password)"
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="Enter current password"
+          />
+          <Input
+            label="New password (optional)"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Leave empty to keep current password"
+          />
 
           <Input
             label="Address line"

@@ -21,6 +21,7 @@ export const registerUser = async (payload: {
     email: payload.email.toLowerCase(),
     phone: payload.phone,
     passwordHash: await hashPassword(payload.password),
+    role: 'USER',
   });
 
   const sessionId = await createSession({
