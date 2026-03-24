@@ -2,10 +2,21 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+
+const DEMO_CREDENTIALS = {
+  customer: {
+    email: 'customer@cosmetics.local',
+    password: 'Passw0rd!123',
+  },
+  admin: {
+    email: 'admin@cosmetics.local',
+    password: 'Passw0rd!123',
+  },
+} as const;
 
 export function LoginStartCard() {
   const router = useRouter();
@@ -13,6 +24,18 @@ export function LoginStartCard() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isLocalhost, setIsLocalhost] = useState(false);
+
+  useEffect(() => {
+    const hostname = window.location.hostname;
+    setIsLocalhost(hostname === 'localhost' || hostname === '127.0.0.1');
+  }, []);
+
+  const applyDemoCredentials = (type: keyof typeof DEMO_CREDENTIALS) => {
+    setEmail(DEMO_CREDENTIALS[type].email);
+    setPassword(DEMO_CREDENTIALS[type].password);
+    setMessage(null);
+  };
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -37,8 +60,18 @@ export function LoginStartCard() {
       <p className="text-sm text-slate-600">Enter your account details to access the store and dashboard features.</p>
       <div className="rounded border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
         <p className="font-semibold">Demo credentials:</p>
-        <p>Customer: customer@cosmetics.local / Passw0rd!123</p>
-        <p>Admin: admin@cosmetics.local / Passw0rd!123</p>
+        <p>Customer: {DEMO_CREDENTIALS.customer.email} / {DEMO_CREDENTIALS.customer.password}</p>
+        <p>Admin: {DEMO_CREDENTIALS.admin.email} / {DEMO_CREDENTIALS.admin.password}</p>
+        {isLocalhost ? (
+          <div className="mt-3 flex gap-2">
+            <Button type="button" variant="secondary" onClick={() => applyDemoCredentials('customer')}>
+              Use customer demo
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => applyDemoCredentials('admin')}>
+              Use admin demo
+            </Button>
+          </div>
+        ) : null}
       </div>
 
       <form className="space-y-3" onSubmit={onSubmit}>

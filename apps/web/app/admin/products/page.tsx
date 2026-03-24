@@ -29,6 +29,11 @@ export default function AdminProductsPage() {
   useEffect(() => {
     if (searchParams.get('created') === '1') {
       setMessage('Product created');
+      return;
+    }
+
+    if (searchParams.get('updated') === '1') {
+      setMessage('Product updated');
     }
   }, [searchParams]);
 
@@ -58,6 +63,9 @@ export default function AdminProductsPage() {
                 </p>
               </div>
               <div className="flex gap-2">
+                <Link href={`/admin/products/${product.id}`}>
+                  <Button variant="secondary">Edit</Button>
+                </Link>
                 <Button variant="danger" onClick={() => removeProduct(product.id)}>
                   Delete
                 </Button>

@@ -75,6 +75,10 @@ export function Navbar() {
     href === '/admin'
       ? pathname === '/admin'
       : pathname === href || pathname.startsWith(`${href}/`);
+  const customerLinkClass = (href: string) =>
+    `transition-colors hover:text-brand-700 hover:underline underline-offset-4 ${
+      pathname === href || pathname.startsWith(`${href}/`) ? 'text-brand-700 underline' : ''
+    }`;
 
   return (
     <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -91,7 +95,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`whitespace-nowrap rounded px-3 py-2 font-semibold ${isAdminLinkActive(link.href) ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700'}`}
+                className={`whitespace-nowrap rounded px-3 py-2 font-semibold shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md ${isAdminLinkActive(link.href) ? 'bg-brand-600 text-white hover:bg-brand-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
               >
                 {link.label}
               </Link>
@@ -104,14 +108,23 @@ export function Navbar() {
           <nav className="flex flex-wrap items-center justify-end gap-4 text-sm font-medium text-slate-700">
             {auth.isAuthenticated ? (
               <>
-                {!isProductsRoute && <Link href="/products">Products</Link>}
-                <Link href="/cart">Cart</Link>
-                <Link href="/orders">Orders</Link>
-                <Link href="/profile">Profile</Link>
+                {!isProductsRoute && (
+                  <Link href="/products" className={customerLinkClass('/products')}>
+                    Products
+                  </Link>
+                )}
+                <Link href="/cart" className={customerLinkClass('/cart')}>
+                  Cart
+                </Link>
+                <Link href="/orders" className={customerLinkClass('/orders')}>
+                  Orders
+                </Link>
+                <Link href="/profile" className={customerLinkClass('/profile')}>
+                  Profile
+                </Link>
                 <Button type="button" variant="secondary" className="px-3 py-1.5" onClick={handleLogout}>
                   Logout
                 </Button>
-                {auth.role === 'ADMIN' && <Link href="/admin">Admin</Link>}
               </>
             ) : !isProtectedRoute && authChecked ? (
               <>
