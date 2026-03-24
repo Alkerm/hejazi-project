@@ -24,14 +24,6 @@ export default function OrderDetailsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Link href="/orders" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
-          Back to orders
-        </Link>
-        <Link href="/cart" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
-          Cart
-        </Link>
-      </div>
       <h1 className="text-3xl font-bold">Order #{order.id.slice(-8)}</h1>
       <p className="text-sm text-slate-600">Placed on {formatDate(order.createdAt)}</p>
 
@@ -62,6 +54,12 @@ export default function OrderDetailsPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="pt-2">
+        <Link href="/orders" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+          Back to orders
+        </Link>
       </div>
     </div>
   );

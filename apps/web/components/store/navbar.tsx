@@ -20,7 +20,6 @@ const clearAuthHintCookie = () => {
 export function Navbar() {
   const pathname = usePathname();
   const isLoginPage = pathname === '/' || pathname === '/login';
-  const isProductsRoute = pathname === '/products' || pathname.startsWith('/products/');
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
   const isProfileRoute = pathname === '/profile' || pathname.startsWith('/profile/');
   const isProtectedRoute =
@@ -108,11 +107,9 @@ export function Navbar() {
           <nav className="flex flex-wrap items-center justify-end gap-4 text-sm font-medium text-slate-700">
             {auth.isAuthenticated ? (
               <>
-                {!isProductsRoute && (
-                  <Link href="/products" className={customerLinkClass('/products')}>
-                    Products
-                  </Link>
-                )}
+                <Link href="/products" className={customerLinkClass('/products')}>
+                  Products
+                </Link>
                 <Link href="/cart" className={customerLinkClass('/cart')}>
                   Cart
                 </Link>

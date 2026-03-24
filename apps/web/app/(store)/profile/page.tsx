@@ -9,44 +9,67 @@ import { Input } from '@/components/ui/input';
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [initialProfile, setInitialProfile] = useState<UserProfile | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     api
       .profile()
-      .then(setProfile)
+      .then((nextProfile) => {
+        setProfile(nextProfile);
+        setInitialProfile(nextProfile);
+      })
       .catch((e: Error) => setMessage(e.message));
   }, []);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!profile) return;
+    setSaving(true);
+    setMessage(null);
+
+    const emailChanged = initialProfile ? profile.email !== initialProfile.email : false;
 
     try {
       const next = await api.updateProfile({
         firstName: profile.firstName,
         lastName: profile.lastName,
-        email: profile.email,
+        email: emailChanged ? profile.email : undefined,
         phone: profile.phone,
         currentPassword: currentPassword || undefined,
         newPassword: newPassword || undefined,
         address: profile.defaultAddress ?? undefined,
       });
       setProfile(next);
+      setInitialProfile(next);
       setMessage('Profile updated');
       setCurrentPassword('');
       setNewPassword('');
     } catch (e) {
       setMessage((e as Error).message);
+    } finally {
+      setSaving(false);
     }
   };
 
   const logout = async () => {
-    await api.logout();
-    router.push('/');
-    router.refresh();
+    setLoggingOut(true);
+    setMessage(null);
+
+    try {
+      await api.logout();
+    } catch (e) {
+      setMessage((e as Error).message);
+    } finally {
+      document.cookie = 'cosmetics_sid_hint=; Max-Age=0; path=/';
+      router.push('/');
+      router.refresh();
+      setLoggingOut(false);
+    }
   };
 
   if (!profile) return <p>Loading profile...</p>;
@@ -159,9 +182,11 @@ export default function ProfilePage() {
           />
 
           <div className="col-span-full flex gap-3">
-            <Button type="submit">Save profile</Button>
-            <Button type="button" variant="secondary" onClick={logout}>
-              Logout
+            <Button type="submit" disabled={saving || loggingOut}>
+              {saving ? 'Saving...' : 'Save profile'}
+            </Button>
+            <Button type="button" variant="secondary" onClick={logout} disabled={saving || loggingOut}>
+              {loggingOut ? 'Logging out...' : 'Logout'}
             </Button>
           </div>
         </form>

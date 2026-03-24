@@ -13,6 +13,7 @@ export default function CartPage() {
   const [cart, setCart] = useState<Cart | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const load = () =>
     api
@@ -35,8 +36,18 @@ export default function CartPage() {
   };
 
   const removeItem = async (id: string) => {
-    const next = await api.deleteCartItem(id);
-    setCart(next);
+    setRemovingId(id);
+    setMessage(null);
+
+    try {
+      const next = await api.deleteCartItem(id);
+      setCart(next);
+    } catch (e) {
+      setMessage((e as Error).message);
+      await load();
+    } finally {
+      setRemovingId(null);
+    }
   };
 
   const placeOrder = async () => {
@@ -69,11 +80,6 @@ export default function CartPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold">Your Cart</h1>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/products" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
-            Back to products
-          </Link>
-        </div>
       </div>
       {cart.items.length === 0 ? (
         <p className="rounded border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
@@ -102,8 +108,12 @@ export default function CartPage() {
                     onChange={(e) => updateQty(item.id, Number(e.target.value))}
                   />
                   <p className="w-20 text-right font-semibold">{formatMoney(item.lineTotal)}</p>
-                  <Button variant="danger" onClick={() => removeItem(item.id)}>
-                    Remove
+                  <Button
+                    variant="danger"
+                    onClick={() => removeItem(item.id)}
+                    disabled={removingId === item.id}
+                  >
+                    {removingId === item.id ? 'Removing...' : 'Remove'}
                   </Button>
                 </div>
               </div>
@@ -119,6 +129,12 @@ export default function CartPage() {
           </div>
         </div>
       )}
+
+      <div className="pt-2">
+        <Link href="/products" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold">
+          Continue shopping
+        </Link>
+      </div>
 
       {message && <p className="text-sm text-slate-700">{message}</p>}
     </div>

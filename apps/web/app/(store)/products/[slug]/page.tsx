@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
@@ -18,6 +17,7 @@ export default function ProductDetailsPage() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const [showGoToCart, setShowGoToCart] = useState(false);
 
   useEffect(() => {
     if (!params.slug) return;
@@ -33,8 +33,10 @@ export default function ProductDetailsPage() {
     try {
       await api.addCartItem({ productId: product.id, quantity });
       setMessage('Item added to cart');
+      setShowGoToCart(true);
     } catch (e) {
       setMessage((e as Error).message);
+      setShowGoToCart(false);
     }
   };
 
@@ -45,18 +47,6 @@ export default function ProductDetailsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="secondary" onClick={() => router.back()}>
-          Back
-        </Button>
-        <Link
-          href="/cart"
-          className="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800"
-        >
-          Cart
-        </Link>
-      </div>
-
       <div className="grid gap-8 md:grid-cols-2">
         <div className="relative h-[420px] overflow-hidden rounded-xl bg-slate-100">
           <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
@@ -81,12 +71,20 @@ export default function ProductDetailsPage() {
             <Button disabled={product.stockQuantity < 1} onClick={addToCart}>
               Add to cart
             </Button>
-            <Button variant="secondary" onClick={() => router.push('/cart')}>
-              Go to cart
-            </Button>
+            {showGoToCart ? (
+              <Button variant="secondary" onClick={() => router.push('/cart')}>
+                Go to cart
+              </Button>
+            ) : null}
           </div>
 
           {message && <p className="text-sm text-slate-700">{message}</p>}
+
+          <div className="pt-2">
+            <Button type="button" variant="secondary" onClick={() => router.back()}>
+              Back
+            </Button>
+          </div>
         </div>
       </div>
     </div>

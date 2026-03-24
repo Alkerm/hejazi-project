@@ -24,15 +24,17 @@ class HttpError extends Error {
 
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   let response: Response;
+  const headers = new Headers(init?.headers ?? undefined);
+
+  if (init?.body !== undefined && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
 
   try {
     response = await fetch(`${API_BASE}${path}`, {
       ...init,
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(init?.headers ?? {}),
-      },
+      headers,
       cache: 'no-store',
     });
   } catch {

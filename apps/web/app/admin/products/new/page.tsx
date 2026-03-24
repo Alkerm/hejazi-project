@@ -49,9 +49,6 @@ export default function AdminCreateProductPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-bold">Create Product</h2>
-        <Button variant="secondary" onClick={() => router.push('/admin/products')}>
-          Back to Products
-        </Button>
       </div>
 
       <div className="grid gap-4 rounded border bg-white p-4 md:grid-cols-2">
