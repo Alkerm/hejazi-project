@@ -10,6 +10,7 @@ const mapProfile = (user: Awaited<ReturnType<typeof findUserById>>) => {
     lastName: user.lastName,
     email: user.email,
     phone: user.phone,
+    marketingConsent: user.marketingConsent,
     role: user.role,
     defaultAddress: user.addresses[0] ?? null,
   };
@@ -30,6 +31,7 @@ export const updateMyProfile = async (
     lastName: string;
     email?: string;
     phone?: string | null;
+    marketingConsent?: boolean;
     currentPassword?: string;
     newPassword?: string;
     address?: {
@@ -77,6 +79,7 @@ export const updateMyProfile = async (
     email: normalizedEmail,
     passwordHash,
     phone: payload.phone,
+    marketingConsent: payload.marketingConsent,
     address: payload.address ?? null,
   });
 

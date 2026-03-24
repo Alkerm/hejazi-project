@@ -32,6 +32,7 @@ export const createUser = (payload: {
   email: string;
   passwordHash: string;
   phone?: string;
+  marketingConsent?: boolean;
   role?: 'USER' | 'ADMIN';
 }) =>
   prisma.user.create({
@@ -51,6 +52,7 @@ export const updateProfile = async (
     email?: string;
     passwordHash?: string;
     phone?: string | null;
+    marketingConsent?: boolean;
     address: {
       line1: string;
       line2?: string | null;
@@ -69,6 +71,7 @@ export const updateProfile = async (
         ...(payload.email ? { email: payload.email } : {}),
         ...(payload.passwordHash ? { passwordHash: payload.passwordHash } : {}),
         phone: payload.phone,
+        ...(payload.marketingConsent !== undefined ? { marketingConsent: payload.marketingConsent } : {}),
       },
     });
 

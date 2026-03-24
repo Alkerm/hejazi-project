@@ -4,6 +4,7 @@ import { ok } from '../../utils/response';
 import {
   adminListOrdersQuerySchema,
   adminListProductsQuerySchema,
+  adminAuditLogsQuerySchema,
   adminLowStockQuerySchema,
   adminOrderIdSchema,
   adminProductIdSchema,
@@ -15,9 +16,11 @@ import {
   createAdminProduct,
   deleteAdminProduct,
   getAdminCategories,
+  getAdminAuditLogs,
   getAdminDashboardSummary,
   getAdminLowStock,
   getAdminOrderDetails,
+  getAdminProductDetails,
   getAdminOrders,
   getAdminProducts,
   getAdminSalesAnalytics,
@@ -49,6 +52,13 @@ export const adminProductCreateHandler = async (request: FastifyRequest, reply: 
   const payload = adminProductUpsertSchema.parse(request.body);
   const data = await createAdminProduct(request.auth!.userId, payload);
   return ok(reply, data, 201);
+};
+
+export const adminProductDetailsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAdmin(request, reply);
+  const params = adminProductIdSchema.parse(request.params);
+  const data = await getAdminProductDetails(params.id);
+  return ok(reply, data);
 };
 
 export const adminProductUpdateHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -99,5 +109,12 @@ export const adminSalesAnalyticsHandler = async (request: FastifyRequest, reply:
   await requireAdmin(request, reply);
   const query = adminSalesQuerySchema.parse(request.query);
   const data = await getAdminSalesAnalytics(query.days);
+  return ok(reply, data);
+};
+
+export const adminAuditLogsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAdmin(request, reply);
+  const query = adminAuditLogsQuerySchema.parse(request.query);
+  const data = await getAdminAuditLogs(query);
   return ok(reply, data);
 };

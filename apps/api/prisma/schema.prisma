@@ -29,6 +29,13 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum ProductStatus {
+  DRAFT
+  COMPLIANCE_REVIEW
+  APPROVED
+  INACTIVE
+}
+
 model User {
   id           String      @id @default(cuid())
   firstName    String
@@ -36,6 +43,7 @@ model User {
   email        String      @unique
   passwordHash String
   phone        String?
+  marketingConsent Boolean @default(false)
   role         UserRole    @default(USER)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -80,17 +88,30 @@ model Category {
 }
 
 model Product {
-  id           String   @id @default(cuid())
-  name         String
-  slug         String   @unique
-  description  String
-  price        Decimal  @db.Decimal(10, 2)
-  stockQuantity Int
-  imageUrl     String
-  isActive     Boolean  @default(true)
-  categoryId   String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                     String        @id @default(cuid())
+  name                   String
+  arabicName             String?
+  slug                   String        @unique
+  description            String
+  price                  Decimal       @db.Decimal(10, 2)
+  stockQuantity          Int
+  sku                    String?
+  brand                  String?
+  ingredients            String?
+  warnings               String?
+  usageInstructions      String?
+  countryOfOrigin        String?
+  manufacturer           String?
+  importerResponsible    String?
+  sfdaReference          String?
+  batchNumberRequired    Boolean       @default(false)
+  expiryDateRequired     Boolean       @default(false)
+  productStatus          ProductStatus @default(DRAFT)
+  imageUrl               String
+  isActive               Boolean       @default(true)
+  categoryId             String
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
 
   category   Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   cartItems  CartItem[]
@@ -98,6 +119,7 @@ model Product {
 
   @@index([categoryId])
   @@index([isActive])
+  @@index([productStatus])
   @@index([name])
   @@index([createdAt])
 }
@@ -133,9 +155,17 @@ model Order {
   userId                  String
   status                  OrderStatus   @default(PENDING)
   paymentStatus           PaymentStatus @default(UNPAID)
+  invoiceNumber           String?       @unique
+  invoiceIssuedAt         DateTime?
+  refundNoteNumber        String?       @unique
+  refundIssuedAt          DateTime?
   subtotal                Decimal       @db.Decimal(10, 2)
+  vatAmount               Decimal       @default(0) @db.Decimal(10, 2)
+  shippingAmount          Decimal       @default(0) @db.Decimal(10, 2)
   total                   Decimal       @db.Decimal(10, 2)
   currency                String        @default("SAR")
+  paymentMethodLabel      String?
+  deliveryEstimate        String?
   shippingAddressSnapshot Json
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt

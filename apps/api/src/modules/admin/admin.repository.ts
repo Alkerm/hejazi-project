@@ -76,7 +76,11 @@ export const updateProductRepo = (id: string, data: Prisma.ProductUpdateInput) =
 
 export const deleteProductRepo = (id: string) => prisma.product.delete({ where: { id } });
 
-export const findProductByIdRepo = (id: string) => prisma.product.findUnique({ where: { id } });
+export const findProductByIdRepo = (id: string) =>
+  prisma.product.findUnique({
+    where: { id },
+    include: { category: true },
+  });
 
 export const listAdminOrdersRepo = (input: { skip: number; take: number; status?: OrderStatus }) => {
   const where: Prisma.OrderWhereInput = input.status ? { status: input.status } : {};
@@ -195,3 +199,23 @@ export const getDashboardSummaryCountsRepo = async (lowStockThreshold: number) =
 };
 
 export const listCategoriesRepo = () => prisma.category.findMany({ orderBy: { name: 'asc' } });
+
+export const listAdminAuditLogsRepo = (skip: number, take: number) =>
+  prisma.$transaction([
+    prisma.adminAuditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take,
+      include: {
+        adminUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    }),
+    prisma.adminAuditLog.count(),
+  ]);

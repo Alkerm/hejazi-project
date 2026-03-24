@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient, ProductStatus, UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -150,6 +150,7 @@ async function main() {
         imageUrl: rest.imageUrl,
         categoryId,
         isActive: true,
+        productStatus: ProductStatus.APPROVED,
       },
       create: {
         ...rest,
@@ -159,6 +160,7 @@ async function main() {
           },
         },
         isActive: true,
+        productStatus: ProductStatus.APPROVED,
       },
     });
   }

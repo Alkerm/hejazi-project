@@ -17,6 +17,7 @@ export const listProducts = async (input: {
 }) => {
   const where: Prisma.ProductWhereInput = {
     isActive: true,
+    productStatus: 'APPROVED',
     ...(input.search
       ? {
           name: {
@@ -54,6 +55,7 @@ export const findProductByIdOrSlug = (idOrSlug: string) =>
   prisma.product.findFirst({
     where: {
       isActive: true,
+      productStatus: 'APPROVED',
       OR: [{ id: idOrSlug }, { slug: idOrSlug }],
     },
     include: {

@@ -53,18 +53,20 @@ export default function AdminOrdersPage() {
       <div className="rounded border bg-white p-4">
         <div className="overflow-x-auto">
           <div className="min-w-[760px] space-y-2">
-            <div className="grid grid-cols-[140px_minmax(0,1fr)_140px_140px_220px] items-center border-b pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="grid grid-cols-[140px_minmax(0,1fr)_160px_120px_140px_220px] items-center border-b pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
               <span>Order ID</span>
               <span>Customer</span>
+              <span>Invoice</span>
               <span>Status</span>
               <span>Total</span>
               <span>Date</span>
             </div>
             {orders.map((order) => (
               <Link key={order.id} href={`/admin/orders/${order.id}`} className="block border-b pb-2 text-sm">
-                <div className="grid grid-cols-[140px_minmax(0,1fr)_140px_140px_220px] items-center">
+                <div className="grid grid-cols-[140px_minmax(0,1fr)_160px_120px_140px_220px] items-center">
                   <span>#{order.id.slice(-8)}</span>
                   <span>{order.user?.email ?? '-'}</span>
+                  <span>{order.invoiceNumber ?? 'Pending'}</span>
                   <span>{order.status}</span>
                   <span>{formatMoney(order.total, order.currency)}</span>
                   <span>{formatDate(order.createdAt)}</span>

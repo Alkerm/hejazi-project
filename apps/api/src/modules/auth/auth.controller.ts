@@ -11,6 +11,7 @@ const publicUser = (user: {
   lastName: string;
   email: string;
   phone: string | null;
+  marketingConsent: boolean;
   role: 'USER' | 'ADMIN';
 }) => ({
   id: user.id,
@@ -18,6 +19,7 @@ const publicUser = (user: {
   lastName: user.lastName,
   email: user.email,
   phone: user.phone,
+  marketingConsent: user.marketingConsent,
   role: user.role,
 });
 

@@ -1,5 +1,6 @@
 import type {
   AdminDashboardSummary,
+  AdminAuditLog,
   AdminInventoryResponse,
   AdminSalesAnalytics,
   ApiEnvelope,
@@ -66,6 +67,7 @@ export const api = {
     email: string;
     password: string;
     phone?: string;
+    marketingConsent: boolean;
   }) =>
     request<UserProfile>('/auth/register', {
       method: 'POST',
@@ -92,6 +94,7 @@ export const api = {
     lastName: string;
     email?: string;
     phone?: string | null;
+    marketingConsent?: boolean;
     currentPassword?: string;
     newPassword?: string;
     address?: {
@@ -147,12 +150,26 @@ export const api = {
   adminSummary: () => request<AdminDashboardSummary>('/admin/dashboard/summary'),
   adminCategories: () => request<Category[]>('/admin/categories'),
   adminProducts: (query = '') => request<Paginated<Product>>(`/admin/products${query}`),
+  adminProductDetails: (id: string) => request<Product>(`/admin/products/${id}`),
   adminCreateProduct: (payload: {
     name: string;
+    arabicName?: string | null;
     slug?: string;
     description: string;
     price: number;
     stockQuantity: number;
+    sku?: string | null;
+    brand?: string | null;
+    ingredients?: string | null;
+    warnings?: string | null;
+    usageInstructions?: string | null;
+    countryOfOrigin?: string | null;
+    manufacturer?: string | null;
+    importerResponsible?: string | null;
+    sfdaReference?: string | null;
+    batchNumberRequired: boolean;
+    expiryDateRequired: boolean;
+    productStatus: 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
     imageUrl: string;
     isActive: boolean;
     categoryId: string;
@@ -165,10 +182,23 @@ export const api = {
     id: string,
     payload: {
       name: string;
+      arabicName?: string | null;
       slug?: string;
       description: string;
       price: number;
       stockQuantity: number;
+      sku?: string | null;
+      brand?: string | null;
+      ingredients?: string | null;
+      warnings?: string | null;
+      usageInstructions?: string | null;
+      countryOfOrigin?: string | null;
+      manufacturer?: string | null;
+      importerResponsible?: string | null;
+      sfdaReference?: string | null;
+      batchNumberRequired: boolean;
+      expiryDateRequired: boolean;
+      productStatus: 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
       imageUrl: string;
       isActive: boolean;
       categoryId: string;
@@ -194,6 +224,7 @@ export const api = {
   adminInventoryLowStock: (query = '') =>
     request<AdminInventoryResponse>(`/admin/inventory/low-stock${query}`),
   adminSalesAnalytics: (query = '') => request<AdminSalesAnalytics>(`/admin/analytics/sales${query}`),
+  adminAuditLogs: (query = '') => request<Paginated<AdminAuditLog>>(`/admin/audit-logs${query}`),
 };
 
 export { HttpError };

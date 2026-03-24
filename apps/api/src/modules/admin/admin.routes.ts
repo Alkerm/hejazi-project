@@ -1,10 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import {
+  adminAuditLogsHandler,
   adminCategoriesHandler,
   adminDashboardSummaryHandler,
   adminLowStockHandler,
   adminOrderDetailsHandler,
   adminOrderStatusPatchHandler,
+  adminProductDetailsHandler,
   adminOrdersListHandler,
   adminProductCreateHandler,
   adminProductDeleteHandler,
@@ -19,6 +21,7 @@ export const adminRoutes = async (app: FastifyInstance) => {
 
   app.get('/products', adminProductsListHandler);
   app.post('/products', adminProductCreateHandler);
+  app.get('/products/:id', adminProductDetailsHandler);
   app.put('/products/:id', adminProductUpdateHandler);
   app.delete('/products/:id', adminProductDeleteHandler);
 
@@ -28,4 +31,5 @@ export const adminRoutes = async (app: FastifyInstance) => {
 
   app.get('/inventory/low-stock', adminLowStockHandler);
   app.get('/analytics/sales', adminSalesAnalyticsHandler);
+  app.get('/audit-logs', adminAuditLogsHandler);
 };

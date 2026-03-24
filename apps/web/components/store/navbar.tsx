@@ -19,9 +19,9 @@ const clearAuthHintCookie = () => {
 
 export function Navbar() {
   const pathname = usePathname();
+  const initialHasAuthHint = hasAuthHintCookie();
   const isLoginPage = pathname === '/' || pathname === '/login';
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
-  const isProfileRoute = pathname === '/profile' || pathname.startsWith('/profile/');
   const isProtectedRoute =
     pathname === '/products' ||
     pathname.startsWith('/products/') ||
@@ -33,8 +33,9 @@ export function Navbar() {
     pathname.startsWith('/profile/') ||
     isAdminRoute;
 
+  const [hasAuthHint, setHasAuthHint] = useState(initialHasAuthHint);
   const [auth, setAuth] = useState<{ isAuthenticated: boolean; role: 'USER' | 'ADMIN' | null }>({
-    isAuthenticated: false,
+    isAuthenticated: initialHasAuthHint,
     role: null,
   });
   const [authChecked, setAuthChecked] = useState(false);
@@ -44,18 +45,24 @@ export function Navbar() {
     { href: '/admin/orders', label: 'Orders' },
     { href: '/admin/inventory', label: 'Inventory' },
     { href: '/admin/analytics', label: 'Analytics' },
+    { href: '/admin/audit-logs', label: 'Audit Logs' },
     { href: '/profile', label: 'Profile' },
   ];
 
   useEffect(() => {
-    if (hasAuthHintCookie()) {
+    const hasHint = hasAuthHintCookie();
+    setHasAuthHint(hasHint);
+
+    if (hasHint) {
       setAuth((prev) => ({ ...prev, isAuthenticated: true }));
     }
 
     api
       .me()
       .then((me) => setAuth({ isAuthenticated: true, role: me.role }))
-      .catch(() => setAuth({ isAuthenticated: false, role: null }))
+      .catch(() =>
+        setAuth((prev) => (prev.isAuthenticated ? prev : { isAuthenticated: false, role: null })),
+      )
       .finally(() => setAuthChecked(true));
   }, []);
 
@@ -64,12 +71,15 @@ export function Navbar() {
       await api.logout();
     } finally {
       clearAuthHintCookie();
+      setHasAuthHint(false);
       setAuth({ isAuthenticated: false, role: null });
       window.location.href = '/';
     }
   };
 
-  const isAdminSection = isAdminRoute || (isProfileRoute && auth.role === 'ADMIN');
+  const isSignedIn = auth.isAuthenticated || hasAuthHint;
+  const isAdminSection =
+    isAdminRoute || auth.role === 'ADMIN' || (isSignedIn && pathname === '/profile');
   const isAdminLinkActive = (href: string) =>
     href === '/admin'
       ? pathname === '/admin'
@@ -105,7 +115,7 @@ export function Navbar() {
           </nav>
         ) : (
           <nav className="flex flex-wrap items-center justify-end gap-4 text-sm font-medium text-slate-700">
-            {auth.isAuthenticated ? (
+            {isSignedIn ? (
               <>
                 <Link href="/products" className={customerLinkClass('/products')}>
                   Products
@@ -123,7 +133,7 @@ export function Navbar() {
                   Logout
                 </Button>
               </>
-            ) : !isProtectedRoute && authChecked ? (
+            ) : !isProtectedRoute && authChecked && !hasAuthHint ? (
               <>
                 <Link href="/">Login</Link>
                 <Link href="/register">Register</Link>

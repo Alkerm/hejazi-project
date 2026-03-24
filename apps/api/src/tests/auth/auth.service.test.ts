@@ -35,6 +35,7 @@ describe('auth.service', () => {
         lastName: 'B',
         email: 'a@b.com',
         password: 'Passw0rd!123',
+        marketingConsent: false,
       }),
     ).rejects.toMatchObject({ code: 'EMAIL_EXISTS' });
   });
@@ -50,12 +51,14 @@ describe('auth.service', () => {
       lastName: 'B',
       email: 'a@b.com',
       password: 'Passw0rd!123',
+      marketingConsent: true,
     });
 
     expect(result.sessionId).toBe('sess-1');
     expect(createUser).toHaveBeenCalledWith(
       expect.objectContaining({
         role: 'USER',
+        marketingConsent: true,
       }),
     );
   });

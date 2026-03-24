@@ -7,10 +7,23 @@ export interface Category {
 export interface Product {
   id: string;
   name: string;
+  arabicName?: string | null;
   slug: string;
   description: string;
   price: number;
   stockQuantity: number;
+  sku?: string | null;
+  brand?: string | null;
+  ingredients?: string | null;
+  warnings?: string | null;
+  usageInstructions?: string | null;
+  countryOfOrigin?: string | null;
+  manufacturer?: string | null;
+  importerResponsible?: string | null;
+  sfdaReference?: string | null;
+  batchNumberRequired?: boolean;
+  expiryDateRequired?: boolean;
+  productStatus?: 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
   imageUrl: string;
   isActive: boolean;
   category: Category;
@@ -33,6 +46,7 @@ export interface UserProfile {
   lastName: string;
   email: string;
   phone: string | null;
+  marketingConsent: boolean;
   role: 'USER' | 'ADMIN';
   defaultAddress: {
     line1: string;
@@ -79,9 +93,17 @@ export interface Order {
   id: string;
   status: string;
   paymentStatus: string;
+  invoiceNumber?: string | null;
+  invoiceIssuedAt?: string | null;
+  refundNoteNumber?: string | null;
+  refundIssuedAt?: string | null;
   subtotal: number;
+  vatAmount: number;
+  shippingAmount: number;
   total: number;
   currency: string;
+  paymentMethodLabel?: string | null;
+  deliveryEstimate?: string | null;
   shippingAddressSnapshot: {
     line1: string;
     line2?: string | null;
@@ -143,5 +165,20 @@ export interface AdminInventoryResponse extends Paginated<Product> {
   meta: Paginated<Product>['meta'] & {
     threshold: number;
     outOfStockCount: number;
+  };
+}
+
+export interface AdminAuditLog {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId?: string | null;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+  adminUser: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
   };
 }

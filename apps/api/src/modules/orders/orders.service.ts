@@ -5,6 +5,12 @@ import { toMoney } from '../../utils/money';
 import { normalizePagination } from '../../utils/pagination';
 import { findOrderByUser, getCartWithItems, listOrdersByUser } from './orders.repository';
 
+const VAT_RATE = 0.15;
+const DEFAULT_SHIPPING_AMOUNT = 0;
+const DEFAULT_PAYMENT_METHOD_LABEL = 'Payment method to be confirmed';
+const DEFAULT_DELIVERY_ESTIMATE = '3 to 5 business days';
+const createInvoiceNumber = () => `INV-${Date.now()}`;
+
 export const createOrderFromCart = async (
   userId: string,
   payload: {
@@ -32,6 +38,13 @@ export const createOrderFromCart = async (
       for (const item of cart.items) {
         if (!item.product.isActive) {
           throw new AppError(`Product ${item.product.name} is inactive`, 400, 'PRODUCT_INACTIVE');
+        }
+        if (item.product.productStatus !== 'APPROVED') {
+          throw new AppError(
+            `Product ${item.product.name} is not approved for sale`,
+            400,
+            'PRODUCT_NOT_APPROVED',
+          );
         }
 
         const stockUpdate = await tx.product.updateMany({
@@ -66,16 +79,24 @@ export const createOrderFromCart = async (
       }
 
       const subtotalRounded = toMoney(subtotal);
-      const total = subtotalRounded;
+      const vatAmount = toMoney(subtotalRounded * VAT_RATE);
+      const shippingAmount = DEFAULT_SHIPPING_AMOUNT;
+      const total = toMoney(subtotalRounded + vatAmount + shippingAmount);
 
       const created = await tx.order.create({
         data: {
           userId,
           status: 'PENDING',
           paymentStatus: 'UNPAID',
+          invoiceNumber: createInvoiceNumber(),
+          invoiceIssuedAt: new Date(),
           subtotal: new Prisma.Decimal(subtotalRounded),
+          vatAmount: new Prisma.Decimal(vatAmount),
+          shippingAmount: new Prisma.Decimal(shippingAmount),
           total: new Prisma.Decimal(total),
           currency: payload.currency ?? 'SAR',
+          paymentMethodLabel: DEFAULT_PAYMENT_METHOD_LABEL,
+          deliveryEstimate: DEFAULT_DELIVERY_ESTIMATE,
           shippingAddressSnapshot: payload.shippingAddress,
           items: {
             createMany: {

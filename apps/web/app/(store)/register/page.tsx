@@ -15,6 +15,7 @@ export default function RegisterPage() {
     email: '',
     phone: '',
     password: '',
+    marketingConsent: false,
   });
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ export default function RegisterPage() {
         email: form.email,
         password: form.password,
         phone: form.phone || undefined,
+        marketingConsent: form.marketingConsent,
       });
       document.cookie = 'cosmetics_sid_hint=1; path=/';
       router.push('/products');
@@ -51,6 +53,22 @@ export default function RegisterPage() {
         <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
         <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
         <Input label="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+        <label className="flex items-start gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={form.marketingConsent}
+            onChange={(e) => setForm({ ...form, marketingConsent: e.target.checked })}
+            className="mt-1"
+          />
+          <span>
+            I agree to receive optional marketing messages. This is separate from the data needed to process my
+            orders.
+          </span>
+        </label>
+        <p className="text-xs text-slate-500">
+          Your account and order data are processed to fulfill purchases. Optional marketing consent can be changed
+          later in your profile.
+        </p>
         <Button type="submit" disabled={loading} className="w-full">
           {loading ? 'Creating account...' : 'Create account'}
         </Button>

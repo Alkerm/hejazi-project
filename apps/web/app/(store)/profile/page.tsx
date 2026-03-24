@@ -40,6 +40,7 @@ export default function ProfilePage() {
         lastName: profile.lastName,
         email: emailChanged ? profile.email : undefined,
         phone: profile.phone,
+        marketingConsent: profile.marketingConsent,
         currentPassword: currentPassword || undefined,
         newPassword: newPassword || undefined,
         address: profile.defaultAddress ?? undefined,
@@ -180,6 +181,21 @@ export default function ProfilePage() {
               })
             }
           />
+
+          {profile.role === 'USER' ? (
+            <label className="col-span-full flex items-start gap-2 text-sm font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={profile.marketingConsent}
+                onChange={(e) => setProfile({ ...profile, marketingConsent: e.target.checked })}
+                className="mt-1"
+              />
+              <span>
+                I want to receive optional marketing messages. Order-related communications remain necessary even if
+                this is turned off.
+              </span>
+            </label>
+          ) : null}
 
           <div className="col-span-full flex gap-3">
             <Button type="submit" disabled={saving || loggingOut}>

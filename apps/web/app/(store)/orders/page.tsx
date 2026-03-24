@@ -45,6 +45,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-slate-600">{order.status}</p>
+                  <p className="text-xs text-slate-500">{order.deliveryEstimate ?? 'Delivery estimate pending'}</p>
                   <p className="font-semibold">{formatMoney(order.total, order.currency)}</p>
                 </div>
               </div>

@@ -16,6 +16,7 @@ export const updateProfileSchema = z.object({
   lastName: z.string().min(1).max(50),
   email: z.string().email().optional(),
   phone: z.string().min(6).max(20).nullable().optional(),
+  marketingConsent: z.boolean().optional(),
   currentPassword: z.string().min(8).max(72).optional(),
   newPassword: z.string().min(8).max(72).optional(),
   address: optionalAddressSchema,

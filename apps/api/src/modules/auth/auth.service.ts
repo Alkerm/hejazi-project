@@ -9,6 +9,7 @@ export const registerUser = async (payload: {
   email: string;
   password: string;
   phone?: string;
+  marketingConsent: boolean;
 }) => {
   const existing = await findUserByEmail(payload.email.toLowerCase());
   if (existing) {
@@ -20,6 +21,7 @@ export const registerUser = async (payload: {
     lastName: payload.lastName,
     email: payload.email.toLowerCase(),
     phone: payload.phone,
+    marketingConsent: payload.marketingConsent,
     passwordHash: await hashPassword(payload.password),
     role: 'USER',
   });

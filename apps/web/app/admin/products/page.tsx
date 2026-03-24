@@ -61,6 +61,9 @@ export default function AdminProductsPage() {
                 <p className="text-slate-600">
                   {product.category.name} | {formatMoney(product.price)} | stock {product.stockQuantity}
                 </p>
+                <p className="text-slate-500">
+                  Status {product.productStatus ?? 'DRAFT'} | {product.isActive ? 'Active' : 'Hidden'}
+                </p>
               </div>
               <div className="flex gap-2">
                 <Link href={`/admin/products/${product.id}`}>

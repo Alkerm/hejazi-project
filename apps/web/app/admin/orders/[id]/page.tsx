@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Order } from '@/lib/types';
-import { formatMoney } from '@/lib/format';
+import { formatDate, formatMoney } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 
 const statuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
@@ -59,6 +59,13 @@ export default function AdminOrderDetailsPage() {
       <p className="font-semibold">Total: {formatMoney(order.total, order.currency)}</p>
 
       <div className="rounded border bg-white p-4">
+        <div className="mb-4 border-b border-slate-200 pb-4 text-sm text-slate-700">
+          <p>Invoice number: {order.invoiceNumber ?? 'Pending'}</p>
+          <p>Invoice issued: {order.invoiceIssuedAt ? formatDate(order.invoiceIssuedAt) : 'Pending issuance'}</p>
+          <p>Refund note: {order.refundNoteNumber ?? 'Not issued'}</p>
+          <p>Refund issued: {order.refundIssuedAt ? formatDate(order.refundIssuedAt) : 'Not issued'}</p>
+        </div>
+
         <div className="mb-4">
           <h3 className="mb-2 font-semibold">Order Status</h3>
           <div className="flex flex-wrap gap-2">
@@ -85,34 +92,54 @@ export default function AdminOrderDetailsPage() {
         </div>
 
         <div className="border-t border-slate-200 pt-4">
-        <h3 className="mb-2 font-semibold">Items</h3>
-        <div className="space-y-2 text-sm">
-          {order.items.map((item) => (
-            <div key={item.id} className="flex justify-between border-b pb-2">
-              <span>
-                {item.productNameSnapshot} x {item.quantity}
-              </span>
-              <span>{formatMoney(item.lineTotal, order.currency)}</span>
+          <h3 className="mb-2 font-semibold">Order Summary</h3>
+          <div className="mb-4 space-y-1 text-sm text-slate-700">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{formatMoney(order.subtotal, order.currency)}</span>
             </div>
-          ))}
-        </div>
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>{formatMoney(order.shippingAmount, order.currency)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>VAT</span>
+              <span>{formatMoney(order.vatAmount, order.currency)}</span>
+            </div>
+            <div className="flex justify-between font-semibold text-slate-900">
+              <span>Total</span>
+              <span>{formatMoney(order.total, order.currency)}</span>
+            </div>
+          </div>
 
-        <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-200 pt-4">
-          {hasPendingChange ? (
-            <>
-              <Button onClick={confirmStatusUpdate} disabled={saving}>
-                {saving ? 'Updating...' : 'Confirm update'}
+          <h3 className="mb-2 font-semibold">Items</h3>
+          <div className="space-y-2 text-sm">
+            {order.items.map((item) => (
+              <div key={item.id} className="flex justify-between border-b pb-2">
+                <span>
+                  {item.productNameSnapshot} x {item.quantity}
+                </span>
+                <span>{formatMoney(item.lineTotal, order.currency)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-200 pt-4">
+            {hasPendingChange ? (
+              <>
+                <Button onClick={confirmStatusUpdate} disabled={saving}>
+                  {saving ? 'Updating...' : 'Confirm update'}
+                </Button>
+                <Button variant="secondary" onClick={() => setSelectedStatus(order.status)} disabled={saving}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button variant="secondary" onClick={() => router.push('/admin/orders')}>
+                Back to Orders
               </Button>
-              <Button variant="secondary" onClick={() => setSelectedStatus(order.status)} disabled={saving}>
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <Button variant="secondary" onClick={() => router.push('/admin/orders')}>
-              Back to Orders
-            </Button>
-          )}
-        </div>
+            )}
+          </div>
         </div>
       </div>
 

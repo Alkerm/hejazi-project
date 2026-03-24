@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Order } from '@/lib/types';
 import { formatDate, formatMoney } from '@/lib/format';
+import { storefrontSettings } from '@/lib/storefront';
 
 export default function OrderDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -30,12 +31,40 @@ export default function OrderDetailsPage() {
       <div className="rounded border bg-white p-4">
         <p>Status: {order.status}</p>
         <p>Payment status: {order.paymentStatus}</p>
-        <p>Total: {formatMoney(order.total, order.currency)}</p>
+        <p>Payment method: {order.paymentMethodLabel ?? 'To be confirmed'}</p>
+        <p>Delivery estimate: {order.deliveryEstimate ?? 'To be confirmed'}</p>
+        <p>Invoice number: {order.invoiceNumber ?? 'To be assigned'}</p>
+        <p>
+          Invoice issued: {order.invoiceIssuedAt ? formatDate(order.invoiceIssuedAt) : 'Pending issuance'}
+        </p>
+      </div>
+
+      <div className="rounded border bg-white p-4">
+        <p className="mb-2 font-semibold">Order Summary</p>
+        <div className="space-y-1 text-sm text-slate-700">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>{formatMoney(order.subtotal, order.currency)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Shipping</span>
+            <span>{formatMoney(order.shippingAmount, order.currency)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>VAT</span>
+            <span>{formatMoney(order.vatAmount, order.currency)}</span>
+          </div>
+          <div className="flex justify-between font-semibold text-slate-900">
+            <span>Total</span>
+            <span>{formatMoney(order.total, order.currency)}</span>
+          </div>
+        </div>
       </div>
 
       <div className="rounded border bg-white p-4">
         <p className="mb-2 font-semibold">Shipping Address</p>
         <p>{order.shippingAddressSnapshot.line1}</p>
+        {order.shippingAddressSnapshot.line2 ? <p>{order.shippingAddressSnapshot.line2}</p> : null}
         <p>
           {order.shippingAddressSnapshot.city}, {order.shippingAddressSnapshot.country}{' '}
           {order.shippingAddressSnapshot.postalCode}
@@ -54,6 +83,12 @@ export default function OrderDetailsPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="rounded border bg-white p-4 text-sm text-slate-700">
+        <p className="mb-2 font-semibold">Support Contact</p>
+        <p>Email: {storefrontSettings.email}</p>
+        <p>Phone: {storefrontSettings.phone}</p>
       </div>
 
       <div className="pt-2">

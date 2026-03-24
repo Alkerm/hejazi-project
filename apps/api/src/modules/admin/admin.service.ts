@@ -20,6 +20,7 @@ import {
   getSalesByDayRepo,
   getTopSellingProductsRepo,
   listAdminOrdersRepo,
+  listAdminAuditLogsRepo,
   listAdminProductsRepo,
   listCategoriesRepo,
   updateAdminOrderStatusRepo,
@@ -89,10 +90,23 @@ export const createAdminProduct = async (
   adminUserId: string,
   payload: {
     name: string;
+    arabicName?: string | null;
     slug?: string;
     description: string;
     price: number;
     stockQuantity: number;
+    sku?: string | null;
+    brand?: string | null;
+    ingredients?: string | null;
+    warnings?: string | null;
+    usageInstructions?: string | null;
+    countryOfOrigin?: string | null;
+    manufacturer?: string | null;
+    importerResponsible?: string | null;
+    sfdaReference?: string | null;
+    batchNumberRequired: boolean;
+    expiryDateRequired: boolean;
+    productStatus: 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
     imageUrl: string;
     isActive: boolean;
     categoryId: string;
@@ -107,10 +121,23 @@ export const createAdminProduct = async (
 
   const product = await createProductRepo({
     name: payload.name,
+    arabicName: payload.arabicName,
     slug,
     description: payload.description,
     price: new Prisma.Decimal(payload.price),
     stockQuantity: payload.stockQuantity,
+    sku: payload.sku,
+    brand: payload.brand,
+    ingredients: payload.ingredients,
+    warnings: payload.warnings,
+    usageInstructions: payload.usageInstructions,
+    countryOfOrigin: payload.countryOfOrigin,
+    manufacturer: payload.manufacturer,
+    importerResponsible: payload.importerResponsible,
+    sfdaReference: payload.sfdaReference,
+    batchNumberRequired: payload.batchNumberRequired,
+    expiryDateRequired: payload.expiryDateRequired,
+    productStatus: payload.productStatus,
     imageUrl: payload.imageUrl,
     isActive: payload.isActive,
     category: { connect: { id: payload.categoryId } },
@@ -123,7 +150,11 @@ export const createAdminProduct = async (
       action: 'CREATE_PRODUCT',
       entityType: 'PRODUCT',
       entityId: product.id,
-      metadata: { name: product.name, slug: product.slug } as Prisma.InputJsonValue,
+      metadata: {
+        name: product.name,
+        slug: product.slug,
+        productStatus: product.productStatus,
+      } as Prisma.InputJsonValue,
     }),
   ]);
 
@@ -135,10 +166,23 @@ export const updateAdminProduct = async (
   productId: string,
   payload: {
     name: string;
+    arabicName?: string | null;
     slug?: string;
     description: string;
     price: number;
     stockQuantity: number;
+    sku?: string | null;
+    brand?: string | null;
+    ingredients?: string | null;
+    warnings?: string | null;
+    usageInstructions?: string | null;
+    countryOfOrigin?: string | null;
+    manufacturer?: string | null;
+    importerResponsible?: string | null;
+    sfdaReference?: string | null;
+    batchNumberRequired: boolean;
+    expiryDateRequired: boolean;
+    productStatus: 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
     imageUrl: string;
     isActive: boolean;
     categoryId: string;
@@ -158,10 +202,23 @@ export const updateAdminProduct = async (
 
   const product = await updateProductRepo(productId, {
     name: payload.name,
+    arabicName: payload.arabicName,
     slug,
     description: payload.description,
     price: new Prisma.Decimal(payload.price),
     stockQuantity: payload.stockQuantity,
+    sku: payload.sku,
+    brand: payload.brand,
+    ingredients: payload.ingredients,
+    warnings: payload.warnings,
+    usageInstructions: payload.usageInstructions,
+    countryOfOrigin: payload.countryOfOrigin,
+    manufacturer: payload.manufacturer,
+    importerResponsible: payload.importerResponsible,
+    sfdaReference: payload.sfdaReference,
+    batchNumberRequired: payload.batchNumberRequired,
+    expiryDateRequired: payload.expiryDateRequired,
+    productStatus: payload.productStatus,
     imageUrl: payload.imageUrl,
     isActive: payload.isActive,
     category: {
@@ -178,7 +235,11 @@ export const updateAdminProduct = async (
       action: 'UPDATE_PRODUCT',
       entityType: 'PRODUCT',
       entityId: product.id,
-      metadata: { name: product.name, stockQuantity: product.stockQuantity } as Prisma.InputJsonValue,
+      metadata: {
+        name: product.name,
+        stockQuantity: product.stockQuantity,
+        productStatus: product.productStatus,
+      } as Prisma.InputJsonValue,
     }),
   ]);
 
@@ -308,3 +369,27 @@ export const getAdminSalesAnalytics = async (days: number) => {
 };
 
 export const getAdminCategories = () => listCategoriesRepo();
+
+export const getAdminProductDetails = async (productId: string) => {
+  const product = await findProductByIdRepo(productId);
+  if (!product) {
+    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+  }
+
+  return product;
+};
+
+export const getAdminAuditLogs = async (query: { page: number; pageSize: number }) => {
+  const { skip, take, page, pageSize } = normalizePagination(query);
+  const [items, total] = await listAdminAuditLogsRepo(skip, take);
+
+  return {
+    items,
+    meta: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
+  };
+};
