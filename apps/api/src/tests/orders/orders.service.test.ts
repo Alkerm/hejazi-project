@@ -1,4 +1,4 @@
-﻿import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../modules/orders/orders.repository', () => ({
   getCartWithItems: vi.fn(),
@@ -12,8 +12,8 @@ vi.mock('../../prisma/client', () => ({
   },
 }));
 
-import { createOrderFromCart } from '../../modules/orders/orders.service';
-import { getCartWithItems } from '../../modules/orders/orders.repository';
+import { cancelMyOrder, createOrderFromCart } from '../../modules/orders/orders.service';
+import { findOrderByUser, getCartWithItems } from '../../modules/orders/orders.repository';
 import { prisma } from '../../prisma/client';
 
 describe('orders.service', () => {
@@ -45,6 +45,7 @@ describe('orders.service', () => {
           quantity: 2,
           product: {
             isActive: true,
+            productStatus: 'APPROVED',
             name: 'Prod',
             price: 12,
           },
@@ -74,5 +75,30 @@ describe('orders.service', () => {
         },
       }),
     ).rejects.toMatchObject({ code: 'INSUFFICIENT_STOCK' });
+  });
+
+  it('cancelMyOrder restores product stock atomically', async () => {
+    const mockOrder = {
+      id: 'ord-1',
+      userId: 'user-1',
+      status: 'PENDING',
+      items: [{ productId: 'p1', quantity: 3 }],
+    };
+
+    vi.mocked(findOrderByUser).mockResolvedValue(mockOrder as any);
+
+    vi.mocked(prisma.$transaction).mockImplementation(async (cb: any) => {
+      return cb({
+        product: {
+          update: vi.fn().mockResolvedValue({ id: 'p1', stockQuantity: 10 }),
+        },
+        order: {
+          update: vi.fn().mockResolvedValue({ ...mockOrder, status: 'CANCELLED' }),
+        },
+      });
+    });
+
+    const result = await cancelMyOrder('user-1', 'ord-1');
+    expect(result.status).toBe('CANCELLED');
   });
 });

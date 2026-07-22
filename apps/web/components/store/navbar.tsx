@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Globe } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/lib/language-context';
 import { Button } from '@/components/ui/button';
 
 const hasAuthHintCookie = () =>
@@ -19,6 +21,7 @@ const clearAuthHintCookie = () => {
 
 export function Navbar() {
   const pathname = usePathname();
+  const { lang, toggleLanguage, t } = useLanguage();
   const initialHasAuthHint = hasAuthHintCookie();
   const isLoginPage = pathname === '/' || pathname === '/login';
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
@@ -43,7 +46,11 @@ export function Navbar() {
     { href: '/admin', label: 'Dashboard' },
     { href: '/admin/products', label: 'Products' },
     { href: '/admin/orders', label: 'Orders' },
+    { href: '/driver', label: 'Driver Portal' },
     { href: '/admin/inventory', label: 'Inventory' },
+    { href: '/admin/reviews', label: 'Reviews' },
+    { href: '/admin/coupons', label: 'Coupons' },
+    { href: '/admin/support', label: 'Support' },
     { href: '/admin/analytics', label: 'Analytics' },
     { href: '/admin/audit-logs', label: 'Audit Logs' },
     { href: '/profile', label: 'Profile' },
@@ -85,18 +92,36 @@ export function Navbar() {
       ? pathname === '/admin'
       : pathname === href || pathname.startsWith(`${href}/`);
   const customerLinkClass = (href: string) =>
-    `transition-colors hover:text-brand-700 hover:underline underline-offset-4 ${
-      pathname === href || pathname.startsWith(`${href}/`) ? 'text-brand-700 underline' : ''
+    `relative text-sm font-medium tracking-wide text-slate-600 transition-colors duration-200 hover:text-brand-500 py-1 ${
+      pathname === href || pathname.startsWith(`${href}/`)
+        ? 'text-brand-600 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-brand-500 after:rounded-full'
+        : 'after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-brand-500 after:transition-all after:duration-200 hover:after:w-full'
     }`;
 
   return (
-    <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-50 glass-panel shadow-sm transition-all duration-300">
       <div
-        className={`mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-4 py-3 ${isLoginPage ? 'justify-center' : 'justify-between'}`}
+        className={`mx-auto flex w-full max-w-6xl flex-wrap items-center gap-4 px-6 py-4 ${isLoginPage ? 'justify-center' : 'justify-between'}`}
       >
-        <Link href="/" className="text-xl font-bold text-brand-700">
-          Hejazi Cosmetics
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/" className="group flex items-center gap-2">
+            <span className="serif-font text-2xl font-bold tracking-wider text-slate-800 transition duration-300 group-hover:text-brand-600">
+              Hejazi
+            </span>
+            <span className="text-xs tracking-[0.2em] font-semibold text-luxury-gold uppercase border-l border-slate-300 pl-2">
+              Cosmetics
+            </span>
+          </Link>
+
+          {/* Language Switcher Toggle */}
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 hover:bg-slate-100 transition"
+          >
+            <Globe className="w-3.5 h-3.5 text-slate-500" />
+            {lang === 'ar' ? 'English (EN)' : 'العربية (AR)'}
+          </button>
+        </div>
 
         {isLoginPage ? null : isAdminSection ? (
           <nav className="flex max-w-full items-center gap-2 overflow-x-auto pb-1 text-sm font-medium text-slate-700">
@@ -104,40 +129,51 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`whitespace-nowrap rounded px-3 py-2 font-semibold shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md ${isAdminLinkActive(link.href) ? 'bg-brand-600 text-white hover:bg-brand-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                className={`whitespace-nowrap rounded-lg px-3.5 py-2 text-xs uppercase tracking-wider font-semibold transition duration-200 hover:-translate-y-0.5 ${isAdminLinkActive(link.href) ? 'bg-slate-900 text-white shadow-sm' : 'bg-white/60 text-slate-700 border border-slate-200/60 hover:bg-white hover:border-slate-300'}`}
               >
                 {link.label}
               </Link>
             ))}
-            <Button type="button" variant="secondary" className="whitespace-nowrap px-3 py-1.5" onClick={handleLogout}>
+            <Button type="button" variant="secondary" className="whitespace-nowrap border-slate-200/80 bg-white/60 px-4 py-2 hover:bg-white text-xs uppercase tracking-wider text-red-600 border hover:border-red-200" onClick={handleLogout}>
               Logout
             </Button>
           </nav>
         ) : (
-          <nav className="flex flex-wrap items-center justify-end gap-4 text-sm font-medium text-slate-700">
+          <nav className="flex flex-wrap items-center justify-end gap-6 text-sm font-medium text-slate-700">
             {isSignedIn ? (
               <>
                 <Link href="/products" className={customerLinkClass('/products')}>
-                  Products
+                  {t('Products', 'المنتجات')}
                 </Link>
                 <Link href="/cart" className={customerLinkClass('/cart')}>
-                  Cart
+                  {t('Cart', 'السلة')}
+                </Link>
+                <Link href="/wishlist" className={customerLinkClass('/wishlist')}>
+                  {t('Wishlist', 'المفضلة')}
                 </Link>
                 <Link href="/orders" className={customerLinkClass('/orders')}>
-                  Orders
+                  {t('Orders', 'طلباتي')}
                 </Link>
                 <Link href="/profile" className={customerLinkClass('/profile')}>
-                  Profile
+                  {t('Profile', 'حسابي')}
                 </Link>
-                <Button type="button" variant="secondary" className="px-3 py-1.5" onClick={handleLogout}>
-                  Logout
-                </Button>
+                <button
+                  type="button"
+                  className="ml-2 text-xs uppercase tracking-wider font-bold text-slate-500 hover:text-red-500 transition-colors"
+                  onClick={handleLogout}
+                >
+                  {t('Logout', 'خروج')}
+                </button>
               </>
             ) : !isProtectedRoute && authChecked && !hasAuthHint ? (
-              <>
-                <Link href="/">Login</Link>
-                <Link href="/register">Register</Link>
-              </>
+              <div className="flex items-center gap-4">
+                <Link href="/" className="text-sm font-medium text-slate-600 hover:text-brand-500 transition-colors">
+                  {t('Login', 'دخول')}
+                </Link>
+                <Link href="/register" className="rounded-full bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 hover:-translate-y-0.5 hover:shadow-md">
+                  {t('Register', 'تسجيل حساب')}
+                </Link>
+              </div>
             ) : null}
           </nav>
         )}

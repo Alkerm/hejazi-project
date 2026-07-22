@@ -10,6 +10,12 @@ import type {
   Paginated,
   Product,
   UserProfile,
+  Wishlist,
+  Review,
+  ProductReviewsSummaryResponse,
+  Coupon,
+  AppliedCouponResponse,
+  SupportTicket,
 } from './types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1';
@@ -225,6 +231,99 @@ export const api = {
     request<AdminInventoryResponse>(`/admin/inventory/low-stock${query}`),
   adminSalesAnalytics: (query = '') => request<AdminSalesAnalytics>(`/admin/analytics/sales${query}`),
   adminAuditLogs: (query = '') => request<Paginated<AdminAuditLog>>(`/admin/audit-logs${query}`),
+
+  wishlist: () => request<Wishlist>('/wishlist'),
+  toggleWishlist: (productId: string) =>
+    request<{ isWishlisted: boolean; wishlist: Wishlist }>('/wishlist/toggle', {
+      method: 'POST',
+      body: JSON.stringify({ productId }),
+    }),
+
+  productReviews: (productId: string) =>
+    request<ProductReviewsSummaryResponse>(`/reviews/products/${productId}`),
+  submitReview: (payload: { productId: string; rating: number; comment?: string }) =>
+    request<Review>('/reviews', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  adminReviews: () => request<Review[]>('/reviews/admin'),
+  adminModerateReview: (id: string, isApproved: boolean) =>
+    request<Review>(`/reviews/admin/${id}/approve`, {
+      method: 'PATCH',
+      body: JSON.stringify({ isApproved }),
+    }),
+
+  applyCoupon: (code: string, subtotal: number) =>
+    request<AppliedCouponResponse>('/coupons/apply', {
+      method: 'POST',
+      body: JSON.stringify({ code, subtotal }),
+    }),
+  adminCoupons: () => request<Coupon[]>('/coupons/admin'),
+  adminCreateCoupon: (payload: {
+    code: string;
+    discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
+    discountValue: number;
+    minOrderAmount?: number;
+    maxDiscountAmount?: number;
+    expiresAt?: string;
+    usageLimit?: number;
+  }) =>
+    request<Coupon>('/coupons/admin', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  adminToggleCoupon: (id: string, isActive: boolean) =>
+    request<Coupon>(`/coupons/admin/${id}/toggle`, {
+      method: 'PATCH',
+      body: JSON.stringify({ isActive }),
+    }),
+
+  submitContactTicket: (payload: { name: string; email: string; subject: string; message: string }) =>
+    request<SupportTicket>('/support/contact', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  adminTickets: () => request<SupportTicket[]>('/support/admin'),
+  adminUpdateTicketStatus: (id: string, status: string, adminNote?: string) =>
+    request<SupportTicket>(`/support/admin/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, adminNote }),
+    }),
+
+  forgotPassword: (email: string) =>
+    request<{ success: boolean; message: string; token?: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
+  resetPassword: (payload: { token: string; newPassword: string }) =>
+    request<{ success: boolean }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  cancelOrder: (id: string) =>
+    request<Order>(`/orders/me/${id}/cancel`, {
+      method: 'POST',
+    }),
+  adminUpdatePaymentStatus: (id: string, paymentStatus: string) =>
+    request<Order>(`/admin/orders/${id}/payment`, {
+      method: 'PATCH',
+      body: JSON.stringify({ paymentStatus }),
+    }),
+
+  getAvailableDeliveries: () => request<Order[]>('/driver/available'),
+  getMyAssignedDeliveries: (driverName?: string) =>
+    request<Order[]>(`/driver/my-deliveries?driverName=${encodeURIComponent(driverName || 'Driver')}`),
+  assignDriver: (id: string, driverName: string, driverPhone?: string) =>
+    request<Order>(`/driver/${id}/assign`, {
+      method: 'POST',
+      body: JSON.stringify({ driverName, driverPhone }),
+    }),
+  completeDelivery: (id: string, driverName?: string) =>
+    request<Order>(`/driver/${id}/complete`, {
+      method: 'POST',
+      body: JSON.stringify({ driverName }),
+    }),
 };
 
 export { HttpError };

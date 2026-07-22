@@ -148,9 +148,16 @@ export const getLowStockProductsRepo = (threshold: number, skip: number, take: n
 export const getOutOfStockCountRepo = () =>
   prisma.product.count({ where: { stockQuantity: 0, isActive: true } });
 
-export const getTopSellingProductsRepo = (take = 5) =>
+export const getTopSellingProductsRepo = (take = 5, startDate?: Date) =>
   prisma.orderItem.groupBy({
     by: ['productId', 'productNameSnapshot'],
+    where: startDate
+      ? {
+          order: {
+            createdAt: { gte: startDate },
+          },
+        }
+      : undefined,
     _sum: { quantity: true, lineTotal: true },
     orderBy: {
       _sum: {
@@ -160,10 +167,19 @@ export const getTopSellingProductsRepo = (take = 5) =>
     take,
   });
 
-export const getRevenueAggregateRepo = async () => {
+export const getRevenueAggregateRepo = async (startDate?: Date) => {
+  const where: Prisma.OrderWhereInput = {
+    ...(startDate ? { createdAt: { gte: startDate } } : {}),
+  };
   const [ordersCount, salesAggregate] = await prisma.$transaction([
-    prisma.order.count({ where: { paymentStatus: { in: ['UNPAID', 'PENDING', 'PAID'] } } }),
+    prisma.order.count({
+      where: {
+        ...where,
+        paymentStatus: { in: ['UNPAID', 'PENDING', 'PAID'] },
+      },
+    }),
     prisma.order.aggregate({
+      where,
       _sum: { total: true },
       _count: { _all: true },
     }),
@@ -173,6 +189,42 @@ export const getRevenueAggregateRepo = async () => {
     ordersCount,
     totalRevenue: Number(salesAggregate._sum.total ?? 0),
   };
+};
+
+export const getTopCustomersRepo = async (startDate: Date, take = 5) => {
+  const grouped = await prisma.order.groupBy({
+    by: ['userId'],
+    where: {
+      createdAt: { gte: startDate },
+    },
+    _sum: { total: true },
+    _count: { _all: true },
+    orderBy: {
+      _sum: {
+        total: 'desc',
+      },
+    },
+    take,
+  });
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: grouped.map((row) => row.userId) } },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+    },
+  });
+
+  const usersById = new Map(users.map((user) => [user.id, user]));
+
+  return grouped.map((row) => ({
+    userId: row.userId,
+    customer: usersById.get(row.userId),
+    totalSpent: Number(row._sum.total ?? 0),
+    ordersCount: row._count._all,
+  }));
 };
 
 export const getSalesByDayRepo = (startDate: Date) =>

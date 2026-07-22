@@ -144,3 +144,40 @@ export const getMyOrderDetails = async (userId: string, orderId: string) => {
 
   return order;
 };
+
+export const cancelMyOrder = async (userId: string, orderId: string) => {
+  const order = await findOrderByUser(userId, orderId);
+  if (!order) {
+    throw new AppError('Order not found', 404, 'ORDER_NOT_FOUND');
+  }
+
+  if (order.status === 'SHIPPED' || order.status === 'DELIVERED' || order.status === 'CANCELLED') {
+    throw new AppError(`Cannot cancel order in state ${order.status}`, 400, 'INVALID_ORDER_STATE');
+  }
+
+  const updatedOrder = await prisma.$transaction(async (tx) => {
+    // Restore stock for all items in order
+    for (const item of order.items) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: {
+          stockQuantity: {
+            increment: item.quantity,
+          },
+        },
+      });
+    }
+
+    return await tx.order.update({
+      where: { id: orderId },
+      data: {
+        status: 'CANCELLED',
+      },
+      include: {
+        items: true,
+      },
+    });
+  });
+
+  return updatedOrder;
+};

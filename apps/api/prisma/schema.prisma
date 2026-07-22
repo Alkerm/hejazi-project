@@ -36,22 +36,45 @@ enum ProductStatus {
   INACTIVE
 }
 
-model User {
-  id           String      @id @default(cuid())
-  firstName    String
-  lastName     String
-  email        String      @unique
-  passwordHash String
-  phone        String?
-  marketingConsent Boolean @default(false)
-  role         UserRole    @default(USER)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+enum CouponDiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
 
-  addresses     Address[]
-  cart          Cart?
-  orders        Order[]
-  adminAuditLog AdminAuditLog[]
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum PaymentMethodType {
+  COD
+  CREDIT_CARD
+  MADA
+  APPLE_PAY
+}
+
+model User {
+  id               String   @id @default(cuid())
+  firstName        String
+  lastName         String
+  email            String   @unique
+  passwordHash     String
+  phone            String?
+  marketingConsent Boolean  @default(false)
+  role             UserRole @default(USER)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  addresses           Address[]
+  cart                Cart?
+  orders              Order[]
+  adminAuditLog       AdminAuditLog[]
+  reviews             Review[]
+  wishlist            Wishlist?
+  supportTickets      SupportTicket[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([role])
   @@index([createdAt])
@@ -88,34 +111,36 @@ model Category {
 }
 
 model Product {
-  id                     String        @id @default(cuid())
-  name                   String
-  arabicName             String?
-  slug                   String        @unique
-  description            String
-  price                  Decimal       @db.Decimal(10, 2)
-  stockQuantity          Int
-  sku                    String?
-  brand                  String?
-  ingredients            String?
-  warnings               String?
-  usageInstructions      String?
-  countryOfOrigin        String?
-  manufacturer           String?
-  importerResponsible    String?
-  sfdaReference          String?
-  batchNumberRequired    Boolean       @default(false)
-  expiryDateRequired     Boolean       @default(false)
-  productStatus          ProductStatus @default(DRAFT)
-  imageUrl               String
-  isActive               Boolean       @default(true)
-  categoryId             String
-  createdAt              DateTime      @default(now())
-  updatedAt              DateTime      @updatedAt
+  id                  String        @id @default(cuid())
+  name                String
+  arabicName          String?
+  slug                String        @unique
+  description         String
+  price               Decimal       @db.Decimal(10, 2)
+  stockQuantity       Int
+  sku                 String?
+  brand               String?
+  ingredients         String?
+  warnings            String?
+  usageInstructions   String?
+  countryOfOrigin     String?
+  manufacturer        String?
+  importerResponsible String?
+  sfdaReference       String?
+  batchNumberRequired Boolean       @default(false)
+  expiryDateRequired  Boolean       @default(false)
+  productStatus       ProductStatus @default(DRAFT)
+  imageUrl            String
+  isActive            Boolean       @default(true)
+  categoryId          String
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
-  category   Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  cartItems  CartItem[]
-  orderItems OrderItem[]
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
 
   @@index([categoryId])
   @@index([isActive])
@@ -125,10 +150,10 @@ model Product {
 }
 
 model Cart {
-  id        String    @id @default(cuid())
-  userId    String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   items CartItem[]
@@ -151,27 +176,35 @@ model CartItem {
 }
 
 model Order {
-  id                      String        @id @default(cuid())
+  id                      String            @id @default(cuid())
   userId                  String
-  status                  OrderStatus   @default(PENDING)
-  paymentStatus           PaymentStatus @default(UNPAID)
-  invoiceNumber           String?       @unique
+  status                  OrderStatus       @default(PENDING)
+  paymentStatus           PaymentStatus     @default(UNPAID)
+  paymentMethod           PaymentMethodType @default(COD)
+  invoiceNumber           String?           @unique
   invoiceIssuedAt         DateTime?
-  refundNoteNumber        String?       @unique
+  refundNoteNumber        String?           @unique
   refundIssuedAt          DateTime?
-  subtotal                Decimal       @db.Decimal(10, 2)
-  vatAmount               Decimal       @default(0) @db.Decimal(10, 2)
-  shippingAmount          Decimal       @default(0) @db.Decimal(10, 2)
-  total                   Decimal       @db.Decimal(10, 2)
-  currency                String        @default("SAR")
+  subtotal                Decimal           @db.Decimal(10, 2)
+  discountAmount          Decimal           @default(0) @db.Decimal(10, 2)
+  couponCode              String?
+  vatAmount               Decimal           @default(0) @db.Decimal(10, 2)
+  shippingAmount          Decimal           @default(0) @db.Decimal(10, 2)
+  total                   Decimal           @db.Decimal(10, 2)
+  currency                String            @default("SAR")
   paymentMethodLabel      String?
   deliveryEstimate        String?
+  driverName              String?
+  driverPhone             String?
+  assignedAt              DateTime?
+  deliveredAt             DateTime?
   shippingAddressSnapshot Json
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
 
-  user  User        @relation(fields: [userId], references: [id], onDelete: Restrict)
-  items OrderItem[]
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items        OrderItem[]
+  transactions PaymentTransaction[]
 
   @@index([userId])
   @@index([status])
@@ -193,6 +226,116 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+}
+
+model PaymentTransaction {
+  id             String        @id @default(cuid())
+  orderId        String
+  gateway        String        // e.g. "MOYASAR", "STRIPE", "COD"
+  transactionId  String?       // Gateway ID / Intent ID
+  idempotencyKey String?       @unique
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String        @default("SAR")
+  status         PaymentStatus @default(PENDING)
+  rawResponse    Json?
+  createdAt      DateTime      @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([transactionId])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  userId     String
+  productId  String
+  rating     Int      // 1 to 5
+  comment    String?
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([userId])
+  @@index([isApproved])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items WishlistItem[]
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String
+  productId  String
+  createdAt  DateTime @default(now())
+
+  wishlist Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId])
+  @@index([wishlistId])
+  @@index([productId])
+}
+
+model Coupon {
+  id                String             @id @default(cuid())
+  code              String             @unique
+  discountType      CouponDiscountType
+  discountValue     Decimal            @db.Decimal(10, 2)
+  minOrderAmount    Decimal?           @db.Decimal(10, 2)
+  maxDiscountAmount Decimal?           @db.Decimal(10, 2)
+  expiresAt         DateTime?
+  usageLimit        Int?
+  usedCount         Int                @default(0)
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model SupportTicket {
+  id        String       @id @default(cuid())
+  userId    String?
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    TicketStatus @default(OPEN)
+  adminNote String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
 }
 
 model AdminAuditLog {

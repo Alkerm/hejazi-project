@@ -5,15 +5,15 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const styles: Record<NonNullable<Props['variant']>, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700',
-  secondary: 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50',
-  danger: 'bg-red-600 text-white hover:bg-red-700',
+  primary: 'bg-brand-600 text-white hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-500/10 active:bg-brand-800',
+  secondary: 'border border-slate-200/80 bg-white/80 backdrop-blur-sm text-slate-800 hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100',
+  danger: 'bg-red-500 text-white hover:bg-red-600 active:bg-red-700 hover:shadow-lg hover:shadow-red-500/10',
 };
 
 export function Button({ variant = 'primary', className = '', ...props }: Props) {
   return (
     <button
-      className={`rounded-md px-4 py-2 text-sm font-semibold shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm ${styles[variant]} ${className}`}
+      className={`rounded-xl px-5 py-2.5 text-xs font-semibold uppercase tracking-wider shadow-sm transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm ${styles[variant]} ${className}`}
       {...props}
     />
   );

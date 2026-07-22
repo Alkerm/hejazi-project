@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -55,55 +55,75 @@ export function LoginStartCard() {
   };
 
   return (
-    <div className="mx-auto max-w-md space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="text-2xl font-bold">Sign in to Hejazi Cosmetics</h1>
-      <p className="text-sm text-slate-600">Enter your account details to access the store and dashboard features.</p>
-      <div className="rounded border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
-        <p className="font-semibold">Demo credentials:</p>
-        <p>Customer: {DEMO_CREDENTIALS.customer.email} / {DEMO_CREDENTIALS.customer.password}</p>
-        <p>Admin: {DEMO_CREDENTIALS.admin.email} / {DEMO_CREDENTIALS.admin.password}</p>
-        {isLocalhost ? (
-          <div className="mt-3 flex gap-2">
-            <Button type="button" variant="secondary" onClick={() => applyDemoCredentials('customer')}>
-              Use customer demo
-            </Button>
-            <Button type="button" variant="secondary" onClick={() => applyDemoCredentials('admin')}>
-              Use admin demo
-            </Button>
-          </div>
-        ) : null}
+    <div className="mx-auto max-w-md space-y-6 glass-card rounded-2xl p-8 border border-slate-200/40 animate-fade-in">
+      <div className="text-center space-y-2">
+        <h1 className="serif-font text-3xl font-bold text-slate-800">Welcome Back</h1>
+        <p className="text-xs uppercase tracking-widest text-luxury-gold font-medium">Hejazi Cosmetics Portal</p>
       </div>
 
-      <form className="space-y-3" onSubmit={onSubmit}>
+      <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-2">
+        <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">Quick Demo Login</p>
+        <div className="text-[10px] text-slate-500 space-y-1">
+          <p><span className="font-semibold text-slate-700">Customer:</span> {DEMO_CREDENTIALS.customer.email}</p>
+          <p><span className="font-semibold text-slate-700">Admin:</span> {DEMO_CREDENTIALS.admin.email}</p>
+        </div>
+        {isLocalhost && (
+          <div className="mt-3 flex gap-2">
+            <button 
+              type="button" 
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 active:scale-95 transition"
+              onClick={() => applyDemoCredentials('customer')}
+            >
+              Customer Log
+            </button>
+            <button 
+              type="button" 
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 active:scale-95 transition"
+              onClick={() => applyDemoCredentials('admin')}
+            >
+              Admin Log
+            </button>
+          </div>
+        )}
+      </div>
+
+      <form className="space-y-4" onSubmit={onSubmit}>
         <Input
-          label="Email"
+          label="Email Address"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="example@cosmetics.local"
           required
+          className="bg-white/80"
         />
         <Input
           label="Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Your password"
+          placeholder="Your account password"
           required
+          className="bg-white/80"
         />
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? 'Signing in...' : 'Sign in'}
+        
+        {message && (
+          <p className="text-xs font-semibold text-red-500">{message}</p>
+        )}
+
+        <Button type="submit" disabled={loading} className="w-full py-3">
+          {loading ? 'Verifying...' : 'Sign in'}
         </Button>
       </form>
 
-      {message && <p className="text-sm text-red-600">{message}</p>}
-
-      <p className="text-sm text-slate-600">
-        Don&apos;t have an account?{' '}
-        <Link href="/register" className="font-semibold text-brand-700">
-          Create account
-        </Link>
-      </p>
+      <div className="border-t border-slate-200/50 pt-4 text-center">
+        <p className="text-xs text-slate-500">
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className="font-semibold text-brand-600 hover:text-brand-700 transition">
+            Create an account
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

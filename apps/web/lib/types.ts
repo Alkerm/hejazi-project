@@ -154,6 +154,13 @@ export interface AdminSalesAnalytics {
     unitsSold: number;
     revenue: number;
   }>;
+  topCustomers: Array<{
+    userId: string;
+    customerName: string;
+    email: string | null;
+    ordersCount: number;
+    totalSpent: number;
+  }>;
   salesByDay: Array<{
     day: string;
     revenue: number;
@@ -182,3 +189,92 @@ export interface AdminAuditLog {
     email: string;
   };
 }
+
+export interface WishlistItem {
+  id: string;
+  wishlistId: string;
+  productId: string;
+  createdAt: string;
+  product: Product;
+}
+
+export interface Wishlist {
+  id: string;
+  userId: string;
+  items: WishlistItem[];
+}
+
+export interface Review {
+  id: string;
+  userId: string;
+  productId: string;
+  rating: number;
+  comment?: string | null;
+  isApproved: boolean;
+  createdAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email?: string;
+  };
+  product?: {
+    id: string;
+    name: string;
+    slug: string;
+    imageUrl: string;
+  };
+}
+
+export interface ProductReviewsSummaryResponse {
+  reviews: Review[];
+  summary: {
+    totalReviews: number;
+    averageRating: number;
+    breakdown: Record<number, number>;
+  };
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
+  discountValue: number;
+  minOrderAmount?: number | null;
+  maxDiscountAmount?: number | null;
+  expiresAt?: string | null;
+  usageLimit?: number | null;
+  usedCount: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AppliedCouponResponse {
+  code: string;
+  discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
+  discountValue: number;
+  discountAmount: number;
+  newSubtotal: number;
+}
+
+export interface SupportTicket {
+  id: string;
+  userId?: string | null;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  adminNote?: string | null;
+  createdAt: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | null;
+}
+
+
+
+

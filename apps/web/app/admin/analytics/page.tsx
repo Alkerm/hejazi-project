@@ -13,50 +13,107 @@ export default function AdminAnalyticsPage() {
     api.adminSalesAnalytics(`?days=${days}`).then(setData).catch(() => null);
   }, [days]);
 
-  if (!data) return <p>Loading analytics...</p>;
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 space-y-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600"></div>
+        <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">Loading analytics...</p>
+      </div>
+    );
+  }
+
+  // Calculate maximum values for visual bar scaling
+  const maxProductRevenue = Math.max(...data.topProducts.map((p) => p.revenue), 1);
+  const maxCustomerSpend = Math.max(...data.topCustomers.map((c) => c.totalSpent), 1);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Sales Analytics</h2>
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/50 pb-6">
+        <div className="space-y-1">
+          <h1 className="serif-font text-3xl font-bold text-slate-800">Sales Analytics</h1>
+          <p className="text-xs text-slate-500 uppercase tracking-widest">In-depth performance metrics and analytics</p>
+        </div>
         <select
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
+          className="rounded-xl border border-slate-200 bg-white/80 px-4 py-2.5 text-xs font-medium text-slate-700 outline-none transition focus:border-brand-400"
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
         >
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
+          <option value={7}>Last 7 Days</option>
+          <option value={30}>Last 30 Days</option>
+          <option value={90}>Last 90 Days</option>
         </select>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <StatCard label="Revenue" value={formatMoney(data.totalRevenue)} />
-        <StatCard label="Orders" value={data.totalOrders} />
+        <StatCard label="Revenue for Period" value={formatMoney(data.totalRevenue)} />
+        <StatCard label="Total Orders" value={data.totalOrders} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded border bg-white p-4">
-          <h3 className="mb-2 font-semibold">Top Products</h3>
-          <div className="space-y-2 text-sm">
-            {data.topProducts.map((item) => (
-              <div key={item.productId} className="flex justify-between border-b pb-2">
-                <span>{item.productName}</span>
-                <span>{item.unitsSold} units</span>
-                <span>{formatMoney(item.revenue)}</span>
-              </div>
-            ))}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Top Products Card */}
+        <div className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-4">
+          <h3 className="text-xs uppercase tracking-widest font-bold text-slate-700 border-b border-slate-200/40 pb-2">
+            Top Performing Products
+          </h3>
+          <div className="space-y-4">
+            {data.topProducts.map((item) => {
+              const widthPct = Math.min((item.revenue / maxProductRevenue) * 100, 100);
+              return (
+                <div key={item.productId} className="space-y-1 text-xs">
+                  <div className="flex justify-between font-medium">
+                    <span className="text-slate-700 font-semibold">{item.productName}</span>
+                    <span className="text-slate-500">{item.unitsSold} units · {formatMoney(item.revenue)}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full luxury-gradient rounded-full" style={{ width: `${widthPct}%` }}></div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        <div className="rounded border bg-white p-4">
-          <h3 className="mb-2 font-semibold">Revenue by Day</h3>
-          <div className="space-y-2 text-sm">
+        {/* Top Customers Card */}
+        <div className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-4">
+          <h3 className="text-xs uppercase tracking-widest font-bold text-slate-700 border-b border-slate-200/40 pb-2">
+            Top Customers
+          </h3>
+          <div className="space-y-4">
+            {data.topCustomers.map((customer) => {
+              const widthPct = Math.min((customer.totalSpent / maxCustomerSpend) * 100, 100);
+              return (
+                <div key={customer.userId} className="space-y-1 text-xs">
+                  <div className="flex justify-between font-medium">
+                    <div>
+                      <span className="text-slate-700 font-semibold block">{customer.customerName}</span>
+                      <span className="text-[10px] text-slate-400">{customer.email ?? 'No email'}</span>
+                    </div>
+                    <span className="text-slate-500 text-right">
+                      {customer.ordersCount} orders · {formatMoney(customer.totalSpent)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-slate-800 rounded-full" style={{ width: `${widthPct}%` }}></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Revenue by Day Card */}
+        <div className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-4 lg:col-span-2">
+          <h3 className="text-xs uppercase tracking-widest font-bold text-slate-700 border-b border-slate-200/40 pb-2">
+            Revenue Daily Breakdown
+          </h3>
+          <div className="divide-y divide-slate-100">
             {data.salesByDay.map((row) => (
-              <div key={row.day} className="flex justify-between border-b pb-2">
-                <span>{row.day}</span>
-                <span>{row.orders} orders</span>
-                <span>{formatMoney(row.revenue)}</span>
+              <div key={row.day} className="flex justify-between items-center py-3 text-xs">
+                <span className="font-semibold text-slate-700">{row.day}</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-slate-500">{row.orders} order{row.orders === 1 ? '' : 's'}</span>
+                  <span className="font-bold text-slate-850">{formatMoney(row.revenue)}</span>
+                </div>
               </div>
             ))}
           </div>

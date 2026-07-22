@@ -3,6 +3,10 @@ module.exports = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Outfit', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
+      },
       colors: {
         brand: {
           50: '#fef7f5',
@@ -15,6 +19,11 @@ module.exports = {
           700: '#b73922',
           800: '#962f22',
           900: '#7c2b21',
+        },
+        luxury: {
+          light: '#fdfbf7',
+          gold: '#c5a880',
+          dark: '#1e293b',
         },
       },
     },

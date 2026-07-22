@@ -65,3 +65,54 @@ export const getCurrentUser = async (userId: string) => {
 
   return user;
 };
+
+export const requestPasswordReset = async (email: string) => {
+  const user = await findUserByEmail(email.toLowerCase());
+  if (!user) {
+    // Return true without leaking user existence for security
+    return { success: true, message: 'If email exists, reset instructions have been sent.' };
+  }
+
+  const token = `rst_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  const { prisma } = await import('../../prisma/client');
+  await prisma.passwordResetToken.create({
+    data: {
+      userId: user.id,
+      token,
+      expiresAt,
+    },
+  });
+
+  return {
+    success: true,
+    message: 'If email exists, reset instructions have been sent.',
+    token, // Provided for local development & testing simulation
+  };
+};
+
+export const resetPassword = async (token: string, newPassword: string) => {
+  const { prisma } = await import('../../prisma/client');
+
+  const resetRecord = await prisma.passwordResetToken.findUnique({
+    where: { token },
+  });
+
+  if (!resetRecord || resetRecord.expiresAt < new Date()) {
+    throw new AppError('Invalid or expired password reset token', 400, 'INVALID_TOKEN');
+  }
+
+  const newHash = await hashPassword(newPassword);
+
+  await prisma.user.update({
+    where: { id: resetRecord.userId },
+    data: { passwordHash: newHash },
+  });
+
+  await prisma.passwordResetToken.delete({
+    where: { id: resetRecord.id },
+  });
+
+  return { success: true };
+};

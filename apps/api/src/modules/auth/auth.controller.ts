@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ok } from '../../utils/response';
 import { loginSchema, registerSchema } from './auth.schemas';
-import { getCurrentUser, loginUser, logoutUser, registerUser } from './auth.service';
+import { getCurrentUser, loginUser, logoutUser, registerUser, requestPasswordReset, resetPassword } from './auth.service';
 import { clearAuthCookie, getSignedCookieSessionId, setAuthCookie } from './session.service';
 import { requireAuth } from '../../middleware/auth';
 
@@ -54,4 +54,24 @@ export const meHandler = async (request: FastifyRequest, reply: FastifyReply) =>
     ...publicUser(user),
     defaultAddress: user.addresses[0] ?? null,
   });
+};
+
+export const forgotPasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  const body = request.body as { email?: string };
+  if (!body?.email) {
+    return reply.status(400).send({ error: 'Email is required' });
+  }
+
+  const result = await requestPasswordReset(body.email);
+  return ok(reply, result);
+};
+
+export const resetPasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  const body = request.body as { token?: string; newPassword?: string };
+  if (!body?.token || !body?.newPassword || body.newPassword.length < 6) {
+    return reply.status(400).send({ error: 'Valid token and new password (min 6 chars) are required' });
+  }
+
+  const result = await resetPassword(body.token, body.newPassword);
+  return ok(reply, result);
 };

@@ -1,5 +1,12 @@
-﻿import { FastifyInstance } from 'fastify';
-import { loginHandler, logoutHandler, meHandler, registerHandler } from './auth.controller';
+import { FastifyInstance } from 'fastify';
+import {
+  loginHandler,
+  logoutHandler,
+  meHandler,
+  registerHandler,
+  forgotPasswordHandler,
+  resetPasswordHandler,
+} from './auth.controller';
 import { env } from '../../config/env';
 
 const authRateLimitConfig = {
@@ -16,4 +23,6 @@ export const authRoutes = async (app: FastifyInstance) => {
   app.post('/login', authRateLimitConfig, loginHandler);
   app.post('/logout', logoutHandler);
   app.get('/me', meHandler);
+  app.post('/forgot-password', authRateLimitConfig, forgotPasswordHandler);
+  app.post('/reset-password', authRateLimitConfig, resetPasswordHandler);
 };

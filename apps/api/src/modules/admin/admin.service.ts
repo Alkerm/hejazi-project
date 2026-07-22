@@ -18,6 +18,7 @@ import {
   getRecentOrdersRepo,
   getRevenueAggregateRepo,
   getSalesByDayRepo,
+  getTopCustomersRepo,
   getTopSellingProductsRepo,
   listAdminOrdersRepo,
   listAdminAuditLogsRepo,
@@ -318,6 +319,42 @@ export const updateAdminOrderStatus = async (
   return updated;
 };
 
+export const updateAdminPaymentStatus = async (
+  adminUserId: string,
+  orderId: string,
+  paymentStatus: 'UNPAID' | 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED',
+) => {
+  const order = await findAdminOrderByIdRepo(orderId);
+  if (!order) {
+    throw new AppError('Order not found', 404, 'ORDER_NOT_FOUND');
+  }
+
+  const updated = await prisma.order.update({
+    where: { id: orderId },
+    data: { paymentStatus },
+  });
+
+  await prisma.paymentTransaction.create({
+    data: {
+      orderId,
+      gateway: order.paymentMethod || 'COD',
+      amount: order.total,
+      status: paymentStatus,
+      rawResponse: { updatedByAdmin: adminUserId },
+    },
+  });
+
+  await createAuditLog({
+    adminUserId,
+    action: 'UPDATE_PAYMENT_STATUS',
+    entityType: 'ORDER',
+    entityId: orderId,
+    metadata: { from: order.paymentStatus, to: paymentStatus } as Prisma.InputJsonValue,
+  });
+
+  return updated;
+};
+
 export const getAdminLowStock = async (query: { threshold?: number; page: number; pageSize: number }) => {
   const threshold = query.threshold ?? env.LOW_STOCK_THRESHOLD;
   const { skip, take, page, pageSize } = normalizePagination(query);
@@ -344,9 +381,10 @@ export const getAdminSalesAnalytics = async (days: number) => {
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
 
-  const [revenueAggregate, topProducts, salesByDay] = await Promise.all([
-    getRevenueAggregateRepo(),
-    getTopSellingProductsRepo(10),
+  const [revenueAggregate, topProducts, topCustomers, salesByDay] = await Promise.all([
+    getRevenueAggregateRepo(startDate),
+    getTopSellingProductsRepo(10, startDate),
+    getTopCustomersRepo(startDate, 10),
     getSalesByDayRepo(startDate),
   ]);
 
@@ -359,6 +397,15 @@ export const getAdminSalesAnalytics = async (days: number) => {
       productName: item.productNameSnapshot,
       unitsSold: item._sum.quantity ?? 0,
       revenue: toMoney(Number(item._sum.lineTotal ?? 0)),
+    })),
+    topCustomers: topCustomers.map((item) => ({
+      userId: item.userId,
+      customerName: item.customer
+        ? `${item.customer.firstName} ${item.customer.lastName}`.trim()
+        : 'Unknown Customer',
+      email: item.customer?.email ?? null,
+      ordersCount: item.ordersCount,
+      totalSpent: toMoney(item.totalSpent),
     })),
     salesByDay: salesByDay.map((row) => ({
       day: row.day,

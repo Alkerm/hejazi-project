@@ -6,6 +6,7 @@ import {
   adminLowStockHandler,
   adminOrderDetailsHandler,
   adminOrderStatusPatchHandler,
+  adminOrderPaymentStatusPatchHandler,
   adminProductDetailsHandler,
   adminOrdersListHandler,
   adminProductCreateHandler,
@@ -28,6 +29,7 @@ export const adminRoutes = async (app: FastifyInstance) => {
   app.get('/orders', adminOrdersListHandler);
   app.get('/orders/:id', adminOrderDetailsHandler);
   app.patch('/orders/:id/status', adminOrderStatusPatchHandler);
+  app.patch('/orders/:id/payment', adminOrderPaymentStatusPatchHandler);
 
   app.get('/inventory/low-stock', adminLowStockHandler);
   app.get('/analytics/sales', adminSalesAnalyticsHandler);

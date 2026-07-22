@@ -25,6 +25,7 @@ import {
   getAdminProducts,
   getAdminSalesAnalytics,
   updateAdminOrderStatus,
+  updateAdminPaymentStatus,
   updateAdminProduct,
 } from './admin.service';
 
@@ -95,6 +96,14 @@ export const adminOrderStatusPatchHandler = async (request: FastifyRequest, repl
   const params = adminOrderIdSchema.parse(request.params);
   const body = adminUpdateOrderStatusSchema.parse(request.body);
   const data = await updateAdminOrderStatus(request.auth!.userId, params.id, body.status);
+  return ok(reply, data);
+};
+
+export const adminOrderPaymentStatusPatchHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAdmin(request, reply);
+  const params = adminOrderIdSchema.parse(request.params);
+  const body = request.body as { paymentStatus: 'UNPAID' | 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED' };
+  const data = await updateAdminPaymentStatus(request.auth!.userId, params.id, body.paymentStatus);
   return ok(reply, data);
 };
 

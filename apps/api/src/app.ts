@@ -1,4 +1,4 @@
-﻿import Fastify from 'fastify';
+import Fastify from 'fastify';
 import { env, isProd } from './config/env';
 import { registerCorePlugins } from './plugins/core';
 import { registerErrorHandler } from './plugins/error-handler';
@@ -8,6 +8,16 @@ import { productRoutes } from './modules/products/products.routes';
 import { cartRoutes } from './modules/cart/cart.routes';
 import { ordersRoutes } from './modules/orders/orders.routes';
 import { adminRoutes } from './modules/admin/admin.routes';
+import { paymentsRoutes } from './modules/payments/payments.routes';
+import { wishlistRoutes } from './modules/wishlist/wishlist.routes';
+import { reviewsRoutes } from './modules/reviews/reviews.routes';
+import { couponsRoutes } from './modules/coupons/coupons.routes';
+import { supportRoutes } from './modules/support/support.routes';
+import { uploadRoutes } from './modules/upload/upload.routes';
+import { driverRoutes } from './modules/driver/driver.routes';
+import fastifyMultipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 
 export const buildApp = async () => {
   const app = Fastify({
@@ -20,6 +30,11 @@ export const buildApp = async () => {
   });
 
   await registerCorePlugins(app);
+  await app.register(fastifyMultipart, { limits: { fileSize: 5 * 1024 * 1024 } });
+  await app.register(fastifyStatic, {
+    root: path.join(process.cwd(), 'uploads'),
+    prefix: '/uploads/',
+  });
 
   app.get('/health', async () => ({
     success: true,
@@ -34,6 +49,13 @@ export const buildApp = async () => {
       await v1.register(cartRoutes, { prefix: '/cart' });
       await v1.register(ordersRoutes, { prefix: '/orders' });
       await v1.register(adminRoutes, { prefix: '/admin' });
+      await v1.register(paymentsRoutes, { prefix: '/payments' });
+      await v1.register(wishlistRoutes, { prefix: '/wishlist' });
+      await v1.register(reviewsRoutes, { prefix: '/reviews' });
+      await v1.register(couponsRoutes, { prefix: '/coupons' });
+      await v1.register(supportRoutes, { prefix: '/support' });
+      await v1.register(uploadRoutes, { prefix: '/admin/upload' });
+      await v1.register(driverRoutes, { prefix: '/driver' });
     },
     { prefix: '/api/v1' },
   );

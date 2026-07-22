@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { requireAuth } from '../../middleware/auth';
 import { ok } from '../../utils/response';
 import { createOrderSchema, listMyOrdersQuerySchema, orderIdSchema } from './orders.schemas';
-import { createOrderFromCart, getMyOrderDetails, getMyOrders } from './orders.service';
+import { cancelMyOrder, createOrderFromCart, getMyOrderDetails, getMyOrders } from './orders.service';
 
 export const createOrderHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   await requireAuth(request, reply);
@@ -22,5 +22,12 @@ export const myOrderDetailsHandler = async (request: FastifyRequest, reply: Fast
   await requireAuth(request, reply);
   const params = orderIdSchema.parse(request.params);
   const order = await getMyOrderDetails(request.auth!.userId, params.id);
+  return ok(reply, order);
+};
+
+export const cancelMyOrderHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAuth(request, reply);
+  const params = orderIdSchema.parse(request.params);
+  const order = await cancelMyOrder(request.auth!.userId, params.id);
   return ok(reply, order);
 };
