@@ -306,6 +306,14 @@ export const updateAdminOrderStatus = async (
     throw new AppError('Order not found', 404, 'ORDER_NOT_FOUND');
   }
 
+  if (status === 'SHIPPED' && !order.driverId && !order.driverName) {
+    throw new AppError(
+      'A driver must be assigned to the order before setting status to Out for Delivery',
+      400,
+      'DRIVER_REQUIRED'
+    );
+  }
+
   const updated = await updateAdminOrderStatusRepo(orderId, status);
 
   await createAuditLog({

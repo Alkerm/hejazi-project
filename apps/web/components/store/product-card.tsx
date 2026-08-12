@@ -13,12 +13,14 @@ import { api } from '@/lib/api';
 import { useLanguage } from '@/lib/language-context';
 
 export function ProductCard({ product, initialWishlisted = false }: { product: Product; initialWishlisted?: boolean }) {
-  const { formatProductName, formatPrice, t } = useLanguage();
+  const { formatProductName, formatProductDescription, formatCategoryName, formatPrice, t, lang } = useLanguage();
   const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
   const [isToggling, setIsToggling] = useState(false);
-  const stockStatus = getStockStatus(product.stockQuantity);
+  const stockStatus = getStockStatus(product.stockQuantity, lang);
 
   const displayName = formatProductName(product);
+  const displayDescription = formatProductDescription(product);
+  const displayCategory = formatCategoryName(product.category);
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -31,12 +33,12 @@ export function ProductCard({ product, initialWishlisted = false }: { product: P
       const res = await api.toggleWishlist(product.id);
       setIsWishlisted(res.isWishlisted);
       if (res.isWishlisted) {
-        toast.success(`Saved "${displayName}" to your Wishlist`);
+        toast.success(t(`Saved "${displayName}" to your Wishlist`, `تم حفظ "${displayName}" في المفضلة`));
       } else {
-        toast.info(`Removed "${displayName}" from Wishlist`);
+        toast.info(t(`Removed "${displayName}" from Wishlist`, `تم حذف "${displayName}" من المفضلة`));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Please log in to save items to your wishlist');
+      toast.error(err.message || t('Please log in to save items to your wishlist', 'يرجى تسجيل الدخول لحفظ المنتجات في المفضلة'));
     } finally {
       setIsToggling(false);
     }
@@ -75,16 +77,16 @@ export function ProductCard({ product, initialWishlisted = false }: { product: P
           </div>
 
           <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">{product.category.name}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">{displayCategory}</p>
             <h3 className="line-clamp-1 text-sm font-bold text-slate-800 transition-colors group-hover:text-emerald-600">{displayName}</h3>
-            <p className="line-clamp-2 text-xs text-slate-500 leading-relaxed h-8">{product.description}</p>
+            <p className="line-clamp-2 text-xs text-slate-500 leading-relaxed min-h-[2.5rem]">{displayDescription}</p>
           </div>
         </div>
 
         <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-100">
           <p className="text-sm font-bold text-slate-800">{formatPrice(product.price)}</p>
           <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 group-hover:text-emerald-700 flex items-center gap-1 transition-colors">
-            {t('Details', 'التفاصيل')} <span>→</span>
+            {t('Details', 'التفاصيل')} <span>{t('→', '←')}</span>
           </span>
         </div>
       </div>

@@ -10,6 +10,7 @@ export interface Product {
   arabicName?: string | null;
   slug: string;
   description: string;
+  arabicDescription?: string | null;
   price: number;
   stockQuantity: number;
   sku?: string | null;
@@ -40,6 +41,19 @@ export interface Paginated<T> {
   };
 }
 
+export interface DriverAccount {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string | null;
+  role: 'DRIVER';
+  createdAt: string;
+  _count?: {
+    driverOrders: number;
+  };
+}
+
 export interface UserProfile {
   id: string;
   firstName: string;
@@ -47,7 +61,7 @@ export interface UserProfile {
   email: string;
   phone: string | null;
   marketingConsent: boolean;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'ADMIN' | 'DRIVER';
   defaultAddress: {
     line1: string;
     line2?: string | null;
@@ -104,6 +118,13 @@ export interface Order {
   currency: string;
   paymentMethodLabel?: string | null;
   deliveryEstimate?: string | null;
+  driverId?: string | null;
+  driverName?: string | null;
+  driverPhone?: string | null;
+  assignedAt?: string | null;
+  deliveredAt?: string | null;
+  customerNameSnapshot?: string | null;
+  customerPhoneSnapshot?: string | null;
   shippingAddressSnapshot: {
     line1: string;
     line2?: string | null;
@@ -118,7 +139,15 @@ export interface Order {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string | null;
   };
+  driver?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string | null;
+  } | null;
 }
 
 export interface ApiEnvelope<T> {

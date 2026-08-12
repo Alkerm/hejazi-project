@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { formatMoney } from '@/lib/format';
 import { StatCard } from '@/components/admin/stat-card';
+import { useLanguage } from '@/lib/language-context';
 
 export default function AdminAnalyticsPage() {
+  const { t } = useLanguage();
   const [days, setDays] = useState(30);
   const [data, setData] = useState<Awaited<ReturnType<typeof api.adminSalesAnalytics>> | null>(null);
 
@@ -16,8 +18,10 @@ export default function AdminAnalyticsPage() {
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600"></div>
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">Loading analytics...</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500"></div>
+        <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">
+          {t('Loading analytics...', 'جاري تحميل التقارير والتحليلات...')}
+        </p>
       </div>
     );
   }
@@ -30,23 +34,25 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/50 pb-6">
         <div className="space-y-1">
-          <h1 className="serif-font text-3xl font-bold text-slate-800">Sales Analytics</h1>
-          <p className="text-xs text-slate-500 uppercase tracking-widest">In-depth performance metrics and analytics</p>
+          <h1 className="serif-font text-3xl font-bold text-slate-800">{t('Sales Analytics', 'تحليلات وتقارير المبيعات')}</h1>
+          <p className="text-xs text-slate-500 uppercase tracking-widest">
+            {t('In-depth performance metrics and analytics', 'تحليلات الأداء ومؤشرات المبيعات التفصيلية')}
+          </p>
         </div>
         <select
-          className="rounded-xl border border-slate-200 bg-white/80 px-4 py-2.5 text-xs font-medium text-slate-700 outline-none transition focus:border-brand-400"
+          className="rounded-xl border border-slate-200 bg-white/80 px-4 py-2.5 text-xs font-medium text-slate-700 outline-none transition focus:border-amber-500"
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
         >
-          <option value={7}>Last 7 Days</option>
-          <option value={30}>Last 30 Days</option>
-          <option value={90}>Last 90 Days</option>
+          <option value={7}>{t('Last 7 Days', 'آخر 7 أيام')}</option>
+          <option value={30}>{t('Last 30 Days', 'آخر 30 يوم')}</option>
+          <option value={90}>{t('Last 90 Days', 'آخر 90 يوم')}</option>
         </select>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <StatCard label="Revenue for Period" value={formatMoney(data.totalRevenue)} />
-        <StatCard label="Total Orders" value={data.totalOrders} />
+        <StatCard label={t('Revenue for Period', 'إجمالي الإيرادات للفترة')} value={formatMoney(data.totalRevenue)} />
+        <StatCard label={t('Total Orders', 'إجمالي عدد الطلبات')} value={data.totalOrders} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

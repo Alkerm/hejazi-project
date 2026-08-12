@@ -16,6 +16,10 @@ const DEMO_CREDENTIALS = {
     email: 'admin@cosmetics.local',
     password: 'Passw0rd!123',
   },
+  driver: {
+    email: 'driver@cosmetics.local',
+    password: 'Passw0rd!123',
+  },
 } as const;
 
 export function LoginStartCard() {
@@ -45,7 +49,13 @@ export function LoginStartCard() {
     try {
       const user = await api.login({ email, password });
       document.cookie = 'cosmetics_sid_hint=1; path=/';
-      router.push(user.role === 'ADMIN' ? '/admin' : '/products');
+      if (user.role === 'ADMIN') {
+        router.push('/admin');
+      } else if (user.role === 'DRIVER') {
+        router.push('/driver');
+      } else {
+        router.push('/products');
+      }
       router.refresh();
     } catch (e) {
       setMessage((e as Error).message);
@@ -66,9 +76,10 @@ export function LoginStartCard() {
         <div className="text-[10px] text-slate-500 space-y-1">
           <p><span className="font-semibold text-slate-700">Customer:</span> {DEMO_CREDENTIALS.customer.email}</p>
           <p><span className="font-semibold text-slate-700">Admin:</span> {DEMO_CREDENTIALS.admin.email}</p>
+          <p><span className="font-semibold text-slate-700">Driver:</span> {DEMO_CREDENTIALS.driver.email}</p>
         </div>
         {isLocalhost && (
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             <button 
               type="button" 
               className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 active:scale-95 transition"
@@ -82,6 +93,13 @@ export function LoginStartCard() {
               onClick={() => applyDemoCredentials('admin')}
             >
               Admin Log
+            </button>
+            <button 
+              type="button" 
+              className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-800 hover:bg-amber-100 active:scale-95 transition shadow-2xs"
+              onClick={() => applyDemoCredentials('driver')}
+            >
+              Driver Log
             </button>
           </div>
         )}

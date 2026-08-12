@@ -21,6 +21,8 @@ export const createOrderFromCart = async (
       country: string;
       postalCode: string;
     };
+    customerName?: string;
+    customerPhone?: string;
     currency?: string;
   },
 ) => {
@@ -83,6 +85,10 @@ export const createOrderFromCart = async (
       const shippingAmount = DEFAULT_SHIPPING_AMOUNT;
       const total = toMoney(subtotalRounded + vatAmount + shippingAmount);
 
+      const user = await tx.user.findUnique({ where: { id: userId } });
+      const customerName = payload.customerName || (user ? `${user.firstName} ${user.lastName}`.trim() : 'Customer');
+      const customerPhone = payload.customerPhone || user?.phone || null;
+
       const created = await tx.order.create({
         data: {
           userId,
@@ -97,6 +103,8 @@ export const createOrderFromCart = async (
           currency: payload.currency ?? 'SAR',
           paymentMethodLabel: DEFAULT_PAYMENT_METHOD_LABEL,
           deliveryEstimate: DEFAULT_DELIVERY_ESTIMATE,
+          customerNameSnapshot: customerName,
+          customerPhoneSnapshot: customerPhone,
           shippingAddressSnapshot: payload.shippingAddress,
           items: {
             createMany: {

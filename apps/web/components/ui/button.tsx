@@ -13,6 +13,7 @@ const styles: Record<NonNullable<Props['variant']>, string> = {
 export function Button({ variant = 'primary', className = '', ...props }: Props) {
   return (
     <button
+      suppressHydrationWarning
       className={`rounded-xl px-5 py-2.5 text-xs font-semibold uppercase tracking-wider shadow-sm transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm ${styles[variant]} ${className}`}
       {...props}
     />

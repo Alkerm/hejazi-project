@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { CouponsService } from './coupons.service';
 import { CouponDiscountType } from '@prisma/client';
+import { requireAdmin } from '../../middleware/auth';
 
 const applyCouponSchema = z.object({
   code: z.string().min(1),
@@ -12,10 +13,10 @@ const createCouponSchema = z.object({
   code: z.string().min(2),
   discountType: z.nativeEnum(CouponDiscountType),
   discountValue: z.number().positive(),
-  minOrderAmount: z.number().optional(),
-  maxDiscountAmount: z.number().optional(),
-  expiresAt: z.string().optional(),
-  usageLimit: z.number().int().positive().optional(),
+  minOrderAmount: z.number().nullable().optional(),
+  maxDiscountAmount: z.number().nullable().optional(),
+  expiresAt: z.string().nullable().optional(),
+  usageLimit: z.number().int().positive().nullable().optional(),
 });
 
 const toggleSchema = z.object({
@@ -37,9 +38,7 @@ export const applyCouponHandler = async (req: FastifyRequest, reply: FastifyRepl
 };
 
 export const adminListCouponsHandler = async (req: FastifyRequest, reply: FastifyReply) => {
-  if (req.user?.role !== 'ADMIN') {
-    return reply.status(403).send({ error: 'Forbidden' });
-  }
+  await requireAdmin(req, reply);
 
   try {
     const data = await CouponsService.adminListCoupons();
@@ -50,9 +49,7 @@ export const adminListCouponsHandler = async (req: FastifyRequest, reply: Fastif
 };
 
 export const adminCreateCouponHandler = async (req: FastifyRequest, reply: FastifyReply) => {
-  if (req.user?.role !== 'ADMIN') {
-    return reply.status(403).send({ error: 'Forbidden' });
-  }
+  await requireAdmin(req, reply);
 
   const parseResult = createCouponSchema.safeParse(req.body);
   if (!parseResult.success) {
@@ -71,9 +68,7 @@ export const adminToggleCouponHandler = async (
   req: FastifyRequest<{ Params: { id: string } }>,
   reply: FastifyReply
 ) => {
-  if (req.user?.role !== 'ADMIN') {
-    return reply.status(403).send({ error: 'Forbidden' });
-  }
+  await requireAdmin(req, reply);
 
   const { id } = req.params;
   const parseResult = toggleSchema.safeParse(req.body);

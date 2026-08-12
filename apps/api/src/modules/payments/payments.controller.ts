@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { PaymentsService } from './payments.service';
-import { PaymentMethodType } from '@prisma/client';
+import { PaymentMethodType } from './payments.types';
 
 const createIntentSchema = z.object({
   orderId: z.string().min(1),

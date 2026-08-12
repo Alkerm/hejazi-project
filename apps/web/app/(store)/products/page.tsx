@@ -1,13 +1,17 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { Search } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Category, Product } from '@/lib/types';
 import { ProductCard } from '@/components/store/product-card';
 import { Pagination } from '@/components/ui/pagination';
 import { useDebounce } from '@/hooks/use-debounce';
+import { CategoryCarousel } from '@/components/store/category-carousel';
+import { useLanguage } from '@/lib/language-context';
 
 export default function ProductsPage() {
+  const { t } = useLanguage();
   const [items, setItems] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,89 +52,89 @@ export default function ProductsPage() {
       .finally(() => setLoading(false));
   }, [query]);
 
+  const handleCategorySelect = (selectedSlug: string) => {
+    setPage(1);
+    if (category === selectedSlug) {
+      setCategory('');
+    } else {
+      setCategory(selectedSlug);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="text-center space-y-2 py-4">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-800">
-          The Beauty Collection
+          {t('The Beauty Collection', 'مجموعة التجميل الفاخرة')}
         </h1>
         <p className="text-xs uppercase tracking-[0.25em] font-medium text-luxury-gold">
-          Curated Skincare, Makeup & Fragrances
+          {t('Curated Skincare, Makeup & Fragrances', 'منتجات مختارة للعناية بالبشرة، المكياج والعطور')}
         </p>
       </div>
 
-      {/* Glassmorphic Search & Filters Bar */}
-      <div className="glass-card rounded-2xl p-5 grid gap-4 md:grid-cols-4 items-center">
-        <div className="relative">
+      {/* Visual Category Cards Carousel */}
+      <CategoryCarousel
+        categories={categories}
+        selectedCategory={category}
+        onSelectCategory={handleCategorySelect}
+      />
+
+      {/* Sleek Search & Sort Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 glass-card rounded-2xl p-4 border border-slate-200/50">
+        <div className="relative flex-1 min-w-[240px]">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             value={search}
             onChange={(e) => {
               setPage(1);
               setSearch(e.target.value);
             }}
-            placeholder="Search our collection..."
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-2.5 text-xs font-medium placeholder-slate-400 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+            placeholder={t('Search products', 'البحث في المنتجات')}
+            className="w-full rounded-xl border border-slate-200 bg-white px-9 py-2 text-xs font-medium placeholder-slate-400 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
           />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
-        <div className="relative">
+        <div className="flex items-center gap-3">
           <select
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-2.5 text-xs font-medium text-slate-700 outline-none transition focus:border-brand-400"
-            value={category}
-            onChange={(e) => {
-              setPage(1);
-              setCategory(e.target.value);
-            }}
-          >
-            <option value="">All categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="relative">
-          <select
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-2.5 text-xs font-medium text-slate-700 outline-none transition focus:border-brand-400"
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-amber-500 shadow-2xs"
             value={sort}
             onChange={(e) => {
               setPage(1);
               setSort(e.target.value as typeof sort);
             }}
           >
-            <option value="newest">Newest Arrivals</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-            <option value="name_asc">Alphabetical: A-Z</option>
+            <option value="newest">{t('Newest Arrivals', 'أحدث المنتجات')}</option>
+            <option value="price_asc">{t('Price: Low to High', 'السعر: من الأقل للأعلى')}</option>
+            <option value="price_desc">{t('Price: High to Low', 'السعر: من الأعلى للأقل')}</option>
+            <option value="name_asc">{t('Alphabetical: A-Z', 'أبجدي: أ-ي')}</option>
           </select>
         </div>
-
-        <button
-          className="rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-100/80 hover:border-slate-300 transition duration-300 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-600 active:scale-[0.98]"
-          onClick={() => {
-            setSearch('');
-            setCategory('');
-            setSort('newest');
-            setPage(1);
-          }}
-        >
-          Reset filters
-        </button>
       </div>
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-20 space-y-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600"></div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">Loading collection...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-600"></div>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">
+            {t('Loading collection...', 'جاري تحميل المنتجات...')}
+          </p>
         </div>
       )}
       {error && <p className="text-sm text-red-600 text-center">{error}</p>}
 
       {!loading && !error && items.length === 0 && (
         <p className="rounded-2xl border border-dashed border-slate-200 bg-white/50 backdrop-blur-sm p-10 text-center text-sm text-slate-500">
-          No matches found for your criteria. Try adjusting your search term or category.
+          {t(
+            'No matches found for your criteria. Try adjusting your search term or category.',
+            'لم يتم العثور على نتائج تطابق بحثك. جرب تغيير كلمة البحث أو القسم.'
+          )}
         </p>
       )}
 

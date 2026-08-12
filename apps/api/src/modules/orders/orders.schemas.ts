@@ -8,6 +8,8 @@ export const createOrderSchema = z.object({
     country: z.string().min(2).max(80),
     postalCode: z.string().min(2).max(20),
   }),
+  customerName: z.string().max(100).optional(),
+  customerPhone: z.string().max(30).optional(),
   currency: z.string().default('SAR'),
 });
 

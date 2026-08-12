@@ -62,6 +62,25 @@ async function main() {
     },
   });
 
+  const driver = await prisma.user.upsert({
+    where: { email: 'driver@cosmetics.local' },
+    update: {
+      firstName: 'Driver',
+      lastName: 'Sami',
+      passwordHash,
+      role: UserRole.DRIVER,
+      phone: '+966501234567',
+    },
+    create: {
+      firstName: 'Driver',
+      lastName: 'Sami',
+      email: 'driver@cosmetics.local',
+      passwordHash,
+      role: UserRole.DRIVER,
+      phone: '+966501234567',
+    },
+  });
+
   const categoriesData = [
     { name: 'Skincare', slug: 'skincare' },
     { name: 'Makeup', slug: 'makeup' },

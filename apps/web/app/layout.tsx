@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Navbar } from '@/components/store/navbar';
-import { Footer } from '@/components/store/footer';
 import { LanguageProvider } from '@/lib/language-context';
+import { LayoutWrapper } from '@/components/layout/layout-wrapper';
 
 export const metadata: Metadata = {
   title: 'Hejazi Cosmetics Store | متجر حجازي مستحضرات التجميل',
@@ -14,11 +13,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ar" dir="rtl">
       <body suppressHydrationWarning>
         <LanguageProvider>
-          <Navbar />
-          <main className="mx-auto w-full max-w-6xl px-4 py-8">{children}</main>
-          <Footer />
+          <LayoutWrapper>{children}</LayoutWrapper>
         </LanguageProvider>
       </body>
     </html>
   );
 }
+

@@ -1,5 +1,6 @@
 import { prisma } from '../../prisma/client';
-import { PaymentStatus, PaymentMethodType } from '@prisma/client';
+import { PaymentStatus } from '@prisma/client';
+import { PaymentMethodType } from './payments.types';
 
 export interface CreatePaymentIntentInput {
   orderId: string;

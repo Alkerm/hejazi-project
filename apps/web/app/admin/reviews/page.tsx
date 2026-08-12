@@ -6,8 +6,10 @@ import { toast, Toaster } from 'sonner';
 import { api } from '@/lib/api';
 import { Review } from '@/lib/types';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/lib/language-context';
 
 export default function AdminReviewsPage() {
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +44,9 @@ export default function AdminReviewsPage() {
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
         <Toaster position="top-right" richColors />
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800"></div>
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">Loading moderation queue...</p>
+        <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">
+          {t('Loading moderation queue...', 'جاري تحميل قائمة التقييمات...')}
+        </p>
       </div>
     );
   }
@@ -55,22 +59,24 @@ export default function AdminReviewsPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Shield className="w-6 h-6 text-slate-800" />
-            <h1 className="serif-font text-3xl font-bold text-slate-800">Reviews & Ratings Moderation</h1>
+            <h1 className="serif-font text-3xl font-bold text-slate-800">
+              {t('Reviews & Ratings Moderation', 'إدارة مراجعات وتقييمات العملاء')}
+            </h1>
           </div>
           <p className="text-xs text-slate-500 uppercase tracking-widest">
-            Approve or hide customer cosmetic reviews
+            {t('Approve or hide customer cosmetic reviews', 'اعتماد أو إخفاء التقييمات وآراء العملاء على المنتجات')}
           </p>
         </div>
       </div>
 
       {reviews.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 p-12 text-center text-slate-500 text-sm">
-          No customer reviews submitted yet.
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 p-12 text-center text-slate-500 text-xs font-medium">
+          {t('No customer reviews submitted yet.', 'لا توجد تقييمات منشورة من العملاء حالياً.')}
         </div>
       ) : (
         <div className="space-y-4">
           {reviews.map((rev) => (
-            <div key={rev.id} className="glass-card rounded-2xl p-5 border border-slate-200/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div key={rev.id} className="glass-card rounded-2xl p-5 border border-slate-200/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xs bg-white">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <span className="font-bold text-sm text-slate-800">
@@ -79,15 +85,15 @@ export default function AdminReviewsPage() {
                   <span className="text-[10px] text-slate-400">
                     {new Date(rev.createdAt).toLocaleDateString()}
                   </span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                     rev.isApproved ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                   }`}>
-                    {rev.isApproved ? 'Approved' : 'Pending'}
+                    {rev.isApproved ? t('Approved', 'معتمد ومقبول') : t('Pending Review', 'قيد النظر')}
                   </span>
                 </div>
 
                 {rev.product && (
-                  <p className="text-xs font-semibold text-amber-600">Product: {rev.product.name}</p>
+                  <p className="text-xs font-semibold text-amber-600">{t('Product:', 'المنتج:')} {rev.product.name}</p>
                 )}
 
                 <div className="flex text-amber-400">
@@ -107,16 +113,16 @@ export default function AdminReviewsPage() {
                   <Button
                     onClick={() => handleModerate(rev.id, false)}
                     variant="secondary"
-                    className="text-xs border-amber-200 text-amber-700 hover:bg-amber-50 flex items-center gap-1.5"
+                    className="text-xs border-amber-200 text-amber-700 hover:bg-amber-50 flex items-center gap-1.5 font-bold"
                   >
-                    <XCircle className="w-3.5 h-3.5" /> Hide Review
+                    <XCircle className="w-3.5 h-3.5" /> {t('Hide Review', 'إخفاء التقييم')}
                   </Button>
                 ) : (
                   <Button
                     onClick={() => handleModerate(rev.id, true)}
-                    className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5"
+                    className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 font-bold"
                   >
-                    <CheckCircle className="w-3.5 h-3.5" /> Approve Review
+                    <CheckCircle className="w-3.5 h-3.5" /> {t('Approve Review', 'اعتماد التقييم')}
                   </Button>
                 )}
               </div>

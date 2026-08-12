@@ -10,8 +10,18 @@ interface LanguageContextType {
   toggleLanguage: () => void;
   t: (en: string, ar: string) => string;
   formatProductName: (product: { name: string; arabicName?: string | null }) => string;
+  formatProductDescription: (product: { description: string; arabicDescription?: string | null }) => string;
+  formatCategoryName: (category: { name: string; slug?: string; arabicName?: string | null }) => string;
   formatPrice: (amount: number | string) => string;
 }
+
+const CATEGORY_TRANSLATIONS: Record<string, string> = {
+  skincare: 'العناية بالبشرة',
+  makeup: 'المكياج والتجميل',
+  fragrance: 'العطور الفاخرة',
+  haircare: 'العناية بالشعر',
+  'body-bath': 'الجسم والاستحمام',
+};
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
@@ -41,10 +51,36 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const t = (en: string, ar: string) => (lang === 'ar' ? ar : en);
 
   const formatProductName = (product: { name: string; arabicName?: string | null }) => {
-    if (lang === 'ar' && product.arabicName) {
-      return product.arabicName;
+    const arName = product.arabicName?.trim();
+    const enName = product.name?.trim();
+
+    if (lang === 'ar') {
+      return arName && arName.length > 0 ? arName : (enName || '');
     }
-    return product.name;
+    return enName && enName.length > 0 ? enName : (arName || '');
+  };
+
+  const formatProductDescription = (product: { description: string; arabicDescription?: string | null }) => {
+    const arDesc = product.arabicDescription?.trim();
+    const enDesc = product.description?.trim();
+
+    if (lang === 'ar') {
+      return arDesc && arDesc.length > 0 ? arDesc : (enDesc || '');
+    }
+    return enDesc && enDesc.length > 0 ? enDesc : (arDesc || '');
+  };
+
+  const formatCategoryName = (category: { name: string; slug?: string; arabicName?: string | null }) => {
+    const arName = category.arabicName?.trim();
+    if (arName) {
+      return lang === 'ar' ? arName : category.name;
+    }
+
+    if (lang === 'ar') {
+      const slugKey = (category.slug || category.name).toLowerCase();
+      return CATEGORY_TRANSLATIONS[slugKey] || category.name;
+    }
+    return category.name;
   };
 
   const formatPrice = (amount: number | string) => {
@@ -54,7 +90,18 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, toggleLanguage, t, formatProductName, formatPrice }}>
+    <LanguageContext.Provider
+      value={{
+        lang,
+        setLang,
+        toggleLanguage,
+        t,
+        formatProductName,
+        formatProductDescription,
+        formatCategoryName,
+        formatPrice,
+      }}
+    >
       {children}
     </LanguageContext.Provider>
   );

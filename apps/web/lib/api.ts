@@ -6,6 +6,7 @@ import type {
   ApiEnvelope,
   Cart,
   Category,
+  DriverAccount,
   Order,
   Paginated,
   Product,
@@ -143,6 +144,8 @@ export const api = {
       country: string;
       postalCode: string;
     };
+    customerName?: string;
+    customerPhone?: string;
     currency?: string;
   }) =>
     request<Order>('/orders', {
@@ -311,9 +314,32 @@ export const api = {
       body: JSON.stringify({ paymentStatus }),
     }),
 
+  adminGetRegisteredDrivers: () => request<DriverAccount[]>('/driver/admin/list'),
+  adminCreateDriver: (payload: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    password: string;
+  }) =>
+    request<DriverAccount>('/driver/admin/create', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  adminAssignRegisteredDriver: (id: string, driverId: string) =>
+    request<Order>(`/driver/admin/assign/${id}`, {
+      method: 'POST',
+      body: JSON.stringify({ driverId }),
+    }),
+  adminGetDeliveryOverview: () => request<Order[]>('/driver/admin/overview'),
+
   getAvailableDeliveries: () => request<Order[]>('/driver/available'),
-  getMyAssignedDeliveries: (driverName?: string) =>
-    request<Order[]>(`/driver/my-deliveries?driverName=${encodeURIComponent(driverName || 'Driver')}`),
+  getMyAssignedDeliveries: (driverIdentifier?: string) =>
+    request<Order[]>(
+      `/driver/my-deliveries?driverId=${encodeURIComponent(
+        driverIdentifier || 'Driver'
+      )}&driverName=${encodeURIComponent(driverIdentifier || 'Driver')}`
+    ),
   assignDriver: (id: string, driverName: string, driverPhone?: string) =>
     request<Order>(`/driver/${id}/assign`, {
       method: 'POST',
