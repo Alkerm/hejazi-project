@@ -291,8 +291,8 @@ export default function ProfilePage() {
                   />
                   <span>
                     {t(
-                      'I consent to receive exclusive promotional offers, news, and cosmetic care guides from Hejazi Cosmetics.',
-                      'أوافق على استلام العروض الحصرية والأخبار ونشرات التجميل من حجازي كوزمتكس.'
+                      'I consent to receive exclusive promotional offers, news, and setup guides from Half Link Energy & Security.',
+                      'أوافق على استلام العروض الحصرية والأخبار ونشرات كاميرات المراقبة وحلول الطاقة من هالف لينـك.'
                     )}
                   </span>
                 </label>
