@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  staging-postgres:
+    image: postgres:16-alpine
+    container_name: hejazi-staging-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hejazi_staging_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hejazi_staging_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-hejazidb_staging}
+    volumes:
+      - staging_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  staging-redis:
+    image: redis:7-alpine
+    container_name: hejazi-staging-redis
+    restart: always
+    ports:
+      - "6380:6379"
+
+  staging-api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: hejazi-staging-api
+    restart: always
+    depends_on:
+      - staging-postgres
+      - staging-redis
+    ports:
+      - "4001:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      HOST: 0.0.0.0
+      TRUST_PROXY: "true"
+      USE_IN_MEMORY_STORE: "false"
+      SESSION_TTL_SECONDS: "604800"
+      DATABASE_URL: ${DATABASE_URL:-postgresql://hejazi_staging_user:hejazi_staging_pass@staging-postgres:5432/hejazidb_staging?sslmode=disable}
+      REDIS_URL: ${REDIS_URL:-redis://staging-redis:6379}
+      COOKIE_SECRET: ${COOKIE_SECRET:-staging_cookie_secret_key_123456789_32chars}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      FRONTEND_URL: ${FRONTEND_URL}
+      MOYASAR_SECRET_KEY: ${MOYASAR_SECRET_KEY}
+      MOYASAR_WEBHOOK_SECRET: ${MOYASAR_WEBHOOK_SECRET}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-resend}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+
+  staging-web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+    container_name: hejazi-staging-web
+    restart: always
+    depends_on:
+      - staging-api
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+
+volumes:
+  staging_postgres_data:

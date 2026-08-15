@@ -5,15 +5,7 @@ import { getCurrentUser, loginUser, logoutUser, registerUser, requestPasswordRes
 import { clearAuthCookie, getSignedCookieSessionId, setAuthCookie } from './session.service';
 import { requireAuth } from '../../middleware/auth';
 
-const publicUser = (user: {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string | null;
-  marketingConsent: boolean;
-  role: 'USER' | 'ADMIN';
-}) => ({
+const publicUser = (user: any) => ({
   id: user.id,
   firstName: user.firstName,
   lastName: user.lastName,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -16,7 +16,18 @@ export function ProductCard({ product, initialWishlisted = false }: { product: P
   const { formatProductName, formatProductDescription, formatCategoryName, formatPrice, t, lang } = useLanguage();
   const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
   const [isToggling, setIsToggling] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const stockStatus = getStockStatus(product.stockQuantity, lang);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const hasHint = document.cookie
+        .split(';')
+        .map((cookie) => cookie.trim())
+        .some((cookie) => cookie.startsWith('cosmetics_sid_hint='));
+      setIsSignedIn(hasHint);
+    }
+  }, []);
 
   const displayName = formatProductName(product);
   const displayDescription = formatProductDescription(product);
@@ -38,7 +49,10 @@ export function ProductCard({ product, initialWishlisted = false }: { product: P
         toast.info(t(`Removed "${displayName}" from Wishlist`, `تم حذف "${displayName}" من المفضلة`));
       }
     } catch (err: any) {
-      toast.error(err.message || t('Please log in to save items to your wishlist', 'يرجى تسجيل الدخول لحفظ المنتجات في المفضلة'));
+      toast.error(t('Please log in or create an account to save items to your wishlist', 'يرجى تسجيل الدخول أو إنشاء حساب لحفظ المنتجات في المفضلة'));
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
     } finally {
       setIsToggling(false);
     }
@@ -60,20 +74,22 @@ export function ProductCard({ product, initialWishlisted = false }: { product: P
               <Badge variant={stockStatus.variant}>{stockStatus.label}</Badge>
             </div>
 
-            {/* Wishlist Heart Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleWishlistToggle}
-              className={`absolute top-3 right-3 z-10 p-2 rounded-full backdrop-blur-md transition-all shadow-sm ${
-                isWishlisted
-                  ? 'bg-rose-500 text-white shadow-rose-500/30'
-                  : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 hover:text-rose-500'
-              }`}
-              aria-label="Toggle Wishlist"
-            >
-              <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
-            </motion.button>
+            {/* Wishlist Heart Button (Shown ONLY when signed in) */}
+            {isSignedIn && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleWishlistToggle}
+                className={`absolute top-3 right-3 z-10 p-2 rounded-full backdrop-blur-md transition-all shadow-sm ${
+                  isWishlisted
+                    ? 'bg-rose-500 text-white shadow-rose-500/30'
+                    : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 hover:text-rose-500'
+                }`}
+                aria-label="Toggle Wishlist"
+              >
+                <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+              </motion.button>
+            )}
           </div>
 
           <div className="space-y-1">

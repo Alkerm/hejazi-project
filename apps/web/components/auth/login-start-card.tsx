@@ -78,31 +78,29 @@ export function LoginStartCard() {
           <p><span className="font-semibold text-slate-700">Admin:</span> {DEMO_CREDENTIALS.admin.email}</p>
           <p><span className="font-semibold text-slate-700">Driver:</span> {DEMO_CREDENTIALS.driver.email}</p>
         </div>
-        {isLocalhost && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button 
-              type="button" 
-              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 active:scale-95 transition"
-              onClick={() => applyDemoCredentials('customer')}
-            >
-              Customer Log
-            </button>
-            <button 
-              type="button" 
-              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 active:scale-95 transition"
-              onClick={() => applyDemoCredentials('admin')}
-            >
-              Admin Log
-            </button>
-            <button 
-              type="button" 
-              className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-800 hover:bg-amber-100 active:scale-95 transition shadow-2xs"
-              onClick={() => applyDemoCredentials('driver')}
-            >
-              Driver Log
-            </button>
-          </div>
-        )}
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button 
+            type="button" 
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 active:scale-95 transition shadow-2xs cursor-pointer"
+            onClick={() => applyDemoCredentials('customer')}
+          >
+            👤 Customer Log
+          </button>
+          <button 
+            type="button" 
+            className="rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-purple-700 hover:bg-purple-100 active:scale-95 transition shadow-2xs cursor-pointer"
+            onClick={() => applyDemoCredentials('admin')}
+          >
+            👑 Admin Log
+          </button>
+          <button 
+            type="button" 
+            className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-800 hover:bg-amber-100 active:scale-95 transition shadow-2xs cursor-pointer"
+            onClick={() => applyDemoCredentials('driver')}
+          >
+            🚚 Driver Log
+          </button>
+        </div>
       </div>
 
       <form className="space-y-4" onSubmit={onSubmit}>

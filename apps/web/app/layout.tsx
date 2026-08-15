@@ -4,8 +4,8 @@ import { LanguageProvider } from '@/lib/language-context';
 import { LayoutWrapper } from '@/components/layout/layout-wrapper';
 
 export const metadata: Metadata = {
-  title: 'Hejazi Cosmetics Store | متجر حجازي مستحضرات التجميل',
-  description: 'Luxury hair oil, creams, lotion, and beauty cosmetics store',
+  title: 'Half Link | هالف لينـك - كاميرات المراقبة وحلول الطاقة والبطاريات',
+  description: 'High-tech surveillance security cameras, solar energy systems, and heavy-duty power station batteries for homes and desert camps in Saudi Arabia.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

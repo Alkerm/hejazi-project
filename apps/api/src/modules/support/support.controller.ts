@@ -66,7 +66,7 @@ export const adminUpdateTicketHandler = async (
     const ticket = await SupportService.adminUpdateTicketStatus(
       id,
       parseResult.data.status,
-      parseResult.data.adminNote
+      parseResult.data.adminNote as string | undefined
     );
     return reply.send({ success: true, data: ticket });
   } catch (err: any) {

@@ -1,0 +1,30 @@
+name: 🚀 Deploy Production Environment (Manual Approval)
+
+on:
+  # Manual trigger button on GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      deployment_note:
+        description: 'Note for this production release (e.g. Approved staging test)'
+        required: false
+        default: 'Approved staging test'
+
+jobs:
+  deploy-production:
+    name: Deploy to Production (halflink.sa)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/hejazi
+            sudo docker compose --env-file .env up -d --build
+            sudo docker exec hejazi-api npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma

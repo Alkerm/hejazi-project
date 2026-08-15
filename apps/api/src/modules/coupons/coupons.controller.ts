@@ -57,7 +57,7 @@ export const adminCreateCouponHandler = async (req: FastifyRequest, reply: Fasti
   }
 
   try {
-    const coupon = await CouponsService.adminCreateCoupon(parseResult.data);
+    const coupon = await CouponsService.adminCreateCoupon(parseResult.data as any);
     return reply.send({ success: true, data: coupon });
   } catch (err: any) {
     return reply.status(400).send({ error: err.message || 'Failed to create coupon' });

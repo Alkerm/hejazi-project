@@ -22,7 +22,10 @@ export default function WishlistPage() {
       const data = await api.wishlist();
       setWishlist(data);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to load wishlist. Please log in.');
+      toast.error(t('Please log in or create an account to view your wishlist', 'يرجى تسجيل الدخول أو إنشاء حساب لمشاهدة المفضلة'));
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
     } finally {
       setLoading(false);
     }

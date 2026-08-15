@@ -10,6 +10,8 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { CategoryCarousel } from '@/components/store/category-carousel';
 import { useLanguage } from '@/lib/language-context';
 
+import { HeroBanner } from '@/components/store/hero-banner';
+
 export default function ProductsPage() {
   const { t } = useLanguage();
   const [items, setItems] = useState<Product[]>([]);
@@ -62,15 +64,9 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="text-center space-y-2 py-4">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-800">
-          {t('The Beauty Collection', 'مجموعة التجميل الفاخرة')}
-        </h1>
-        <p className="text-xs uppercase tracking-[0.25em] font-medium text-luxury-gold">
-          {t('Curated Skincare, Makeup & Fragrances', 'منتجات مختارة للعناية بالبشرة، المكياج والعطور')}
-        </p>
-      </div>
+    <div className="space-y-10 animate-fade-in" id="products-grid">
+      {/* Dynamic High-Impact Landing Hero Banner */}
+      <HeroBanner />
 
       {/* Visual Category Cards Carousel */}
       <CategoryCarousel

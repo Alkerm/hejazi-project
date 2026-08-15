@@ -12,20 +12,20 @@ interface CategoryCarouselProps {
 }
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  all: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=600&auto=format&fit=crop',
-  skincare: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?q=80&w=600&auto=format&fit=crop',
-  makeup: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=600&auto=format&fit=crop',
-  fragrance: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?q=80&w=600&auto=format&fit=crop',
-  haircare: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?q=80&w=600&auto=format&fit=crop',
-  default: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop',
+  all: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=800&auto=format&fit=crop',
+  'monitoring-cameras': 'https://images.unsplash.com/photo-1589820296156-2454bb8a6ad1?q=80&w=800&auto=format&fit=crop',
+  'power-batteries': 'https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=800&auto=format&fit=crop',
+  'solar-energy': 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=800&auto=format&fit=crop',
+  'power-accessories': 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop',
+  default: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=800&auto=format&fit=crop',
 };
 
 const CATEGORY_ARABIC_NAMES: Record<string, string> = {
   all: 'جميع المنتجات',
-  skincare: 'العناية بالبشرة',
-  makeup: 'المكياج والتجميل',
-  fragrance: 'العطور الفاخرة',
-  haircare: 'العناية بالشعر',
+  'monitoring-cameras': 'كاميرات المراقبة والأمن',
+  'power-batteries': 'بطاريات ومحطات الطاقة',
+  'solar-energy': 'أنظمة الطاقة الشمسية',
+  'power-accessories': 'ملحقات وأسلاك الطاقة',
 };
 
 export function CategoryCarousel({
@@ -91,10 +91,9 @@ export function CategoryCarousel({
       >
         {items.map((cat) => {
           const isSelected = selectedCategory === cat.slug;
-          const imageSrc =
-            CATEGORY_IMAGES[cat.slug || 'all'] || CATEGORY_IMAGES.default;
-          const arabicName =
-            CATEGORY_ARABIC_NAMES[cat.slug || 'all'] || cat.name;
+          const imageKey = cat.id === 'all' || !cat.slug ? 'all' : cat.slug;
+          const imageSrc = CATEGORY_IMAGES[imageKey] || CATEGORY_IMAGES.all;
+          const arabicName = CATEGORY_ARABIC_NAMES[imageKey] || cat.name;
 
           return (
             <button

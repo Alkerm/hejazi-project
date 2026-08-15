@@ -1,0 +1,28 @@
+name: 🧪 Deploy Staging Environment
+
+on:
+  push:
+    branches:
+      - staging
+      - main
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging (staging.halflink.sa)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/hejazi
+            git pull origin main
+            sudo docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build
+            sudo docker exec hejazi-staging-api npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma

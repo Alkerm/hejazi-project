@@ -22,11 +22,22 @@ export default function ProductDetailsPage() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
   // Review Form state
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const hasHint = document.cookie
+        .split(';')
+        .map((cookie) => cookie.trim())
+        .some((cookie) => cookie.startsWith('cosmetics_sid_hint='));
+      setIsSignedIn(hasHint);
+    }
+  }, []);
 
   useEffect(() => {
     if (!params.slug) return;
@@ -64,7 +75,10 @@ export default function ProductDetailsPage() {
       setIsWishlisted(res.isWishlisted);
       toast.success(res.isWishlisted ? t('Saved to Wishlist!', 'تم الحفظ في المفضلة!') : t('Removed from Wishlist', 'تم الحذف من المفضلة'));
     } catch (e: any) {
-      toast.error(e.message || t('Please log in to save items to your wishlist', 'يرجى تسجيل الدخول لحفظ المنتجات في المفضلة'));
+      toast.error(t('Please log in or create an account to save items to your wishlist', 'يرجى تسجيل الدخول أو إنشاء حساب لحفظ المنتجات في المفضلة'));
+      setTimeout(() => {
+        router.push('/login');
+      }, 1000);
     }
   };
 
@@ -86,7 +100,10 @@ export default function ProductDetailsPage() {
       const updatedRevs = await api.productReviews(product.id);
       setReviewsData(updatedRevs);
     } catch (err: any) {
-      toast.error(err.message || t('Please log in to submit a review', 'يرجى تسجيل الدخول لإضافة تقييم'));
+      toast.error(t('Please log in or create an account to submit a review', 'يرجى تسجيل الدخول أو إنشاء حساب لإضافة تقييم'));
+      setTimeout(() => {
+        router.push('/login');
+      }, 1000);
     } finally {
       setSubmittingReview(false);
     }
@@ -96,9 +113,9 @@ export default function ProductDetailsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
         <Toaster position="top-right" richColors />
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-600"></div>
         <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">
-          {t('Loading cosmetic product details...', 'جاري تحميل تفاصيل المنتج...')}
+          {t('Loading product details...', 'جاري تحميل تفاصيل المنتج...')}
         </p>
       </div>
     );
@@ -114,9 +131,10 @@ export default function ProductDetailsPage() {
     <div className="space-y-12 animate-fade-in max-w-5xl mx-auto pb-16">
       <Toaster position="top-right" richColors />
 
+      {/* Breadcrumb Navigation */}
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-        <span className="cursor-pointer hover:text-slate-600 transition" onClick={() => router.push('/products')}>
-          {t('Catalog', 'الكتالوج')}
+        <span className="cursor-pointer hover:text-amber-600 transition" onClick={() => router.push('/products')}>
+          {t('Catalog', 'المنتجات')}
         </span>
         <span>/</span>
         <span className="text-amber-600 font-bold">{formatCategoryName(product.category)}</span>
@@ -125,14 +143,18 @@ export default function ProductDetailsPage() {
       <div className="grid gap-10 md:grid-cols-2">
         <div className="relative h-[480px] overflow-hidden rounded-2xl bg-slate-50 border border-slate-200/40 shadow-md">
           <Image src={product.imageUrl} alt={displayName} fill className="object-cover" />
-          <button
-            onClick={toggleWishlist}
-            className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md shadow-md transition-all ${
-              isWishlisted ? 'bg-rose-500 text-white' : 'bg-white/80 text-slate-700 hover:text-rose-500'
-            }`}
-          >
-            <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-          </button>
+          
+          {/* Wishlist Heart Button (Shown ONLY when signed in) */}
+          {isSignedIn && (
+            <button
+              onClick={toggleWishlist}
+              className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md shadow-md transition-all ${
+                isWishlisted ? 'bg-rose-500 text-white' : 'bg-white/80 text-slate-700 hover:text-rose-500'
+              }`}
+            >
+              <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+            </button>
+          )}
         </div>
 
         <div className="space-y-6 flex flex-col justify-between py-2">
@@ -164,20 +186,18 @@ export default function ProductDetailsPage() {
               <span className="text-xs text-slate-400">({ratingSummary.totalReviews} {t('customer reviews', 'تقييمات العملاء')})</span>
             </div>
 
-            <p className="text-3xl font-bold text-emerald-700">{formatMoney(product.price)}</p>
+            <p className="text-3xl font-bold text-amber-700">{formatMoney(product.price)}</p>
 
             <div className="border-t border-b border-slate-200/50 py-4 my-2">
               <h2 className="text-xs uppercase tracking-widest font-bold text-slate-700 mb-2">{t('Product Overview', 'نظرة عامة عن المنتج')}</h2>
               <p className="text-sm text-slate-600 leading-relaxed font-light">{formatProductDescription(product)}</p>
             </div>
 
-            {/* Cosmetic SFDA Regulatory Compliance Badges */}
-            {product.sfdaReference && (
-              <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200/60 text-xs px-3 py-1.5 rounded-xl font-medium">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>{t('SFDA Compliance Registered', 'مسجل لدى هيئة الغذاء والدواء')} #{product.sfdaReference}</span>
-              </div>
-            )}
+            {/* Quality & Warranty Badge */}
+            <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-900 border border-amber-200/60 text-xs px-3 py-1.5 rounded-xl font-medium">
+              <ShieldCheck className="w-4 h-4 text-amber-600" />
+              <span>{t('Half Link 2-Year KSA Official Warranty', 'ضمان هالف لينـك الرسمي لمدة سنتين بالمملكة')}</span>
+            </div>
           </div>
 
           <div className="space-y-4 pt-4 border-t border-slate-100">
@@ -200,7 +220,7 @@ export default function ProductDetailsPage() {
 
               <Button
                 disabled={product.stockQuantity < 1}
-                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-md shadow-emerald-600/20"
+                className="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold shadow-md shadow-amber-600/20"
                 onClick={addToCart}
               >
                 {t('Add to Cart', 'إضافة إلى السلة')} ({formatMoney(product.price * quantity)})
@@ -210,21 +230,21 @@ export default function ProductDetailsPage() {
         </div>
       </div>
 
-      {/* Cosmetics Details & Ingredients Section */}
+      {/* Details & Specifications Section */}
       <div className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-4">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">{t('Ingredients & Instructions', 'المكونات وتعليمات الاستخدام')}</h3>
+        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">{t('Technical Specifications', 'المواصفات التقنية والدليل')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600">
           <div>
-            <span className="font-bold text-slate-700 block mb-1">{t('Full Ingredients:', 'المكونات الكاملة:')}</span>
+            <span className="font-bold text-slate-700 block mb-1">{t('Technical Features:', 'المواصفات الفنية:')}</span>
             <p className="leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200/50">
-              {product.ingredients || t('Natural plant extracts, essential oils, and organic moisture formulas.', 'خلاصات نباتية طبيعية وزيوت عطرية ومرطبات عضوية.')}
+              {product.ingredients || t('High-efficiency solar cells, smart BMS lithium protection, and weather resistant casing.', 'خلايا طاقة شمسية عالية الكفاءة، حماية ذكية لبطاريات الليثيوم، وهيكل مقاوم للظروف الجوية.')}
             </p>
           </div>
           <div>
-            <span className="font-bold text-slate-700 block mb-1">{t('Usage Guidelines & Warnings:', 'طريقة الاستخدام والتحذيرات:')}</span>
+            <span className="font-bold text-slate-700 block mb-1">{t('Installation & Warranty:', 'التثبيت والضمان:')}</span>
             <p className="leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200/50">
-              {product.usageInstructions || t('Apply small amount to clean skin or hair daily.', 'ضعي كمية مناسبة على بشرة أو شعر نظيف يومياً.')}{' '}
-              {product.warnings ? `[${t('Warning:', 'تحذير:')} ${product.warnings}]` : ''}
+              {product.usageInstructions || t('Easy plug and play setup. Includes mounting accessories and user manual.', 'تركيب سهل ومباشر. يتضمن ملحقات التثبيت ودليل المستخدم.')}{' '}
+              {product.warnings ? `[${t('Note:', 'ملاحظة:')} ${product.warnings}]` : ''}
             </p>
           </div>
         </div>
@@ -283,12 +303,12 @@ export default function ProductDetailsPage() {
               rows={3}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder={t('Share your experience with this cosmetic product (texture, fragrance, effectiveness)', 'شاركنا تجربتك ورأيك عن هذا المنتج (الملمس، الرائحة، الفاعلية)')}
-              className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white"
+              placeholder={t('Share your experience with this energy or camera system', 'شاركنا تجربتك ورأيك عن هذا المنتج والكفاءة')}
+              className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white"
             />
           </div>
 
-          <Button type="submit" disabled={submittingReview} className="bg-slate-900 text-white text-xs px-5 py-2 flex items-center gap-2">
+          <Button type="submit" disabled={submittingReview} className="bg-slate-900 text-amber-400 hover:bg-amber-500 hover:text-slate-950 font-bold text-xs px-5 py-2 flex items-center gap-2">
             <Send className="w-3.5 h-3.5" />
             {submittingReview ? t('Submitting...', 'جاري النشر...') : t('Post Review', 'نشر التقييم')}
           </Button>
@@ -306,7 +326,7 @@ export default function ProductDetailsPage() {
                     <span className="font-bold text-xs text-slate-800">
                       {rev.user.firstName} {rev.user.lastName}
                     </span>
-                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-medium">
+                    <span className="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-medium">
                       {t('Verified Buyer', 'مشتري موثق')}
                     </span>
                   </div>

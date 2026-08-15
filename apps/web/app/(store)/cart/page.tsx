@@ -87,6 +87,11 @@ export default function CartPage() {
 
   const placeOrder = async () => {
     if (!cart || cart.items.length === 0) return;
+    if (!profile) {
+      toast.error(t('Please log in or create an account to complete checkout', 'يرجى تسجيل الدخول أو إنشاء حساب لاستكمال الطلب'));
+      router.push('/login');
+      return;
+    }
     if (!profile?.defaultAddress) {
       toast.error(t('Please add a delivery address before placing order', 'يرجى تحديد عنوان التوصيل قبل تقديم الطلب'));
       return;

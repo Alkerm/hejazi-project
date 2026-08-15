@@ -1,5 +1,6 @@
-﻿import { LoginStartCard } from '@/components/auth/login-start-card';
+import ProductsPage from '@/app/(store)/products/page';
 
 export default function StartPage() {
-  return <LoginStartCard />;
+  return <ProductsPage />;
 }
+
