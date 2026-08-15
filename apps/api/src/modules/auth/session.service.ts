@@ -1,4 +1,4 @@
-﻿import crypto from 'node:crypto';
+import crypto from 'node:crypto';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { UserRole } from '@prisma/client';
 import { env, isProd } from '../../config/env';
@@ -32,39 +32,45 @@ export const deleteSession = async (sessionId: string) => {
 };
 
 export const setAuthCookie = (reply: FastifyReply, sessionId: string) => {
+  const isSubdomain = isProd || env.CORS_ORIGIN?.includes('halflink.sa');
+  const domain = env.COOKIE_DOMAIN || (isSubdomain ? '.halflink.sa' : undefined);
+
   reply.setCookie(env.COOKIE_NAME, sessionId, {
     path: '/',
     httpOnly: true,
-    secure: isProd || env.COOKIE_SAME_SITE === 'none',
-    sameSite: env.COOKIE_SAME_SITE,
+    secure: true,
+    sameSite: 'none',
     signed: true,
     maxAge: env.SESSION_TTL_SECONDS,
-    domain: env.COOKIE_DOMAIN,
+    domain,
   });
 
   reply.setCookie(`${env.COOKIE_NAME}_hint`, '1', {
     path: '/',
-    secure: isProd || env.COOKIE_SAME_SITE === 'none',
-    sameSite: env.COOKIE_SAME_SITE,
+    secure: true,
+    sameSite: 'none',
     maxAge: env.SESSION_TTL_SECONDS,
-    domain: env.COOKIE_DOMAIN,
+    domain,
   });
 };
 
 export const clearAuthCookie = (reply: FastifyReply) => {
+  const isSubdomain = isProd || env.CORS_ORIGIN?.includes('halflink.sa');
+  const domain = env.COOKIE_DOMAIN || (isSubdomain ? '.halflink.sa' : undefined);
+
   reply.clearCookie(env.COOKIE_NAME, {
     path: '/',
-    sameSite: env.COOKIE_SAME_SITE,
-    secure: isProd || env.COOKIE_SAME_SITE === 'none',
+    sameSite: 'none',
+    secure: true,
     httpOnly: true,
-    domain: env.COOKIE_DOMAIN,
+    domain,
   });
 
   reply.clearCookie(`${env.COOKIE_NAME}_hint`, {
     path: '/',
-    sameSite: env.COOKIE_SAME_SITE,
-    secure: isProd || env.COOKIE_SAME_SITE === 'none',
-    domain: env.COOKIE_DOMAIN,
+    sameSite: 'none',
+    secure: true,
+    domain,
   });
 };
 

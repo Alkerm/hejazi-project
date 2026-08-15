@@ -70,7 +70,7 @@ export default function WishlistPage() {
             {t('Click the heart icon on any product to save it here for later.', 'انقر على أيقونة القلب على أي منتج لحفظه هنا لاحقاً.')}
           </p>
           <Link href="/products" className="inline-block pt-2">
-            <Button className="bg-rose-600 hover:bg-rose-700 text-white">{t('Browse Cosmetics Catalog', 'استكشف كتالوج التجميل')}</Button>
+            <Button className="bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold">{t('Browse Energy & Security Catalog', 'استكشف كتالوج الطاقة والمراقبة')}</Button>
           </Link>
         </div>
       ) : (
