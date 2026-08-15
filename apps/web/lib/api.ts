@@ -38,6 +38,13 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
     headers.set('Content-Type', 'application/json');
   }
 
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('halflink_token');
+    if (token && !headers.has('Authorization')) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+  }
+
   try {
     response = await fetch(`${API_BASE}${path}`, {
       ...init,
@@ -68,29 +75,43 @@ export const api = {
   productDetails: (idOrSlug: string) => request<Product>(`/products/${idOrSlug}`),
   categories: () => request<Category[]>('/products/categories'),
 
-  register: (payload: {
+  register: async (payload: {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
     phone?: string;
     marketingConsent: boolean;
-  }) =>
-    request<UserProfile>('/auth/register', {
+  }) => {
+    const res = await request<UserProfile & { token?: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(payload),
-    }),
+    });
+    if (typeof window !== 'undefined' && res.token) {
+      localStorage.setItem('halflink_token', res.token);
+    }
+    return res;
+  },
 
-  login: (payload: { email: string; password: string }) =>
-    request<UserProfile>('/auth/login', {
+  login: async (payload: { email: string; password: string }) => {
+    const res = await request<UserProfile & { token?: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(payload),
-    }),
+    });
+    if (typeof window !== 'undefined' && res.token) {
+      localStorage.setItem('halflink_token', res.token);
+    }
+    return res;
+  },
 
-  logout: () =>
-    request<{ loggedOut: boolean }>('/auth/logout', {
+  logout: async () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('halflink_token');
+    }
+    return request<{ loggedOut: boolean }>('/auth/logout', {
       method: 'POST',
-    }),
+    });
+  },
 
   me: () => request<UserProfile>('/auth/me'),
 

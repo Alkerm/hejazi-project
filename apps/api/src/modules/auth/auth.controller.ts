@@ -5,7 +5,7 @@ import { getCurrentUser, loginUser, logoutUser, registerUser, requestPasswordRes
 import { clearAuthCookie, getSignedCookieSessionId, setAuthCookie } from './session.service';
 import { requireAuth } from '../../middleware/auth';
 
-const publicUser = (user: any) => ({
+const publicUser = (user: any, token?: string) => ({
   id: user.id,
   firstName: user.firstName,
   lastName: user.lastName,
@@ -13,20 +13,21 @@ const publicUser = (user: any) => ({
   phone: user.phone,
   marketingConsent: user.marketingConsent,
   role: user.role,
+  token,
 });
 
 export const registerHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   const payload = registerSchema.parse(request.body);
   const { user, sessionId } = await registerUser(payload);
   setAuthCookie(reply, sessionId);
-  return ok(reply, publicUser(user), 201);
+  return ok(reply, publicUser(user, sessionId), 201);
 };
 
 export const loginHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   const payload = loginSchema.parse(request.body);
   const { user, sessionId } = await loginUser(payload);
   setAuthCookie(reply, sessionId);
-  return ok(reply, publicUser(user));
+  return ok(reply, publicUser(user, sessionId));
 };
 
 export const logoutHandler = async (request: FastifyRequest, reply: FastifyReply) => {

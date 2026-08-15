@@ -75,10 +75,20 @@ export const clearAuthCookie = (reply: FastifyReply) => {
 };
 
 export const getSignedCookieSessionId = (request: FastifyRequest): string | null => {
+  // 1. Check Authorization Bearer header (100% immune to browser cross-domain cookie restrictions)
+  const authHeader = request.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7).trim();
+    if (token) return token;
+  }
+
+  // 2. Check signed cookie
   const cookieValue = request.cookies[env.COOKIE_NAME];
   if (!cookieValue) return null;
 
   const unsigned = request.unsignCookie(cookieValue);
-  if (!unsigned.valid) return null;
-  return unsigned.value;
+  if (unsigned.valid && unsigned.value) return unsigned.value;
+
+  // 3. Fallback to raw cookie value if already unsigned
+  return cookieValue;
 };
