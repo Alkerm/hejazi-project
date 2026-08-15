@@ -1,5 +1,9 @@
-﻿import { redirect } from 'next/navigation';
+import { LoginStartCard } from '@/components/auth/login-start-card';
 
 export default function LoginPage() {
-  redirect('/');
+  return (
+    <div className="py-8">
+      <LoginStartCard />
+    </div>
+  );
 }

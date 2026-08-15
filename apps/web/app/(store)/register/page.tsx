@@ -1,17 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { api } from '@/lib/api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/lib/language-context';
 
 export default function RegisterPage() {
-  const router = useRouter();
+  const { t } = useLanguage();
   const [form, setForm] = useState({
-    firstName: 'Sara',
-    lastName: 'Lee',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     password: '',
@@ -35,51 +35,86 @@ export default function RegisterPage() {
         marketingConsent: form.marketingConsent,
       });
       document.cookie = 'cosmetics_sid_hint=1; path=/';
-      router.push('/products');
-      router.refresh();
+      window.location.href = '/products';
     } catch (e) {
       setMessage((e as Error).message);
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="mx-auto max-w-md space-y-5 rounded-xl border border-slate-200 bg-white p-6">
-      <h1 className="text-2xl font-bold">Register</h1>
-      <form className="space-y-3" onSubmit={onSubmit}>
-        <Input label="First name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
-        <Input label="Last name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
-        <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-        <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-        <Input label="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-        <label className="flex items-start gap-2 text-sm text-slate-700">
-          <input
-            type="checkbox"
-            checked={form.marketingConsent}
-            onChange={(e) => setForm({ ...form, marketingConsent: e.target.checked })}
-            className="mt-1"
-          />
-          <span>
-            I agree to receive optional marketing messages. This is separate from the data needed to process my
-            orders.
-          </span>
-        </label>
-        <p className="text-xs text-slate-500">
-          Your account and order data are processed to fulfill purchases. Optional marketing consent can be changed
-          later in your profile.
+    <div className="mx-auto max-w-md space-y-6 glass-card rounded-2xl p-8 border border-slate-200/40 animate-fade-in my-8">
+      <div className="text-center space-y-2">
+        <h1 className="serif-font text-3xl font-bold text-slate-800">
+          {t('Create Account', 'إنشاء حساب جديد')}
+        </h1>
+        <p className="text-xs uppercase tracking-widest text-amber-600 font-extrabold">
+          {t('Half Link Energy & Security', 'هالف لينـك لأنظمة الطاقة وكاميرات المراقبة')}
         </p>
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? 'Creating account...' : 'Create account'}
+      </div>
+
+      <form className="space-y-4" onSubmit={onSubmit}>
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            label={t('First Name', 'الاسم الأول')}
+            value={form.firstName}
+            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+            placeholder="فهد"
+            required
+            className="bg-white/80"
+          />
+          <Input
+            label={t('Last Name', 'الاسم الأخير')}
+            value={form.lastName}
+            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+            placeholder="العتيبي"
+            required
+            className="bg-white/80"
+          />
+        </div>
+        <Input
+          label={t('Email Address', 'البريد الإلكتروني')}
+          type="email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          placeholder="fahad@halflink.sa"
+          required
+          className="bg-white/80"
+        />
+        <Input
+          label={t('Phone Number (Optional)', 'رقم الجوال (اختياري)')}
+          value={form.phone}
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          placeholder="+966 50 000 0000"
+          className="bg-white/80"
+        />
+        <Input
+          label={t('Password', 'كلمة المرور')}
+          type="password"
+          value={form.password}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          placeholder="••••••••"
+          required
+          className="bg-white/80"
+        />
+
+        {message && (
+          <p className="text-xs font-semibold text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200">{message}</p>
+        )}
+
+        <Button type="submit" disabled={loading} className="w-full py-3.5 bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-amber-400 font-bold transition shadow-md">
+          {loading ? t('Creating Account...', 'جاري إنشاء الحساب...') : t('Create Account', 'إنشاء الحساب')}
         </Button>
       </form>
-      {message && <p className="text-sm text-red-600">{message}</p>}
-      <p className="text-sm text-slate-600">
-        Already registered?{' '}
-        <Link href="/" className="font-semibold text-brand-700">
-          Sign in
-        </Link>
-      </p>
+
+      <div className="border-t border-slate-200/50 pt-4 text-center">
+        <p className="text-xs text-slate-500">
+          {t('Already registered?', 'لديك حساب بالفعل؟')}{' '}
+          <Link href="/login" className="font-bold text-amber-600 hover:text-amber-700 transition">
+            {t('Sign in', 'تسجيل الدخول')}
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
