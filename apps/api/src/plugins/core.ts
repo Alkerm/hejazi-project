@@ -6,6 +6,8 @@ import rateLimit from '@fastify/rate-limit';
 import Redis from 'ioredis';
 import { corsOrigins, env, isProd } from '../config/env';
 import { AppError } from '../utils/app-error';
+import { getSignedCookieSessionId, getSession } from '../modules/auth/session.service';
+import { prisma } from '../prisma/client';
 
 export const registerCorePlugins = async (app: FastifyInstance) => {
   const devOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
@@ -38,6 +40,35 @@ export const registerCorePlugins = async (app: FastifyInstance) => {
 
   await app.register(cookie, {
     secret: env.SESSION_SECRET,
+  });
+
+  // Global hook: auto-populate req.user from Bearer token or cookie session
+  // This is critical — many controllers (wishlist, reviews, payments, support, upload)
+  // check req.user?.id for auth. Without this hook, req.user is always undefined.
+  app.addHook('onRequest', async (request) => {
+    try {
+      const sessionId = getSignedCookieSessionId(request);
+      if (!sessionId) return;
+
+      const session = await getSession(sessionId);
+      if (!session) return;
+
+      const user = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { id: true, firstName: true, lastName: true, email: true, role: true },
+      });
+
+      if (user) {
+        request.user = user;
+        request.auth = {
+          userId: session.userId,
+          role: session.role,
+          sessionId,
+        };
+      }
+    } catch {
+      // Silently continue — if session lookup fails, user stays unauthenticated
+    }
   });
 
   app.addHook('onRequest', async (request) => {
