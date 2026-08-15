@@ -23,13 +23,16 @@ export const registerCorePlugins = async (app: FastifyInstance) => {
       callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
     },
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'Accept', 'Origin'],
+    exposedHeaders: ['set-cookie', 'authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
   await app.register(helmet, {
     global: true,
     contentSecurityPolicy: isProd ? undefined : false,
-    crossOriginOpenerPolicy: { policy: 'same-origin' },
-    crossOriginResourcePolicy: { policy: 'same-site' },
+    crossOriginOpenerPolicy: { policy: 'unsafe-none' },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
     referrerPolicy: { policy: 'no-referrer' },
   });
 
