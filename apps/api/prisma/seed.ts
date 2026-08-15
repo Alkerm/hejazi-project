@@ -41,6 +41,62 @@ async function main() {
     },
   });
 
+  const customer = await prisma.user.upsert({
+    where: { email: 'customer@cosmetics.local' },
+    update: {
+      firstName: 'Fahad',
+      lastName: 'Al-Otaibi',
+      passwordHash,
+      role: UserRole.USER,
+    },
+    create: {
+      firstName: 'Fahad',
+      lastName: 'Al-Otaibi',
+      email: 'customer@cosmetics.local',
+      passwordHash,
+      role: UserRole.USER,
+      phone: '+966500000002',
+      cart: { create: {} },
+      addresses: {
+        create: {
+          line1: 'Olaya Street',
+          city: 'Riyadh',
+          country: 'Saudi Arabia',
+          postalCode: '12211',
+          isDefault: true,
+        },
+      },
+    },
+  });
+
+  const driver = await prisma.user.upsert({
+    where: { email: 'driver@cosmetics.local' },
+    update: {
+      firstName: 'Sultan',
+      lastName: 'Driver',
+      passwordHash,
+      role: UserRole.DRIVER,
+    },
+    create: {
+      firstName: 'Sultan',
+      lastName: 'Driver',
+      email: 'driver@cosmetics.local',
+      passwordHash,
+      role: UserRole.DRIVER,
+      phone: '+966500000003',
+      cart: { create: {} },
+      addresses: {
+        create: {
+          line1: 'Takhassusi Street',
+          city: 'Riyadh',
+          country: 'Saudi Arabia',
+          postalCode: '12331',
+          isDefault: true,
+        },
+      },
+    },
+  });
+
   const categoriesData = [
     { name: 'Surveillance Cameras', slug: 'monitoring-cameras' },
     { name: 'Power Stations & Batteries', slug: 'power-batteries' },
