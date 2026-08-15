@@ -115,76 +115,124 @@ a {
   background: #ec6340;
 }
 
-/* ── Ambient Floating Background ── */
-.ambient-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
+/* ── Dynamic Ambient Background ── */
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.18;
+  filter: blur(45px);
+  opacity: 0.42;
   will-change: transform;
 }
 
-/* Coral orb — top-right drift */
+/* Solar Amber Orb — Top Right */
 .ambient-orb-1 {
-  width: 340px;
-  height: 340px;
-  background: radial-gradient(circle, #ec6340 0%, transparent 70%);
-  top: -60px;
-  right: -40px;
-  animation: drift1 22s ease-in-out infinite;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(236, 99, 64, 0.7) 0%, rgba(245, 158, 11, 0.4) 60%, transparent 80%);
+  top: -40px;
+  right: 5%;
+  animation: floatOrb1 12s ease-in-out infinite alternate;
 }
 
-/* Warm sand orb — bottom-left drift */
+/* Smart Tech Blue/Cyan Orb — Bottom Left */
 .ambient-orb-2 {
   width: 280px;
   height: 280px;
-  background: radial-gradient(circle, #f4a985 0%, transparent 70%);
-  bottom: 10%;
-  left: -60px;
-  animation: drift2 26s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, rgba(14, 165, 233, 0.3) 60%, transparent 80%);
+  bottom: 12%;
+  left: 2%;
+  animation: floatOrb2 14s ease-in-out infinite alternate;
 }
 
-/* Soft peach orb — center drift */
+/* Energy Gold Orb — Center Drift */
 .ambient-orb-3 {
-  width: 220px;
-  height: 220px;
-  background: radial-gradient(circle, #fcd5c4 0%, transparent 70%);
-  top: 45%;
-  right: 25%;
-  animation: drift3 30s ease-in-out infinite;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.6) 0%, rgba(251, 191, 36, 0.3) 60%, transparent 80%);
+  top: 38%;
+  right: 20%;
+  animation: floatOrb3 10s ease-in-out infinite alternate;
 }
 
-@keyframes drift1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25%      { transform: translate(-50px, 40px) scale(1.05); }
-  50%      { transform: translate(-30px, 80px) scale(0.95); }
-  75%      { transform: translate(20px, 30px) scale(1.02); }
+/* Emerald Power Orb — Bottom Right */
+.ambient-orb-4 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, rgba(52, 211, 153, 0.2) 60%, transparent 80%);
+  bottom: 5%;
+  right: 15%;
+  animation: floatOrb4 16s ease-in-out infinite alternate;
 }
 
-@keyframes drift2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25%      { transform: translate(40px, -30px) scale(1.04); }
-  50%      { transform: translate(70px, -60px) scale(0.96); }
-  75%      { transform: translate(25px, -20px) scale(1.01); }
+@keyframes floatOrb1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-60px, 50px) scale(1.12); }
+  100% { transform: translate(-100px, 20px) scale(0.95); }
 }
 
-@keyframes drift3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%      { transform: translate(-35px, -25px) scale(1.06); }
-  66%      { transform: translate(25px, 35px) scale(0.94); }
+@keyframes floatOrb2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(70px, -45px) scale(1.15); }
+  100% { transform: translate(40px, -80px) scale(0.9); }
+}
+
+@keyframes floatOrb3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-45px, -35px) scale(1.08); }
+  100% { transform: translate(50px, 45px) scale(0.92); }
+}
+
+@keyframes floatOrb4 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-50px, -40px) scale(1.1); }
+  100% { transform: translate(-30px, 60px) scale(0.95); }
+}
+
+/* Energy Particle Specks floating upward */
+.energy-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(236, 99, 64, 0.6);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.8);
+  will-change: transform, opacity;
+}
+
+.particle-1 { width: 6px; height: 6px; left: 10%; bottom: -20px; animation: riseParticle 8s ease-in-out infinite; }
+.particle-2 { width: 8px; height: 8px; left: 30%; bottom: -30px; animation: riseParticle 11s ease-in-out infinite 2s; background: rgba(59, 130, 246, 0.7); }
+.particle-3 { width: 5px; height: 5px; left: 55%; bottom: -15px; animation: riseParticle 9s ease-in-out infinite 4s; }
+.particle-4 { width: 7px; height: 7px; left: 75%; bottom: -25px; animation: riseParticle 13s ease-in-out infinite 1s; background: rgba(245, 158, 11, 0.7); }
+.particle-5 { width: 6px; height: 6px; left: 88%; bottom: -20px; animation: riseParticle 10s ease-in-out infinite 3s; }
+.particle-6 { width: 4px; height: 4px; left: 42%; bottom: -10px; animation: riseParticle 7s ease-in-out infinite 5s; background: rgba(16, 185, 129, 0.7); }
+
+@keyframes riseParticle {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-105vh) translateX(40px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Ambient Subtle Wave Ribbon */
+.ambient-wave {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(254, 240, 235, 0.5) 0%, transparent 75%);
+  pointer-events: none;
 }
 
 /* Respect reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
   .ambient-orb,
+  .energy-particle,
   .cart-bounce,
   .cart-added-btn,
   .cart-badge-pop {
