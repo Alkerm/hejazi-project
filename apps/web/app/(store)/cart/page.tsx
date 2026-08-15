@@ -124,7 +124,7 @@ export default function CartPage() {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
         <Toaster position="top-right" richColors />
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-cyan-600"></div>
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest animate-pulse">
           {t('Loading Cart...', 'جاري تحميل السلة...')}
         </p>
@@ -160,7 +160,7 @@ export default function CartPage() {
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 backdrop-blur-sm p-12 text-center space-y-4">
           <p className="text-slate-500 text-sm">{t('Your shopping cart is empty.', 'سلة التسوق فارغة.')}</p>
           <Link href="/products" className="inline-block">
-            <Button>{t('Explore Cosmetic Products', 'استكشف منتجات التجميل')}</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold">{t('Explore Energy & Security Products', 'استكشف منتجات الطاقة والمراقبة')}</Button>
           </Link>
         </div>
       ) : (
@@ -213,7 +213,7 @@ export default function CartPage() {
                           </button>
                         </div>
 
-                        <p className="text-sm font-bold text-slate-800 min-w-[80px] text-right">
+                        <p className="text-sm font-extrabold text-slate-900 min-w-[80px] text-right">
                           {formatMoney(item.lineTotal)}
                         </p>
                         
@@ -236,7 +236,7 @@ export default function CartPage() {
               <PaymentSelector selectedMethod={selectedPayment} onSelectMethod={setSelectedPayment} />
               
               <Button
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg shadow-emerald-600/20 transition-all text-sm font-bold"
+                className="w-full py-3.5 bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-lg shadow-cyan-600/25 transition-all text-sm"
                 disabled={placing}
                 onClick={placeOrder}
               >
@@ -249,14 +249,14 @@ export default function CartPage() {
             {/* Promo Coupon Code Block */}
             <div className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-3">
               <div className="flex items-center gap-2">
-                <Tag className="w-4 h-4 text-emerald-600" />
+                <Tag className="w-4 h-4 text-cyan-600" />
                 <h2 className="text-xs uppercase tracking-widest font-bold text-slate-800">{t('Promotional Coupon', 'كوبون الخصم')}</h2>
               </div>
 
               {appliedCoupon ? (
-                <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-emerald-800 font-medium">
+                <div className="flex items-center justify-between bg-cyan-50 border border-cyan-200 p-3 rounded-xl text-xs text-cyan-800 font-medium">
                   <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-600" />
+                    <Check className="w-4 h-4 text-cyan-600" />
                     <span>{t('Coupon', 'كوبون')} <strong>{appliedCoupon.code}</strong> {t('Applied', 'مطبق')}</span>
                   </div>
                   <button
@@ -272,10 +272,10 @@ export default function CartPage() {
                     type="text"
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value)}
-                    placeholder={t('Enter coupon code (e.g. HEJAZI20)', 'أدخل رمز الكوبون (مثال: HEJAZI20)')}
-                    className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 uppercase font-semibold"
+                    placeholder={t('Enter coupon code (e.g. HALFLINK)', 'أدخل رمز الكوبون (مثال: HALFLINK)')}
+                    className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 uppercase font-semibold"
                   />
-                  <Button type="submit" disabled={applyingCoupon} className="text-xs bg-slate-900 text-white px-4">
+                  <Button type="submit" disabled={applyingCoupon} className="text-xs bg-slate-950 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 border border-cyan-500/30 px-4 font-bold">
                     {applyingCoupon ? '...' : t('Apply', 'تطبيق')}
                   </Button>
                 </form>
@@ -298,7 +298,7 @@ export default function CartPage() {
                 </div>
 
                 {appliedCoupon && (
-                  <div className="flex justify-between text-emerald-600 font-semibold">
+                  <div className="flex justify-between text-cyan-600 font-semibold">
                     <span>{t('Discount', 'الخصم')} ({appliedCoupon.code})</span>
                     <span>-{formatMoney(discountAmount)}</span>
                   </div>
@@ -314,7 +314,7 @@ export default function CartPage() {
                 </div>
                 <div className="border-t border-slate-200/50 pt-3 flex justify-between text-sm font-bold text-slate-800">
                   <span>{t('Total Due', 'الإجمالي المستحق')}</span>
-                  <span className="text-emerald-700">{formatMoney(total)}</span>
+                  <span className="text-cyan-700 font-extrabold">{formatMoney(total)}</span>
                 </div>
               </div>
 

@@ -71,7 +71,7 @@ export function OrderTrackerStepper({
                   {idx > 0 ? (
                     <div
                       className={`flex-1 h-1 transition-all duration-500 ${
-                        isCompleted ? 'bg-amber-500' : 'bg-slate-200'
+                        isCompleted ? 'bg-cyan-500' : 'bg-slate-200'
                       }`}
                     />
                   ) : (
@@ -84,10 +84,10 @@ export function OrderTrackerStepper({
                       compact ? 'h-7 w-7 text-[10px]' : 'h-8 w-8 text-xs'
                     } ${
                       isCompleted
-                        ? 'bg-amber-500 text-slate-950 shadow-xs'
+                        ? 'bg-cyan-500 text-white shadow-xs'
                         : 'bg-slate-200 text-slate-500'
                     } ${
-                      isCurrent ? 'ring-4 ring-amber-300 animate-pulse scale-105' : ''
+                      isCurrent ? 'ring-4 ring-cyan-200 animate-pulse scale-105' : ''
                     }`}
                   >
                     {idx + 1}
@@ -97,7 +97,7 @@ export function OrderTrackerStepper({
                   {!isLast ? (
                     <div
                       className={`flex-1 h-1 transition-all duration-500 ${
-                        isNextActive ? 'bg-amber-500' : 'bg-slate-200'
+                        isNextActive ? 'bg-cyan-500' : 'bg-slate-200'
                       }`}
                     />
                   ) : (
@@ -110,7 +110,7 @@ export function OrderTrackerStepper({
                   className={`text-[10px] sm:text-xs font-semibold text-center leading-tight mt-1.5 ${
                     compact ? 'max-w-[70px]' : 'max-w-[85px] sm:max-w-none'
                   } ${
-                    isCurrent ? 'text-amber-600 font-bold' : isCompleted ? 'text-slate-800' : 'text-slate-400'
+                    isCurrent ? 'text-cyan-600 font-bold' : isCompleted ? 'text-slate-800' : 'text-slate-400'
                   }`}
                 >
                   {t(step.labelEn, step.labelAr)}
@@ -122,10 +122,10 @@ export function OrderTrackerStepper({
       </div>
 
       {driverName && (
-        <div className="mt-3 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3 border border-amber-200/80 flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs">
+        <div className="mt-3 rounded-2xl bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-3 border border-cyan-200/80 flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs">
           <div className="space-y-1">
-            <span className="text-[10px] uppercase font-extrabold tracking-wider text-amber-800 flex items-center gap-1">
-              <Truck className="w-3.5 h-3.5 text-amber-600" />
+            <span className="text-[10px] uppercase font-extrabold tracking-wider text-cyan-800 flex items-center gap-1">
+              <Truck className="w-3.5 h-3.5 text-cyan-600" />
               {t('Assigned Courier Driver', 'السائق المسؤول عن التوصيل')}
             </span>
             <div className="flex items-center gap-2.5 flex-wrap">
@@ -133,7 +133,7 @@ export function OrderTrackerStepper({
               {driverPhone && (
                 <a
                   href={`tel:${driverPhone}`}
-                  className="inline-flex items-center gap-1.5 bg-amber-500 text-slate-950 font-bold px-3 py-1 rounded-full text-xs hover:bg-amber-600 transition shadow-2xs"
+                  className="inline-flex items-center gap-1.5 bg-cyan-600 text-white font-bold px-3 py-1 rounded-full text-xs hover:bg-cyan-700 transition shadow-2xs"
                   title={t('Call Driver', 'الاتصال بالسائق')}
                 >
                   <Phone className="w-3 h-3 fill-current" />
@@ -143,7 +143,7 @@ export function OrderTrackerStepper({
             </div>
           </div>
 
-          <span className="text-[11px] bg-amber-200/80 text-amber-900 font-extrabold px-3 py-1 rounded-full border border-amber-300/50">
+          <span className="text-[11px] bg-cyan-200/80 text-cyan-900 font-extrabold px-3 py-1 rounded-full border border-cyan-300/50">
             {t('Out for Delivery', 'جاري التوصيل إلى عنوانك')}
           </span>
         </div>

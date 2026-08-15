@@ -5,8 +5,8 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const styles: Record<NonNullable<Props['variant']>, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-500/10 active:bg-brand-800',
-  secondary: 'border border-slate-200/80 bg-white/80 backdrop-blur-sm text-slate-800 hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100',
+  primary: 'bg-cyan-600 text-white hover:bg-cyan-700 hover:shadow-lg hover:shadow-cyan-500/20 active:bg-cyan-800',
+  secondary: 'border border-slate-200/90 bg-white/90 backdrop-blur-sm text-slate-800 hover:bg-cyan-50/40 hover:border-cyan-200 active:bg-slate-100',
   danger: 'bg-red-500 text-white hover:bg-red-600 active:bg-red-700 hover:shadow-lg hover:shadow-red-500/10',
 };
 

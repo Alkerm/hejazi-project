@@ -9,7 +9,7 @@ export default function ReturnsRefundsPage() {
         {
           heading: 'Return Eligibility',
           body:
-            'TODO: Define which items are eligible for return, the allowed time window, and any hygiene or cosmetics-specific exclusions.',
+            'TODO: Define which items are eligible for return, the allowed time window, and any technical seals or device packaging requirements.',
         },
         {
           heading: 'Refund Process',

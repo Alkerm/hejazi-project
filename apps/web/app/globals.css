@@ -11,8 +11,8 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: linear-gradient(135deg, #fefbfc 0%, #faf0eb 50%, #fcf7f4 100%);
-  color: #1e293b;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%);
+  color: #0f172a;
   font-family: 'Outfit', 'Cairo', sans-serif;
   overflow-x: hidden;
 }
@@ -46,35 +46,35 @@ a {
   text-decoration: none;
 }
 
-/* Glassmorphism & Premium Utilities */
+/* Glassmorphism & High-Tech Power Utilities */
 .glass-card {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 30px rgba(223, 195, 185, 0.15);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(236, 99, 64, 0.25);
-  box-shadow: 0 10px 40px rgba(223, 195, 185, 0.25);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(14, 165, 233, 0.35);
+  box-shadow: 0 10px 30px -4px rgba(14, 165, 233, 0.15);
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(244, 230, 222, 0.5);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .luxury-gradient {
-  background: linear-gradient(135deg, #ec6340 0%, #b73922 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
 }
 
 .luxury-gradient-hover {
-  background: linear-gradient(135deg, #f48b6c 0%, #ec6340 100%);
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
 }
 
 /* Animations */
@@ -96,69 +96,69 @@ a {
   animation: float 3s ease-in-out infinite;
 }
 
-/* Custom Scrollbar for Luxury Feeling */
+/* Custom Scrollbar for High-Tech Power Feeling */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #fbf6f3;
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #f48b6c;
+  background: #38bdf8;
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ec6340;
+  background: #0ea5e9;
 }
 
 /* ── Dynamic Ambient Background ── */
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(45px);
-  opacity: 0.42;
+  filter: blur(50px);
+  opacity: 0.35;
   will-change: transform;
 }
 
-/* Solar Amber Orb — Top Right */
+/* Laser Cyan / Surveillance Tech Orb — Top Right */
 .ambient-orb-1 {
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle, rgba(236, 99, 64, 0.7) 0%, rgba(245, 158, 11, 0.4) 60%, transparent 80%);
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.6) 0%, rgba(2, 132, 199, 0.3) 60%, transparent 80%);
   top: -40px;
   right: 5%;
   animation: floatOrb1 12s ease-in-out infinite alternate;
 }
 
-/* Smart Tech Blue/Cyan Orb — Bottom Left */
+/* Solar Voltage Amber Orb — Bottom Left */
 .ambient-orb-2 {
   width: 280px;
   height: 280px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, rgba(14, 165, 233, 0.3) 60%, transparent 80%);
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.5) 0%, rgba(251, 191, 36, 0.25) 60%, transparent 80%);
   bottom: 12%;
   left: 2%;
   animation: floatOrb2 14s ease-in-out infinite alternate;
 }
 
-/* Energy Gold Orb — Center Drift */
+/* Deep Power Cobalt Orb — Center Drift */
 .ambient-orb-3 {
   width: 240px;
   height: 240px;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.6) 0%, rgba(251, 191, 36, 0.3) 60%, transparent 80%);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, rgba(14, 165, 233, 0.25) 60%, transparent 80%);
   top: 38%;
   right: 20%;
   animation: floatOrb3 10s ease-in-out infinite alternate;
 }
 
-/* Emerald Power Orb — Bottom Right */
+/* Eco Energy Green Orb — Bottom Right */
 .ambient-orb-4 {
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, rgba(52, 211, 153, 0.2) 60%, transparent 80%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.45) 0%, rgba(52, 211, 153, 0.2) 60%, transparent 80%);
   bottom: 5%;
   right: 15%;
   animation: floatOrb4 16s ease-in-out infinite alternate;
@@ -192,15 +192,15 @@ a {
 .energy-particle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(236, 99, 64, 0.6);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.8);
+  background: rgba(14, 165, 233, 0.7);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.9);
   will-change: transform, opacity;
 }
 
 .particle-1 { width: 6px; height: 6px; left: 10%; bottom: -20px; animation: riseParticle 8s ease-in-out infinite; }
 .particle-2 { width: 8px; height: 8px; left: 30%; bottom: -30px; animation: riseParticle 11s ease-in-out infinite 2s; background: rgba(59, 130, 246, 0.7); }
 .particle-3 { width: 5px; height: 5px; left: 55%; bottom: -15px; animation: riseParticle 9s ease-in-out infinite 4s; }
-.particle-4 { width: 7px; height: 7px; left: 75%; bottom: -25px; animation: riseParticle 13s ease-in-out infinite 1s; background: rgba(245, 158, 11, 0.7); }
+.particle-4 { width: 7px; height: 7px; left: 75%; bottom: -25px; animation: riseParticle 13s ease-in-out infinite 1s; background: rgba(245, 158, 11, 0.7); box-shadow: 0 0 10px rgba(245, 158, 11, 0.8); }
 .particle-5 { width: 6px; height: 6px; left: 88%; bottom: -20px; animation: riseParticle 10s ease-in-out infinite 3s; }
 .particle-6 { width: 4px; height: 4px; left: 42%; bottom: -10px; animation: riseParticle 7s ease-in-out infinite 5s; background: rgba(16, 185, 129, 0.7); }
 
@@ -225,7 +225,7 @@ a {
 .ambient-wave {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(254, 240, 235, 0.5) 0%, transparent 75%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(224, 242, 254, 0.35) 0%, transparent 75%);
   pointer-events: none;
 }
 

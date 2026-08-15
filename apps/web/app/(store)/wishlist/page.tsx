@@ -73,7 +73,7 @@ export default function WishlistPage() {
             {t('Click the heart icon on any product to save it here for later.', 'انقر على أيقونة القلب على أي منتج لحفظه هنا لاحقاً.')}
           </p>
           <Link href="/products" className="inline-block pt-2">
-            <Button className="bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold">{t('Browse Energy & Security Catalog', 'استكشف كتالوج الطاقة والمراقبة')}</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-md shadow-cyan-600/20">{t('Browse Energy & Security Catalog', 'استكشف كتالوج الطاقة والمراقبة')}</Button>
           </Link>
         </div>
       ) : (
@@ -91,7 +91,7 @@ export default function WishlistPage() {
                 <div className="mt-2 flex gap-2">
                   <Button
                     onClick={() => handleAddToCart(item.product.id, item.product.name)}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 flex items-center justify-center gap-1.5"
+                    className="w-full bg-slate-950 hover:bg-cyan-600 text-cyan-400 hover:text-white border border-cyan-500/20 text-xs py-2 flex items-center justify-center gap-1.5 font-bold transition shadow-xs"
                   >
                     <ShoppingBag className="w-3.5 h-3.5" /> {t('Move to Cart', 'إضافة للسلة')}
                   </Button>

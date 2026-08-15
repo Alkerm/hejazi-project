@@ -97,7 +97,7 @@ export default function ProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
         <Toaster position="top-right" richColors />
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-cyan-600"></div>
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest animate-pulse">
           {t('Loading profile', 'جاري تحميل الحساب')}
         </p>
@@ -112,10 +112,10 @@ export default function ProfilePage() {
       <Toaster position="top-right" richColors />
 
       {/* Market-Standard User Profile Banner Card */}
-      <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200/60 shadow-sm relative overflow-hidden bg-gradient-to-br from-white via-slate-50/50 to-amber-50/20">
+      <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200/60 shadow-sm relative overflow-hidden bg-gradient-to-br from-white via-slate-50/50 to-cyan-50/25">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
           {/* Avatar Circle */}
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-slate-900 text-amber-400 flex items-center justify-center text-2xl sm:text-3xl font-extrabold shadow-md border-4 border-white flex-none">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-slate-950 text-cyan-400 border border-cyan-500/30 flex items-center justify-center text-2xl sm:text-3xl font-mono font-extrabold shadow-md border-4 border-white flex-none">
             {initials}
           </div>
 
@@ -156,10 +156,10 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link
           href="/orders"
-          className="glass-card rounded-2xl p-5 border border-slate-200/60 hover:shadow-md hover:border-slate-300 transition-all flex items-center justify-between group bg-white"
+          className="glass-card rounded-2xl p-5 border border-slate-200/60 hover:shadow-md hover:border-cyan-300 transition-all flex items-center justify-between group bg-white"
         >
           <div className="flex items-center gap-3.5">
-            <div className="p-3 rounded-xl bg-slate-900 text-amber-400 group-hover:scale-105 transition-transform">
+            <div className="p-3 rounded-xl bg-slate-950 text-cyan-400 border border-cyan-500/30 group-hover:scale-105 transition-transform">
               <Package className="w-5 h-5" />
             </div>
             <div>
@@ -172,7 +172,7 @@ export default function ProfilePage() {
 
         <Link
           href="/wishlist"
-          className="glass-card rounded-2xl p-5 border border-slate-200/60 hover:shadow-md hover:border-slate-300 transition-all flex items-center justify-between group bg-white"
+          className="glass-card rounded-2xl p-5 border border-slate-200/60 hover:shadow-md hover:border-rose-200 transition-all flex items-center justify-between group bg-white"
         >
           <div className="flex items-center gap-3.5">
             <div className="p-3 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 group-hover:scale-105 transition-transform">
@@ -188,7 +188,7 @@ export default function ProfilePage() {
 
         <div className="glass-card rounded-2xl p-5 border border-slate-200/60 flex items-center justify-between bg-white">
           <div className="flex items-center gap-3.5">
-            <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+            <div className="p-3 rounded-xl bg-cyan-50 text-cyan-600 border border-cyan-100">
               <MapPin className="w-5 h-5" />
             </div>
             <div>
@@ -210,7 +210,7 @@ export default function ProfilePage() {
             onClick={() => setActiveTab('DETAILS')}
             className={`pb-4 text-xs font-extrabold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'DETAILS'
-                ? 'border-slate-900 text-slate-900'
+                ? 'border-cyan-600 text-cyan-700'
                 : 'border-transparent text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -223,7 +223,7 @@ export default function ProfilePage() {
             onClick={() => setActiveTab('ADDRESS')}
             className={`pb-4 text-xs font-extrabold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'ADDRESS'
-                ? 'border-slate-900 text-slate-900'
+                ? 'border-cyan-600 text-cyan-700'
                 : 'border-transparent text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -236,7 +236,7 @@ export default function ProfilePage() {
             onClick={() => setActiveTab('SECURITY')}
             className={`pb-4 text-xs font-extrabold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'SECURITY'
-                ? 'border-slate-900 text-slate-900'
+                ? 'border-cyan-600 text-cyan-700'
                 : 'border-transparent text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -287,7 +287,7 @@ export default function ProfilePage() {
                     type="checkbox"
                     checked={profile.marketingConsent}
                     onChange={(e) => setProfile({ ...profile, marketingConsent: e.target.checked })}
-                    className="mt-0.5 rounded text-amber-600 focus:ring-amber-500 h-4 w-4"
+                    className="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 h-4 w-4"
                   />
                   <span>
                     {t(
@@ -420,7 +420,7 @@ export default function ProfilePage() {
             <Button
               type="submit"
               disabled={saving}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-sm"
+              className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-cyan-600/20"
             >
               {saving ? t('Saving Changes...', 'جاري الحفظ...') : t('Save Changes', 'حفظ التغييرات')}
             </Button>

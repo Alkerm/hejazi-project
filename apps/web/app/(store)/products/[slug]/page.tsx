@@ -126,7 +126,7 @@ export default function ProductDetailsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
         <Toaster position="top-right" richColors />
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-cyan-600"></div>
         <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">
           {t('Loading product details...', 'جاري تحميل تفاصيل المنتج...')}
         </p>
@@ -146,11 +146,11 @@ export default function ProductDetailsPage() {
 
       {/* Breadcrumb Navigation */}
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-        <span className="cursor-pointer hover:text-amber-600 transition" onClick={() => router.push('/products')}>
+        <span className="cursor-pointer hover:text-cyan-600 transition" onClick={() => router.push('/products')}>
           {t('Catalog', 'المنتجات')}
         </span>
         <span>/</span>
-        <span className="text-amber-600 font-bold">{formatCategoryName(product.category)}</span>
+        <span className="text-cyan-600 font-bold">{formatCategoryName(product.category)}</span>
       </div>
 
       <div className="grid gap-10 md:grid-cols-2">
@@ -173,7 +173,7 @@ export default function ProductDetailsPage() {
         <div className="space-y-6 flex flex-col justify-between py-2">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
+              <span className="text-xs font-bold uppercase tracking-widest text-cyan-600">
                 {formatCategoryName(product.category)}
               </span>
               <Badge variant={stockStatus.variant}>{stockStatus.label}</Badge>
@@ -199,7 +199,7 @@ export default function ProductDetailsPage() {
               <span className="text-xs text-slate-400">({ratingSummary.totalReviews} {t('customer reviews', 'تقييمات العملاء')})</span>
             </div>
 
-            <p className="text-3xl font-bold text-amber-700">{formatMoney(product.price)}</p>
+            <p className="text-3xl font-extrabold text-cyan-800">{formatMoney(product.price)}</p>
 
             <div className="border-t border-b border-slate-200/50 py-4 my-2">
               <h2 className="text-xs uppercase tracking-widest font-bold text-slate-700 mb-2">{t('Product Overview', 'نظرة عامة عن المنتج')}</h2>
@@ -207,8 +207,8 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* Quality & Warranty Badge */}
-            <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-900 border border-amber-200/60 text-xs px-3 py-1.5 rounded-xl font-medium">
-              <ShieldCheck className="w-4 h-4 text-amber-600" />
+            <div className="inline-flex items-center gap-2 bg-cyan-50/80 text-cyan-900 border border-cyan-200/60 text-xs px-3 py-1.5 rounded-xl font-medium">
+              <ShieldCheck className="w-4 h-4 text-cyan-600" />
               <span>{t('Half Link 2-Year KSA Official Warranty', 'ضمان هالف لينـك الرسمي لمدة سنتين بالمملكة')}</span>
             </div>
           </div>
@@ -244,12 +244,12 @@ export default function ProductDetailsPage() {
               ) : (
                 <Button
                   disabled={product.stockQuantity < 1 || addingToCart}
-                  className="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold shadow-md shadow-amber-600/20 flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-md shadow-cyan-600/20 flex items-center justify-center gap-2"
                   onClick={addToCart}
                 >
                   {addingToCart ? (
                     <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                       {t('Adding...', 'جاري الإضافة...')}
                     </>
                   ) : (
@@ -339,11 +339,11 @@ export default function ProductDetailsPage() {
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder={t('Share your experience with this energy or camera system', 'شاركنا تجربتك ورأيك عن هذا المنتج والكفاءة')}
-              className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white"
+              className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 bg-white"
             />
           </div>
 
-          <Button type="submit" disabled={submittingReview} className="bg-slate-900 text-amber-400 hover:bg-amber-500 hover:text-slate-950 font-bold text-xs px-5 py-2 flex items-center gap-2">
+          <Button type="submit" disabled={submittingReview} className="bg-slate-950 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 border border-cyan-500/30 font-bold text-xs px-5 py-2 flex items-center gap-2">
             <Send className="w-3.5 h-3.5" />
             {submittingReview ? t('Submitting...', 'جاري النشر...') : t('Post Review', 'نشر التقييم')}
           </Button>
@@ -361,7 +361,7 @@ export default function ProductDetailsPage() {
                     <span className="font-bold text-xs text-slate-800">
                       {rev.user.firstName} {rev.user.lastName}
                     </span>
-                    <span className="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-medium">
+                    <span className="text-[10px] bg-cyan-100 text-cyan-900 px-2 py-0.5 rounded font-medium">
                       {t('Verified Buyer', 'مشتري موثق')}
                     </span>
                   </div>
