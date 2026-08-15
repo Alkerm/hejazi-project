@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Globe, Shield, ShoppingBag, Heart, User, LogOut, Grid } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { useLanguage } from '@/lib/language-context';
+import { useCart } from '@/lib/cart-context';
 
 const hasAuthHintCookie = () =>
   typeof document !== 'undefined' &&
@@ -30,7 +31,8 @@ export function Navbar() {
     isAuthenticated: false,
     role: null,
   });
-  const [cartCount, setCartCount] = useState<number>(0);
+  const { cartCount, setCartCount, cartBounce } = useCart();
+  const cartRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -56,7 +58,17 @@ export function Navbar() {
         .then((c) => setCartCount(c.summary.totalItems))
         .catch(() => setCartCount(0));
     }
-  }, [mounted, currentPath]);
+  }, [mounted, currentPath, setCartCount]);
+
+  // Bounce animation when cart updates
+  useEffect(() => {
+    if (cartBounce > 0 && cartRef.current) {
+      cartRef.current.classList.remove('cart-bounce');
+      // Force reflow to restart animation
+      void cartRef.current.offsetWidth;
+      cartRef.current.classList.add('cart-bounce');
+    }
+  }, [cartBounce]);
 
   const handleLogout = async () => {
     try {
@@ -132,6 +144,7 @@ export function Navbar() {
             <>
               {/* Cart Icon */}
               <Link
+                ref={cartRef}
                 href="/cart"
                 className={`relative p-2 text-slate-700 hover:text-amber-600 transition-colors rounded-full hover:bg-slate-100 ${
                   currentPath.startsWith('/cart') ? 'text-amber-600 bg-slate-100' : ''
@@ -140,7 +153,7 @@ export function Navbar() {
               >
                 <ShoppingBag className="w-5 h-5 stroke-[1.75]" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-extrabold text-white shadow-xs">
+                  <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[9px] font-extrabold text-white shadow-xs cart-badge-pop">
                     {cartCount}
                   </span>
                 )}

@@ -10,9 +10,11 @@ import { Wishlist } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/store/product-card';
 import { useLanguage } from '@/lib/language-context';
+import { useCart } from '@/lib/cart-context';
 
 export default function WishlistPage() {
   const { t } = useLanguage();
+  const { incrementCart } = useCart();
   const [wishlist, setWishlist] = useState<Wishlist | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,6 +40,7 @@ export default function WishlistPage() {
   const handleAddToCart = async (productId: string, productName: string) => {
     try {
       await api.addCartItem({ productId, quantity: 1 });
+      incrementCart(1);
       toast.success(t(`Added "${productName}" to your cart!`, `تمت إضافة "${productName}" إلى السلة!`));
     } catch (err: any) {
       toast.error(err.message || 'Failed to add item to cart');

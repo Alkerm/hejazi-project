@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Star, ShieldCheck, Heart, Send } from 'lucide-react';
+import { Star, ShieldCheck, Heart, Send, ShoppingBag, Check, ArrowRight } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 import { api } from '@/lib/api';
 import { Product, ProductReviewsSummaryResponse } from '@/lib/types';
@@ -12,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatMoney } from '@/lib/format';
 import { getStockStatus } from '@/lib/stock';
 import { useLanguage } from '@/lib/language-context';
+import { useCart } from '@/lib/cart-context';
 
 export default function ProductDetailsPage() {
   const { t, lang, formatProductName, formatProductDescription, formatCategoryName } = useLanguage();
@@ -24,10 +26,14 @@ export default function ProductDetailsPage() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
 
+  const { incrementCart } = useCart();
+
   // Review Form state
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -58,13 +64,20 @@ export default function ProductDetailsPage() {
   }, [params.slug]);
 
   const addToCart = async () => {
-    if (!product) return;
+    if (!product || addingToCart) return;
     const displayName = formatProductName(product);
+    setAddingToCart(true);
     try {
       await api.addCartItem({ productId: product.id, quantity });
+      incrementCart(quantity);
+      setAddedToCart(true);
       toast.success(t(`Added ${quantity} x "${displayName}" to cart!`, `تمت إضافة ${quantity} من "${displayName}" إلى السلة!`));
+      // Reset back to "Add to Cart" after 4 seconds
+      setTimeout(() => setAddedToCart(false), 4000);
     } catch (e: any) {
       toast.error(e.message || t('Failed to add item to cart', 'فشل إضافة المنتج إلى السلة'));
+    } finally {
+      setAddingToCart(false);
     }
   };
 
@@ -218,13 +231,35 @@ export default function ProductDetailsPage() {
                 </button>
               </div>
 
-              <Button
-                disabled={product.stockQuantity < 1}
-                className="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold shadow-md shadow-amber-600/20"
-                onClick={addToCart}
-              >
-                {t('Add to Cart', 'إضافة إلى السلة')} ({formatMoney(product.price * quantity)})
-              </Button>
+              {addedToCart ? (
+                <Link href="/cart" className="flex-1">
+                  <Button
+                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cart-added-btn"
+                  >
+                    <Check className="w-4 h-4" />
+                    {t('Go to Cart', 'الذهاب للسلة')}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  disabled={product.stockQuantity < 1 || addingToCart}
+                  className="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold shadow-md shadow-amber-600/20 flex items-center justify-center gap-2"
+                  onClick={addToCart}
+                >
+                  {addingToCart ? (
+                    <>
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
+                      {t('Adding...', 'جاري الإضافة...')}
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag className="w-4 h-4" />
+                      {t('Add to Cart', 'إضافة إلى السلة')} ({formatMoney(product.price * quantity)})
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </div>

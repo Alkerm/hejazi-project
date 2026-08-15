@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { LanguageProvider } from '@/lib/language-context';
+import { CartProvider } from '@/lib/cart-context';
 import { LayoutWrapper } from '@/components/layout/layout-wrapper';
 
 export const metadata: Metadata = {
@@ -13,10 +14,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ar" dir="rtl">
       <body suppressHydrationWarning>
         <LanguageProvider>
-          <LayoutWrapper>{children}</LayoutWrapper>
+          <CartProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </CartProvider>
         </LanguageProvider>
       </body>
     </html>
   );
 }
+
 
