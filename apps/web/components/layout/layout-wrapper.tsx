@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar } from '@/components/store/navbar';
 import { Footer } from '@/components/store/footer';
+import { AmbientBackground } from '@/components/ui/ambient-background';
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,8 +16,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50/30 text-slate-900">
+      <AmbientBackground />
       <Navbar />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
       <Footer />
     </div>
   );
