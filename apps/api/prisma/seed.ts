@@ -10,7 +10,8 @@ async function main() {
   await prisma.product.deleteMany({});
   await prisma.category.deleteMany({});
 
-  const passwordHash = await bcrypt.hash('Passw0rd!123', 12);
+  const demoPassword = process.env.SEED_USER_PASSWORD || 'HalfLink2026!';
+  const passwordHash = await bcrypt.hash(demoPassword, 12);
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@cosmetics.local' },

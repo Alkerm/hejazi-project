@@ -1,29 +1,31 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { api } from '@/lib/api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/lib/language-context';
 
+const DEFAULT_DEMO_PASS = process.env.NEXT_PUBLIC_DEMO_PASS || 'HalfLink2026!';
+
 const DEMO_CREDENTIALS = {
   customer: {
     email: 'customer@cosmetics.local',
-    password: 'Passw0rd!123',
+    password: DEFAULT_DEMO_PASS,
   },
   admin: {
     email: 'admin@cosmetics.local',
-    password: 'Passw0rd!123',
+    password: DEFAULT_DEMO_PASS,
   },
   driver: {
     email: 'driver@cosmetics.local',
-    password: 'Passw0rd!123',
+    password: DEFAULT_DEMO_PASS,
   },
 } as const;
 
 export function LoginStartCard() {
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState<string | null>(null);
