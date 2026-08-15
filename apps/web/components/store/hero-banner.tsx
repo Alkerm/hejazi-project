@@ -7,11 +7,11 @@ export function HeroBanner() {
   const { t } = useLanguage();
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-cyan-500/15 via-blue-500/10 to-amber-500/10 border border-cyan-500/30 p-8 sm:p-12 text-center space-y-4 backdrop-blur-md shadow-sm transition-all duration-300">
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-cyan-500/20 via-sky-500/15 to-blue-600/20 border border-cyan-500/40 p-8 sm:p-12 text-center space-y-4 backdrop-blur-md shadow-sm transition-all duration-300">
       {/* Vibrant High-Tech Ambient Glow Effects */}
-      <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[500px] rounded-full bg-cyan-500/25 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 right-10 h-48 w-48 rounded-full bg-blue-500/20 blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-amber-400/20 blur-2xl pointer-events-none" />
+      <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[500px] rounded-full bg-cyan-500/30 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 right-10 h-48 w-48 rounded-full bg-blue-500/25 blur-2xl pointer-events-none" />
+      <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-cyan-400/25 blur-2xl pointer-events-none" />
 
       <div className="relative z-10 space-y-3 max-w-3xl mx-auto">
         {/* Clean Vibrant Headline */}
