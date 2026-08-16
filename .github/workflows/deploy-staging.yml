@@ -23,6 +23,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/hejazi
-            git pull origin main
+            sudo chown -R ubuntu:ubuntu /var/www/hejazi
+            git fetch origin main
+            git reset --hard origin/main
             sudo docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build
             sudo docker exec hejazi-staging-api npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma
