@@ -120,7 +120,7 @@ export default function CartPage() {
     }
   };
 
-  if (loading) {
+  if (!cart) {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
         <Toaster position="top-right" richColors />
