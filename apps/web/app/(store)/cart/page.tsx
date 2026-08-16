@@ -132,24 +132,6 @@ export default function CartPage() {
     );
   }
 
-  if (!cart || cart.items.length === 0) {
-    return (
-      <div className="space-y-6 text-center py-16 animate-fade-in max-w-md mx-auto">
-        <Toaster position="top-right" richColors />
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 backdrop-blur-sm p-12 space-y-4">
-          <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto" />
-          <h1 className="text-lg font-bold text-slate-800">{t('Your cart is empty', 'سلة مشترياتك فارغة')}</h1>
-          <p className="text-xs text-slate-500">
-            {t('Explore our certified surveillance cameras and heavy-duty power solutions.', 'استكشف أنظمة الطاقة الشمسية وكاميرات المراقبة المعتمدة لدينا واطلبها الآن.')}
-          </p>
-          <Link href="/products" className="inline-block pt-2">
-            <Button className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black shadow-md shadow-amber-500/20">{t('Explore Energy & Security Products', 'استكشف منتجات الطاقة والمراقبة')}</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   const rawSubtotal = cart.summary.subtotal;
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const subtotalAfterDiscount = Math.max(0, rawSubtotal - discountAmount);
