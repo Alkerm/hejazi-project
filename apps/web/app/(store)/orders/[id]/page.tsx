@@ -55,7 +55,7 @@ export default function OrderDetailsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
         <Toaster position="top-right" richColors />
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-cyan-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500"></div>
         <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">
           {t('Loading order details...', 'جاري تحميل تفاصيل الطلب...')}
         </p>
@@ -98,7 +98,7 @@ export default function OrderDetailsPage() {
             <span
               className={`text-xs font-bold px-3 py-1 rounded-full ${
                 order.status === 'DELIVERED'
-                  ? 'bg-cyan-100 text-cyan-800'
+                  ? 'bg-emerald-100 text-emerald-800'
                   : order.status === 'CANCELLED'
                   ? 'bg-red-100 text-red-800'
                   : 'bg-amber-100 text-amber-800'
@@ -167,10 +167,10 @@ export default function OrderDetailsPage() {
           {order.items.map((item) => (
             <div key={item.id} className="flex justify-between items-center border-b border-slate-100 pb-2 text-xs">
               <div>
-                <p className="font-bold text-slate-800">{item.productNameSnapshot}</p>
+                <p className="font-extrabold text-black">{item.productNameSnapshot}</p>
                 <p className="text-slate-400">{t('Qty:', 'الكمية:')} {item.quantity}</p>
               </div>
-              <span className="font-bold text-slate-800">{formatMoney(item.lineTotal, order.currency)}</span>
+              <span className="font-black text-black">{formatMoney(item.lineTotal, order.currency)}</span>
             </div>
           ))}
         </div>
@@ -191,7 +191,7 @@ export default function OrderDetailsPage() {
           </div>
           <div className="flex justify-between font-bold text-sm text-slate-900 border-t border-slate-200/50 pt-2">
             <span>{t('Total', 'الإجمالي النهائى')}</span>
-            <span className="text-cyan-700 font-extrabold">{formatMoney(order.total, order.currency)}</span>
+            <span className="text-slate-950 font-black">{formatMoney(order.total, order.currency)}</span>
           </div>
         </div>
       </div>

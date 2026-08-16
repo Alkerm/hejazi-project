@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
       <Toaster position="top-right" richColors />
 
       <div className="glass-card rounded-2xl p-8 border border-slate-200/40 w-full space-y-6 text-center">
-        <div className="p-3 bg-cyan-50 rounded-2xl inline-block text-cyan-600 border border-cyan-200/60">
+        <div className="p-3 bg-amber-50 rounded-2xl inline-block text-amber-600 border border-amber-200/60">
           <KeyRound className="w-8 h-8 mx-auto" />
         </div>
 
@@ -45,16 +45,16 @@ export default function ForgotPasswordPage() {
         </div>
 
         {resetToken ? (
-          <div className="bg-cyan-50 border border-cyan-200 p-4 rounded-xl text-left text-xs space-y-3">
-            <div className="flex items-center gap-2 text-cyan-800 font-bold">
-              <CheckCircle2 className="w-4 h-4 text-cyan-600" /> Reset Instructions Generated
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-left text-xs space-y-3">
+            <div className="flex items-center gap-2 text-amber-800 font-bold">
+              <CheckCircle2 className="w-4 h-4 text-amber-600" /> Reset Instructions Generated
             </div>
             <p className="text-slate-600 leading-relaxed">
               [Local Testing Simulation]: Click the link below to set your new password:
             </p>
             <Link
               href={`/reset-password?token=${resetToken}`}
-              className="inline-flex items-center gap-1 font-bold text-cyan-700 underline text-xs"
+              className="inline-flex items-center gap-1 font-bold text-amber-700 underline text-xs"
             >
               Reset Password Now <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -69,11 +69,11 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="e.g. customer@example.com"
-                className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               />
             </div>
 
-            <Button type="submit" disabled={submitting} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs py-3 shadow-md shadow-cyan-600/20">
+            <Button type="submit" disabled={submitting} className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs py-3 shadow-md shadow-amber-500/20">
               {submitting ? 'Sending Instructions...' : 'Send Reset Instructions'}
             </Button>
           </form>
@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
 
         <div className="pt-2 border-t border-slate-100 text-xs text-slate-500">
           Remember your password?{' '}
-          <Link href="/login" className="font-bold text-cyan-600 hover:underline">
+          <Link href="/login" className="font-bold text-amber-600 hover:underline">
             Log in
           </Link>
         </div>

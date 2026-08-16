@@ -24,7 +24,7 @@ export function PolicyPageTemplate({
       </div>
 
       <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">Template</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-500">Official Store Policy</p>
         <h1 className="text-3xl font-bold text-slate-900">{title}</h1>
         <p className="text-sm text-slate-600">{summary}</p>
       </div>

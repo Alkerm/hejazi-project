@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useLanguage } from '@/lib/language-context';
-import { Zap, Sun, Camera, ShieldCheck } from 'lucide-react';
+import { Sun, Camera, ShieldCheck } from 'lucide-react';
 
 export function HeroBanner() {
   const { t } = useLanguage();
@@ -24,12 +24,6 @@ export function HeroBanner() {
       />
 
       <div className="relative z-10 space-y-4 max-w-3xl mx-auto">
-        {/* Top High-Tech Pill Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold tracking-wider">
-          <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-          <span>{t('Certified Solar Energy & Smart Security Systems', 'الوجهة المعتمدة لحلول الطاقة الشمسية وكاميرات المراقبة بالمملكة')}</span>
-        </div>
-
         {/* Clean High-Contrast Headline */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
           {t('Half Link Energy & Security', 'هالف لينـك لأنظمة الطاقة وكاميرات المراقبة')}
@@ -56,7 +50,7 @@ export function HeroBanner() {
           </div>
 
           <div className="flex items-center gap-2 bg-slate-900/90 text-slate-200 border border-slate-700/60 px-3.5 py-2 rounded-xl backdrop-blur-sm shadow-sm">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-amber-400" />
             <span>{t('2-Year Official Warranty', 'ضمان سنتين معتمد بالمملكة')}</span>
           </div>
         </div>

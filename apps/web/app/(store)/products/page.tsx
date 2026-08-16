@@ -86,7 +86,7 @@ export default function ProductsPage() {
               setSearch(e.target.value);
             }}
             placeholder={t('Search products', 'البحث في المنتجات')}
-            className="w-full rounded-xl border border-slate-200 bg-white px-9 py-2 text-xs font-medium placeholder-slate-400 outline-none transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+            className="w-full rounded-xl border border-slate-200 bg-white px-9 py-2 text-xs font-medium placeholder-slate-400 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
           />
           {search && (
             <button
@@ -100,7 +100,7 @@ export default function ProductsPage() {
 
         <div className="flex items-center gap-3">
           <select
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-cyan-500 shadow-2xs"
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-amber-500 shadow-2xs"
             value={sort}
             onChange={(e) => {
               setPage(1);
@@ -117,7 +117,7 @@ export default function ProductsPage() {
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-20 space-y-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-cyan-600"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500"></div>
           <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">
             {t('Loading collection...', 'جاري تحميل المنتجات...')}
           </p>

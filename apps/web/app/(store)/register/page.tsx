@@ -48,7 +48,7 @@ export default function RegisterPage() {
         <h1 className="serif-font text-3xl font-bold text-slate-800">
           {t('Create Account', 'إنشاء حساب جديد')}
         </h1>
-        <p className="text-xs uppercase tracking-widest text-cyan-600 font-extrabold">
+        <p className="text-xs uppercase tracking-widest text-amber-500 font-extrabold">
           {t('Half Link Energy & Security', 'هالف لينـك لأنظمة الطاقة وكاميرات المراقبة')}
         </p>
       </div>
@@ -102,7 +102,7 @@ export default function RegisterPage() {
           <p className="text-xs font-semibold text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200">{message}</p>
         )}
 
-        <Button type="submit" disabled={loading} className="w-full py-3.5 bg-slate-950 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 border border-cyan-500/30 font-bold transition shadow-md">
+        <Button type="submit" disabled={loading} className="w-full py-3.5 bg-slate-950 hover:bg-amber-400 hover:text-slate-950 text-amber-400 border border-amber-500/30 font-bold transition shadow-md">
           {loading ? t('Creating Account...', 'جاري إنشاء الحساب...') : t('Create Account', 'إنشاء الحساب')}
         </Button>
       </form>
@@ -110,7 +110,7 @@ export default function RegisterPage() {
       <div className="border-t border-slate-200/50 pt-4 text-center">
         <p className="text-xs text-slate-500">
           {t('Already registered?', 'لديك حساب بالفعل؟')}{' '}
-          <Link href="/login" className="font-bold text-cyan-600 hover:text-cyan-700 transition">
+          <Link href="/login" className="font-bold text-amber-600 hover:text-amber-700 transition">
             {t('Sign in', 'تسجيل الدخول')}
           </Link>
         </p>

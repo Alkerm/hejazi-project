@@ -64,7 +64,7 @@ export default function ComplaintsContactPage() {
 
             <div className="space-y-4 text-xs text-slate-600">
               <div className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-cyan-600 mt-0.5" />
+                <Mail className="w-4 h-4 text-amber-500 mt-0.5" />
                 <div>
                   <span className="font-bold text-slate-700 block">Email Support</span>
                   <p>{storefrontSettings.email}</p>
@@ -72,7 +72,7 @@ export default function ComplaintsContactPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-cyan-600 mt-0.5" />
+                <Phone className="w-4 h-4 text-amber-500 mt-0.5" />
                 <div>
                   <span className="font-bold text-slate-700 block">Phone Hotline</span>
                   <p>{storefrontSettings.phone}</p>
@@ -80,7 +80,7 @@ export default function ComplaintsContactPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-cyan-600 mt-0.5" />
+                <MapPin className="w-4 h-4 text-amber-500 mt-0.5" />
                 <div>
                   <span className="font-bold text-slate-700 block">Headquarters</span>
                   <p>{storefrontSettings.address}</p>
@@ -99,7 +99,7 @@ export default function ComplaintsContactPage() {
         <div className="md:col-span-2">
           <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-              <MessageSquare className="w-5 h-5 text-cyan-600" />
+              <MessageSquare className="w-5 h-5 text-amber-500" />
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">Submit Support Ticket</h2>
             </div>
 
@@ -112,7 +112,7 @@ export default function ComplaintsContactPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Sara Al-Otaibi"
-                  className="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
 
@@ -124,7 +124,7 @@ export default function ComplaintsContactPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. sara@example.com"
-                  className="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function ComplaintsContactPage() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="e.g. Order #1042 Shipment Delay or Battery Installation Inquiry"
-                className="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 text-xs"
+                className="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-xs"
               />
             </div>
 
@@ -149,11 +149,11 @@ export default function ComplaintsContactPage() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Please describe your question or issue in detail..."
-                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 text-xs"
+                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-xs"
               />
             </div>
 
-            <Button type="submit" disabled={submitting} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2.5 text-xs flex items-center justify-center gap-2 shadow-md shadow-cyan-600/20">
+            <Button type="submit" disabled={submitting} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-2.5 text-xs flex items-center justify-center gap-2 shadow-md shadow-amber-500/20">
               <Send className="w-4 h-4" />
               {submitting ? 'Submitting Ticket...' : 'Send Support Message'}
             </Button>

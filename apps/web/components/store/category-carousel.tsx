@@ -57,7 +57,7 @@ export function CategoryCarousel({
       {/* Header & Scroll Buttons */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-cyan-500" />
+          <Sparkles className="w-4 h-4 text-amber-400" />
           <h2 className="text-xs uppercase tracking-widest font-bold text-slate-800">
             {t('Browse Categories', 'تصفح حسب الفئة')}
           </h2>
@@ -102,7 +102,7 @@ export function CategoryCarousel({
               onClick={() => onSelectCategory(cat.slug)}
               className={`group relative flex-1 min-w-[130px] sm:min-w-[160px] h-40 sm:h-48 rounded-2xl overflow-hidden shadow-sm transition-all duration-300 focus:outline-none ${
                 isSelected
-                  ? 'ring-2 ring-cyan-500 scale-[1.02] shadow-md shadow-cyan-500/15 border-transparent'
+                  ? 'ring-2 ring-amber-500 scale-[1.02] shadow-md shadow-amber-500/20 border-transparent'
                   : 'hover:scale-[1.01] hover:shadow-md border border-slate-200/70 bg-white'
               }`}
             >

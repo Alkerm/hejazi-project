@@ -20,14 +20,14 @@ export function Footer() {
         {/* Brand Info & Entity Details */}
         <div className="space-y-5">
           <Link href="/" className="group inline-flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-cyan-400 font-mono text-base font-bold shadow-sm transition duration-300 group-hover:bg-cyan-500 group-hover:text-slate-950 border border-cyan-500/30">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-amber-400 font-mono text-base font-bold shadow-sm transition duration-300 group-hover:bg-amber-400 group-hover:text-slate-950 border border-amber-500/30">
               HL
             </div>
             <div className="flex flex-col leading-none">
-              <span className="serif-font text-xl font-bold tracking-widest text-slate-900 transition duration-300 group-hover:text-cyan-700">
+              <span className="serif-font text-xl font-bold tracking-widest text-slate-900 transition duration-300 group-hover:text-amber-600">
                 HALF LINK
               </span>
-              <span className="text-[9px] tracking-[0.25em] font-extrabold text-cyan-600 uppercase mt-0.5">
+              <span className="text-[9px] tracking-[0.25em] font-extrabold text-amber-500 uppercase mt-0.5">
                 ENERGY & SECURITY
               </span>
             </div>
@@ -69,7 +69,7 @@ export function Footer() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-slate-600 hover:text-cyan-600 transition-colors duration-200"
+                className="text-slate-600 hover:text-amber-600 transition-colors duration-200"
               >
                 {link.label}
               </Link>

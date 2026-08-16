@@ -93,15 +93,15 @@ export function ProductCard({ product, initialWishlisted = false }: { product: P
           </div>
 
           <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-600">{displayCategory}</p>
-            <h3 className="line-clamp-1 text-sm font-bold text-slate-800 transition-colors group-hover:text-cyan-600">{displayName}</h3>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">{displayCategory}</p>
+            <h3 className="line-clamp-1 text-sm font-extrabold text-black transition-colors">{displayName}</h3>
             <p className="line-clamp-2 text-xs text-slate-500 leading-relaxed min-h-[2.5rem]">{displayDescription}</p>
           </div>
         </div>
 
         <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-100">
-          <p className="text-sm font-extrabold text-slate-900">{formatPrice(product.price)}</p>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-600 group-hover:text-cyan-700 flex items-center gap-1 transition-colors">
+          <p className="text-sm font-black text-black">{formatPrice(product.price)}</p>
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-500 group-hover:text-amber-600 flex items-center gap-1 transition-colors">
             {t('Details', 'التفاصيل')} <span>{t('→', '←')}</span>
           </span>
         </div>

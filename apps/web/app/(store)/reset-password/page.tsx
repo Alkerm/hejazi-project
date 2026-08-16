@@ -51,7 +51,7 @@ export default function ResetPasswordPage() {
       <Toaster position="top-right" richColors />
 
       <div className="glass-card rounded-2xl p-8 border border-slate-200/40 w-full space-y-6 text-center">
-        <div className="p-3 bg-cyan-50 rounded-2xl inline-block text-cyan-600 border border-cyan-200/60">
+        <div className="p-3 bg-amber-50 rounded-2xl inline-block text-amber-600 border border-amber-200/60">
           <ShieldCheck className="w-8 h-8 mx-auto" />
         </div>
 
@@ -61,12 +61,12 @@ export default function ResetPasswordPage() {
         </div>
 
         {success ? (
-          <div className="bg-cyan-50 border border-cyan-200 p-4 rounded-xl text-center text-xs space-y-3">
-            <CheckCircle2 className="w-8 h-8 text-cyan-600 mx-auto" />
-            <p className="text-cyan-800 font-bold text-sm">Password Updated!</p>
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-center text-xs space-y-3">
+            <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+            <p className="text-amber-900 font-bold text-sm">Password Updated!</p>
             <p className="text-slate-600">Your account password has been changed successfully.</p>
             <Link href="/login" className="inline-block pt-2">
-              <Button className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs shadow-md shadow-cyan-600/20">Proceed to Login</Button>
+              <Button className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20">Proceed to Login</Button>
             </Link>
           </div>
         ) : (
@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="At least 6 characters"
-                className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               />
             </div>
 
@@ -93,11 +93,11 @@ export default function ResetPasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter new password"
-                className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               />
             </div>
 
-            <Button type="submit" disabled={submitting || !token} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs py-3 shadow-md shadow-cyan-600/20">
+            <Button type="submit" disabled={submitting || !token} className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs py-3 shadow-md shadow-amber-500/20">
               {submitting ? 'Updating Password...' : 'Save New Password'}
             </Button>
           </form>

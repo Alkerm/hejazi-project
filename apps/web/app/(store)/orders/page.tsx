@@ -33,7 +33,7 @@ export default function OrdersPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-cyan-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500"></div>
         <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">
           {t('Loading orders', 'جاري تحميل قائمة طلباتك')}
         </p>
@@ -54,7 +54,7 @@ export default function OrdersPage() {
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-500 text-xs font-medium space-y-3">
           <Package className="w-10 h-10 text-slate-300 mx-auto" />
           <p>{t('No orders yet.', 'لا توجد طلبات سابقة في حسابك.')}</p>
-          <Link href="/products" className="inline-block text-xs font-bold text-cyan-600 hover:underline">
+          <Link href="/products" className="inline-block text-xs font-bold text-amber-600 hover:underline">
             {t('Explore Energy & Security Catalog', 'تصفح كتالوج المنتجات واطلب الآن')}
           </Link>
         </div>
@@ -89,7 +89,7 @@ export default function OrdersPage() {
 
                   <Link
                     href={`/orders/${order.id}`}
-                    className="flex items-center gap-1 bg-slate-950 text-cyan-400 border border-cyan-500/20 px-3.5 py-1.5 rounded-xl text-xs font-bold hover:bg-cyan-500 hover:text-slate-950 transition"
+                    className="flex items-center gap-1 bg-slate-950 text-amber-400 border border-amber-500/30 px-3.5 py-1.5 rounded-xl text-xs font-bold hover:bg-amber-400 hover:text-slate-950 transition"
                   >
                     {t('Details', 'التفاصيل')}
                     <ChevronRight className={`w-3.5 h-3.5 ${lang === 'ar' ? 'rotate-180' : ''}`} />

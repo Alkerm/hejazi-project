@@ -63,7 +63,7 @@ export const PaymentSelector: React.FC<PaymentSelectorProps> = ({ selectedMethod
               onClick={() => onSelectMethod(opt.id)}
               className={`relative cursor-pointer p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between ${
                 isSelected
-                  ? 'border-cyan-600 bg-cyan-50/60 shadow-sm ring-2 ring-cyan-600/20'
+                  ? 'border-amber-500 bg-amber-50/60 shadow-sm ring-2 ring-amber-500/20'
                   : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs'
               }`}
             >
@@ -76,7 +76,7 @@ export const PaymentSelector: React.FC<PaymentSelectorProps> = ({ selectedMethod
                   </div>
                 </div>
                 {opt.badge && (
-                  <span className="text-[9px] font-extrabold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-cyan-100 text-cyan-800 border border-cyan-200/60 flex-none">
+                  <span className="text-[9px] font-extrabold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200/60 flex-none">
                     {opt.badge}
                   </span>
                 )}
@@ -85,7 +85,7 @@ export const PaymentSelector: React.FC<PaymentSelectorProps> = ({ selectedMethod
               {isSelected && (
                 <motion.div
                   layoutId="selectedIndicator"
-                  className="mt-3 pt-2 border-t border-cyan-200/60 text-xs font-bold text-cyan-700 flex items-center gap-1.5"
+                  className="mt-3 pt-2 border-t border-amber-200/60 text-xs font-bold text-amber-700 flex items-center gap-1.5"
                 >
                   {t('✓ Selected', '✓ تم الاختيار')}
                 </motion.div>

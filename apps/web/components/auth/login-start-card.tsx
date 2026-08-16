@@ -66,13 +66,13 @@ export function LoginStartCard() {
         <h1 className="serif-font text-3xl font-bold text-slate-800">
           {t('Welcome Back', 'مرحباً بك مجدداً')}
         </h1>
-        <p className="text-xs uppercase tracking-widest text-cyan-600 font-extrabold">
+        <p className="text-xs uppercase tracking-widest text-amber-500 font-extrabold">
           {t('Half Link Energy & Security', 'هالف لينـك لأنظمة الطاقة وكاميرات المراقبة')}
         </p>
       </div>
 
       {/* Quick Demo Fill & Auto-Login Buttons */}
-      <div className="rounded-xl border border-cyan-500/20 bg-cyan-50/40 p-4 space-y-2">
+      <div className="rounded-xl border border-amber-500/20 bg-amber-50/40 p-4 space-y-2">
         <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">
           {t('Quick Demo Auto-Login Buttons', 'أزرار الدخول السريع التجريبي')}
         </p>
@@ -101,7 +101,7 @@ export function LoginStartCard() {
           <button 
             type="button" 
             disabled={loading}
-            className="rounded-xl border border-cyan-300 bg-cyan-100 px-3.5 py-2 text-xs font-bold text-cyan-900 hover:bg-cyan-200 active:scale-95 transition shadow-sm cursor-pointer disabled:opacity-50"
+            className="rounded-xl border border-amber-300 bg-amber-100 px-3.5 py-2 text-xs font-bold text-amber-900 hover:bg-amber-200 active:scale-95 transition shadow-sm cursor-pointer disabled:opacity-50"
             onClick={() => handleDemoLogin('driver')}
           >
             🚚 {t('Driver Log', 'دخول السائق')}
@@ -133,7 +133,7 @@ export function LoginStartCard() {
           <p className="text-xs font-semibold text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200">{message}</p>
         )}
 
-        <Button type="submit" disabled={loading} className="w-full py-3.5 bg-slate-950 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 border border-cyan-500/30 font-bold transition shadow-md">
+        <Button type="submit" disabled={loading} className="w-full py-3.5 bg-slate-950 hover:bg-amber-400 hover:text-slate-950 text-amber-400 border border-amber-500/30 font-bold transition shadow-md">
           {loading ? t('Verifying & Logging In...', 'جاري التحقق والدخول...') : t('Sign In', 'تسجيل الدخول')}
         </Button>
       </form>
@@ -141,7 +141,7 @@ export function LoginStartCard() {
       <div className="border-t border-slate-200/50 pt-4 text-center">
         <p className="text-xs text-slate-500">
           {t("Don't have an account?", 'ليس لديك حساب؟')}{' '}
-          <Link href="/register" className="font-bold text-cyan-600 hover:text-cyan-700 transition">
+          <Link href="/register" className="font-bold text-amber-600 hover:text-amber-700 transition">
             {t('Create an account', 'أنشئ حساباً جديداً')}
           </Link>
         </p>

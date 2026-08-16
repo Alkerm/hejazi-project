@@ -120,14 +120,32 @@ export default function CartPage() {
     }
   };
 
-  if (!cart) {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-3">
         <Toaster position="top-right" richColors />
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-cyan-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500"></div>
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest animate-pulse">
           {t('Loading Cart...', 'جاري تحميل السلة...')}
         </p>
+      </div>
+    );
+  }
+
+  if (!cart || cart.items.length === 0) {
+    return (
+      <div className="space-y-6 text-center py-16 animate-fade-in max-w-md mx-auto">
+        <Toaster position="top-right" richColors />
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 backdrop-blur-sm p-12 space-y-4">
+          <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto" />
+          <h1 className="text-lg font-bold text-slate-800">{t('Your cart is empty', 'سلة مشترياتك فارغة')}</h1>
+          <p className="text-xs text-slate-500">
+            {t('Explore our certified surveillance cameras and heavy-duty power solutions.', 'استكشف أنظمة الطاقة الشمسية وكاميرات المراقبة المعتمدة لدينا واطلبها الآن.')}
+          </p>
+          <Link href="/products" className="inline-block pt-2">
+            <Button className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black shadow-md shadow-amber-500/20">{t('Explore Energy & Security Products', 'استكشف منتجات الطاقة والمراقبة')}</Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -160,7 +178,7 @@ export default function CartPage() {
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 backdrop-blur-sm p-12 text-center space-y-4">
           <p className="text-slate-500 text-sm">{t('Your shopping cart is empty.', 'سلة التسوق فارغة.')}</p>
           <Link href="/products" className="inline-block">
-            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold">{t('Explore Energy & Security Products', 'استكشف منتجات الطاقة والمراقبة')}</Button>
+            <Button className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black shadow-md shadow-amber-500/20">{t('Explore Energy & Security Products', 'استكشف منتجات الطاقة والمراقبة')}</Button>
           </Link>
         </div>
       ) : (
@@ -187,7 +205,7 @@ export default function CartPage() {
                       className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center"
                     >
                       <div className="space-y-2">
-                        <h3 className="text-base font-bold text-slate-800">{item.product.name}</h3>
+                        <h3 className="text-base font-extrabold text-black">{item.product.name}</h3>
                         <div className="flex flex-wrap items-center gap-3">
                           <span className="text-xs text-slate-500 font-medium">{formatMoney(item.product.price)} {t('each', 'للقطعة')}</span>
                           <Badge variant={stockStatus.variant}>{stockStatus.label}</Badge>
@@ -213,7 +231,7 @@ export default function CartPage() {
                           </button>
                         </div>
 
-                        <p className="text-sm font-extrabold text-slate-900 min-w-[80px] text-right">
+                        <p className="text-sm font-black text-black min-w-[80px] text-right">
                           {formatMoney(item.lineTotal)}
                         </p>
                         
@@ -236,7 +254,7 @@ export default function CartPage() {
               <PaymentSelector selectedMethod={selectedPayment} onSelectMethod={setSelectedPayment} />
               
               <Button
-                className="w-full py-3.5 bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-lg shadow-cyan-600/25 transition-all text-sm"
+                className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black shadow-lg shadow-amber-500/20 transition-all text-sm"
                 disabled={placing}
                 onClick={placeOrder}
               >
@@ -249,14 +267,14 @@ export default function CartPage() {
             {/* Promo Coupon Code Block */}
             <div className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-3">
               <div className="flex items-center gap-2">
-                <Tag className="w-4 h-4 text-cyan-600" />
+                <Tag className="w-4 h-4 text-amber-500" />
                 <h2 className="text-xs uppercase tracking-widest font-bold text-slate-800">{t('Promotional Coupon', 'كوبون الخصم')}</h2>
               </div>
 
               {appliedCoupon ? (
-                <div className="flex items-center justify-between bg-cyan-50 border border-cyan-200 p-3 rounded-xl text-xs text-cyan-800 font-medium">
+                <div className="flex items-center justify-between bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-900 font-medium">
                   <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-cyan-600" />
+                    <Check className="w-4 h-4 text-amber-600" />
                     <span>{t('Coupon', 'كوبون')} <strong>{appliedCoupon.code}</strong> {t('Applied', 'مطبق')}</span>
                   </div>
                   <button
@@ -273,9 +291,9 @@ export default function CartPage() {
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value)}
                     placeholder={t('Enter coupon code (e.g. HALFLINK)', 'أدخل رمز الكوبون (مثال: HALFLINK)')}
-                    className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 uppercase font-semibold"
+                    className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 uppercase font-semibold"
                   />
-                  <Button type="submit" disabled={applyingCoupon} className="text-xs bg-slate-950 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 border border-cyan-500/30 px-4 font-bold">
+                  <Button type="submit" disabled={applyingCoupon} className="text-xs bg-slate-950 text-amber-400 hover:bg-amber-400 hover:text-slate-950 border border-amber-500/30 px-4 font-bold">
                     {applyingCoupon ? '...' : t('Apply', 'تطبيق')}
                   </Button>
                 </form>
@@ -298,7 +316,7 @@ export default function CartPage() {
                 </div>
 
                 {appliedCoupon && (
-                  <div className="flex justify-between text-cyan-600 font-semibold">
+                  <div className="flex justify-between text-amber-600 font-semibold">
                     <span>{t('Discount', 'الخصم')} ({appliedCoupon.code})</span>
                     <span>-{formatMoney(discountAmount)}</span>
                   </div>
@@ -314,7 +332,7 @@ export default function CartPage() {
                 </div>
                 <div className="border-t border-slate-200/50 pt-3 flex justify-between text-sm font-bold text-slate-800">
                   <span>{t('Total Due', 'الإجمالي المستحق')}</span>
-                  <span className="text-cyan-700 font-extrabold">{formatMoney(total)}</span>
+                  <span className="text-slate-950 font-black">{formatMoney(total)}</span>
                 </div>
               </div>
 

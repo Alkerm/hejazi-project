@@ -91,14 +91,14 @@ export function Navbar() {
         {/* Brand Logo */}
         <div className="flex items-center gap-4">
           <Link href="/" className="group flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-cyan-400 font-mono text-base font-bold shadow-sm transition duration-300 group-hover:bg-cyan-500 group-hover:text-slate-950 group-hover:scale-105 border border-cyan-500/30">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-amber-400 font-mono text-base font-bold shadow-sm transition duration-300 group-hover:bg-amber-400 group-hover:text-slate-950 group-hover:scale-105 border border-amber-500/30">
               HL
             </div>
             <div className="flex flex-col leading-none">
-              <span className="serif-font text-xl font-bold tracking-widest text-slate-900 transition duration-300 group-hover:text-cyan-700">
+              <span className="serif-font text-xl font-bold tracking-widest text-slate-900 transition duration-300 group-hover:text-amber-600">
                 HALF LINK
               </span>
-              <span className="text-[9px] tracking-[0.25em] font-extrabold text-cyan-600 uppercase mt-0.5">
+              <span className="text-[9px] tracking-[0.25em] font-extrabold text-amber-500 uppercase mt-0.5">
                 ENERGY & SECURITY
               </span>
             </div>
@@ -121,7 +121,7 @@ export function Navbar() {
           {/* Products Direct Link */}
           <Link
             href="/products"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/90 bg-slate-50/80 text-xs font-bold text-slate-800 hover:bg-cyan-500 hover:text-slate-950 hover:border-cyan-500 transition shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/90 bg-slate-50/80 text-xs font-bold text-slate-800 hover:bg-amber-400 hover:text-slate-950 hover:border-amber-400 transition shadow-2xs"
           >
             <Grid className="w-3.5 h-3.5" />
             <span>{t('Products', 'المنتجات')}</span>
@@ -131,7 +131,7 @@ export function Navbar() {
             type="button"
             suppressHydrationWarning
             onClick={toggleLanguage}
-            className="relative p-2 text-slate-700 hover:text-cyan-600 transition-colors rounded-full hover:bg-cyan-50/60"
+            className="relative p-2 text-slate-700 hover:text-amber-600 transition-colors rounded-full hover:bg-amber-50/60"
             title={lang === 'ar' ? 'Switch to English' : 'التحويل للعربية'}
           >
             <Globe className="w-5 h-5 stroke-[1.75]" />
@@ -146,14 +146,14 @@ export function Navbar() {
               <Link
                 ref={cartRef}
                 href="/cart"
-                className={`relative p-2 text-slate-700 hover:text-cyan-600 transition-colors rounded-full hover:bg-cyan-50/60 ${
-                  currentPath.startsWith('/cart') ? 'text-cyan-600 bg-cyan-50/80' : ''
+                className={`relative p-2 text-slate-700 hover:text-amber-600 transition-colors rounded-full hover:bg-amber-50/60 ${
+                  currentPath.startsWith('/cart') ? 'text-amber-600 bg-amber-50/80' : ''
                 }`}
                 title={t('Cart', 'السلة')}
               >
                 <ShoppingBag className="w-5 h-5 stroke-[1.75]" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-cyan-600 text-[9px] font-extrabold text-white shadow-xs cart-badge-pop">
+                  <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-slate-950 shadow-xs cart-badge-pop">
                     {cartCount}
                   </span>
                 )}
@@ -176,8 +176,8 @@ export function Navbar() {
               {isSignedIn && (
                 <Link
                   href="/profile"
-                  className={`p-2 text-slate-700 hover:text-cyan-600 transition-colors rounded-full hover:bg-cyan-50/60 ${
-                    currentPath.startsWith('/profile') ? 'text-cyan-600 bg-cyan-50/80' : ''
+                  className={`p-2 text-slate-700 hover:text-amber-600 transition-colors rounded-full hover:bg-amber-50/60 ${
+                    currentPath.startsWith('/profile') ? 'text-amber-600 bg-amber-50/80' : ''
                   }`}
                   title={t('Profile', 'حسابي')}
                 >
@@ -199,10 +199,10 @@ export function Navbar() {
             </button>
           ) : !isLoginPage ? (
             <div className="flex items-center gap-3">
-              <Link href="/login" className="text-xs font-semibold text-slate-700 hover:text-cyan-600 transition-colors">
+              <Link href="/login" className="text-xs font-bold text-slate-700 hover:text-amber-600 transition-colors">
                 {t('Login', 'دخول')}
               </Link>
-              <Link href="/register" className="rounded-full bg-slate-950 px-4 py-1.5 text-xs font-bold text-cyan-400 border border-cyan-500/30 shadow-sm transition hover:bg-cyan-500 hover:text-slate-950">
+              <Link href="/register" className="rounded-full bg-slate-950 px-4 py-1.5 text-xs font-bold text-amber-400 border border-amber-500/30 shadow-sm transition hover:bg-amber-400 hover:text-slate-950">
                 {t('Register', 'تسجيل حساب')}
               </Link>
             </div>
