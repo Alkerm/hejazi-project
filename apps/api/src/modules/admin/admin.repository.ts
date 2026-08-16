@@ -252,6 +252,16 @@ export const getDashboardSummaryCountsRepo = async (lowStockThreshold: number) =
 
 export const listCategoriesRepo = () => prisma.category.findMany({ orderBy: { name: 'asc' } });
 
+export const findCategoryBySlugOrNameRepo = (slug: string, name: string) =>
+  prisma.category.findFirst({
+    where: {
+      OR: [{ slug }, { name }],
+    },
+  });
+
+export const createCategoryRepo = (data: { name: string; slug: string }) =>
+  prisma.category.create({ data });
+
 export const listAdminAuditLogsRepo = (skip: number, take: number) =>
   prisma.$transaction([
     prisma.adminAuditLog.findMany({

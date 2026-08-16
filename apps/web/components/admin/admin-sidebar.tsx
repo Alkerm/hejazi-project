@@ -92,7 +92,7 @@ export function AdminSidebar({ user, isOpen, onClose }: AdminSidebarProps) {
   const adminName = user
     ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Admin User'
     : 'Admin User';
-  const adminEmail = user?.email || 'admin@cosmetics.local';
+  const adminEmail = user?.email || 'admin@halflink.sa';
 
   return (
     <>

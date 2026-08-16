@@ -8,9 +8,11 @@ import { slugify } from '../../utils/slug';
 import { invalidateProductCaches } from '../products/products.service';
 import {
   createAuditLog,
+  createCategoryRepo,
   createProductRepo,
   deleteProductRepo,
   findAdminOrderByIdRepo,
+  findCategoryBySlugOrNameRepo,
   findProductByIdRepo,
   getDashboardSummaryCountsRepo,
   getLowStockProductsRepo,
@@ -424,6 +426,40 @@ export const getAdminSalesAnalytics = async (days: number) => {
 };
 
 export const getAdminCategories = () => listCategoriesRepo();
+
+export const createAdminCategory = async (
+  adminUserId: string,
+  payload: {
+    name: string;
+    arabicName?: string | null;
+    slug?: string;
+  },
+) => {
+  const generatedSlug = (payload.slug?.trim() || slugify(payload.name)).toLowerCase();
+
+  const existing = await findCategoryBySlugOrNameRepo(generatedSlug, payload.name.trim());
+  if (existing) {
+    throw new AppError('Category with this name or slug already exists', 409, 'CATEGORY_EXISTS');
+  }
+
+  const category = await createCategoryRepo({
+    name: payload.name.trim(),
+    slug: generatedSlug,
+  });
+
+  await createAuditLog({
+    adminUserId,
+    action: 'CREATE_CATEGORY',
+    entityType: 'CATEGORY',
+    entityId: category.id,
+    metadata: { name: payload.name, arabicName: payload.arabicName, slug: generatedSlug },
+  });
+
+  return {
+    ...category,
+    arabicName: payload.arabicName ?? null,
+  };
+};
 
 export const getAdminProductDetails = async (productId: string) => {
   const product = await findProductByIdRepo(productId);

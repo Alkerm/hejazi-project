@@ -179,6 +179,11 @@ export const api = {
 
   adminSummary: () => request<AdminDashboardSummary>('/admin/dashboard/summary'),
   adminCategories: () => request<Category[]>('/admin/categories'),
+  adminCreateCategory: (payload: { name: string; arabicName?: string | null; slug?: string }) =>
+    request<Category>('/admin/categories', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   adminProducts: (query = '') => request<Paginated<Product>>(`/admin/products${query}`),
   adminProductDetails: (id: string) => request<Product>(`/admin/products/${id}`),
   adminCreateProduct: (payload: {
@@ -186,6 +191,7 @@ export const api = {
     arabicName?: string | null;
     slug?: string;
     description: string;
+    arabicDescription?: string | null;
     price: number;
     stockQuantity: number;
     sku?: string | null;
@@ -197,8 +203,8 @@ export const api = {
     manufacturer?: string | null;
     importerResponsible?: string | null;
     sfdaReference?: string | null;
-    batchNumberRequired: boolean;
-    expiryDateRequired: boolean;
+    batchNumberRequired?: boolean;
+    expiryDateRequired?: boolean;
     productStatus: 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
     imageUrl: string;
     isActive: boolean;
@@ -215,6 +221,7 @@ export const api = {
       arabicName?: string | null;
       slug?: string;
       description: string;
+      arabicDescription?: string | null;
       price: number;
       stockQuantity: number;
       sku?: string | null;
@@ -226,8 +233,8 @@ export const api = {
       manufacturer?: string | null;
       importerResponsible?: string | null;
       sfdaReference?: string | null;
-      batchNumberRequired: boolean;
-      expiryDateRequired: boolean;
+      batchNumberRequired?: boolean;
+      expiryDateRequired?: boolean;
       productStatus: 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
       imageUrl: string;
       isActive: boolean;

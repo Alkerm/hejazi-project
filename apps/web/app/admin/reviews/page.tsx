@@ -64,7 +64,7 @@ export default function AdminReviewsPage() {
             </h1>
           </div>
           <p className="text-xs text-slate-500 uppercase tracking-widest">
-            {t('Approve or hide customer cosmetic reviews', 'اعتماد أو إخفاء التقييمات وآراء العملاء على المنتجات')}
+            {t('Approve or hide customer product reviews', 'اعتماد أو إخفاء التقييمات وآراء العملاء على المنتجات')}
           </p>
         </div>
       </div>

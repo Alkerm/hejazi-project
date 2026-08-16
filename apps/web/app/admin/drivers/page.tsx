@@ -540,7 +540,7 @@ export default function AdminDriversPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="driver.sami@cosmetics.local"
+                placeholder="driver.sami@halflink.sa"
                 required
               />
 

@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { requireAdmin } from '../../middleware/auth';
 import { ok } from '../../utils/response';
 import {
+  adminCreateCategorySchema,
   adminListOrdersQuerySchema,
   adminListProductsQuerySchema,
   adminAuditLogsQuerySchema,
@@ -13,6 +14,7 @@ import {
   adminUpdateOrderStatusSchema,
 } from './admin.schemas';
 import {
+  createAdminCategory,
   createAdminProduct,
   deleteAdminProduct,
   getAdminCategories,
@@ -39,6 +41,13 @@ export const adminCategoriesHandler = async (request: FastifyRequest, reply: Fas
   await requireAdmin(request, reply);
   const data = await getAdminCategories();
   return ok(reply, data);
+};
+
+export const adminCategoryCreateHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAdmin(request, reply);
+  const payload = adminCreateCategorySchema.parse(request.body);
+  const data = await createAdminCategory(request.auth!.userId, payload);
+  return ok(reply, data, 201);
 };
 
 export const adminProductsListHandler = async (request: FastifyRequest, reply: FastifyReply) => {

@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import {
   adminAuditLogsHandler,
   adminCategoriesHandler,
+  adminCategoryCreateHandler,
   adminDashboardSummaryHandler,
   adminLowStockHandler,
   adminOrderDetailsHandler,
@@ -19,6 +20,7 @@ import {
 export const adminRoutes = async (app: FastifyInstance) => {
   app.get('/dashboard/summary', adminDashboardSummaryHandler);
   app.get('/categories', adminCategoriesHandler);
+  app.post('/categories', adminCategoryCreateHandler);
 
   app.get('/products', adminProductsListHandler);
   app.post('/products', adminProductCreateHandler);

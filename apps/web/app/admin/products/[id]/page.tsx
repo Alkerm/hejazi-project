@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Sparkles, ArrowRight, ArrowLeft, CheckCircle2, Globe } from 'lucide-react';
+import { Sparkles, ArrowRight, ArrowLeft, CheckCircle2, Globe, PlusCircle } from 'lucide-react';
 import { api } from '@/lib/api';
+import { Category } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CreateCategoryModal } from '@/components/admin/create-category-modal';
 import { useLanguage } from '@/lib/language-context';
 
 type ProductStatus = 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
@@ -20,16 +22,8 @@ const initialForm = {
   stockQuantity: 0,
   sku: '',
   brand: '',
-  ingredients: '',
-  warnings: '',
-  usageInstructions: '',
   countryOfOrigin: '',
-  manufacturer: '',
-  importerResponsible: '',
-  sfdaReference: '',
-  batchNumberRequired: false,
-  expiryDateRequired: false,
-  productStatus: 'DRAFT' as ProductStatus,
+  productStatus: 'APPROVED' as ProductStatus,
   imageUrl: '',
   isActive: true,
   categoryId: '',
@@ -37,12 +31,13 @@ const initialForm = {
 
 export default function AdminEditProductPage() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, formatCategoryName } = useLanguage();
   const params = useParams<{ id: string }>();
   const productId = Array.isArray(params.id) ? params.id[0] : params.id;
   const [stage, setStage] = useState<1 | 2>(1);
-  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState(initialForm);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -56,7 +51,7 @@ export default function AdminEditProductPage() {
 
     Promise.all([api.adminCategories(), api.adminProductDetails(productId)])
       .then(([categoryRes, product]) => {
-        setCategories(categoryRes.map((c) => ({ id: c.id, name: c.name })));
+        setCategories(categoryRes);
         setForm({
           name: product.name,
           arabicName: product.arabicName ?? '',
@@ -67,16 +62,8 @@ export default function AdminEditProductPage() {
           stockQuantity: product.stockQuantity,
           sku: product.sku ?? '',
           brand: product.brand ?? '',
-          ingredients: product.ingredients ?? '',
-          warnings: product.warnings ?? '',
-          usageInstructions: product.usageInstructions ?? '',
           countryOfOrigin: product.countryOfOrigin ?? '',
-          manufacturer: product.manufacturer ?? '',
-          importerResponsible: product.importerResponsible ?? '',
-          sfdaReference: product.sfdaReference ?? '',
-          batchNumberRequired: product.batchNumberRequired ?? false,
-          expiryDateRequired: product.expiryDateRequired ?? false,
-          productStatus: product.productStatus ?? 'DRAFT',
+          productStatus: product.productStatus ?? 'APPROVED',
           imageUrl: product.imageUrl,
           isActive: product.isActive,
           categoryId: product.categoryId ?? product.category.id,
@@ -85,6 +72,14 @@ export default function AdminEditProductPage() {
       .catch((e: Error) => setMessage(e.message))
       .finally(() => setLoading(false));
   }, [productId]);
+
+  const handleCategoryCreated = (newCat: Category) => {
+    setCategories((prev) => {
+      if (prev.some((c) => c.id === newCat.id)) return prev;
+      return [...prev, newCat];
+    });
+    setForm((prev) => ({ ...prev, categoryId: newCat.id }));
+  };
 
   const submit = async () => {
     if (!productId) return;
@@ -115,6 +110,13 @@ export default function AdminEditProductPage() {
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-12 animate-fade-in">
+      {/* Category Creation Modal */}
+      <CreateCategoryModal
+        isOpen={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        onSuccess={handleCategoryCreated}
+      />
+
       {/* Title */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -122,7 +124,7 @@ export default function AdminEditProductPage() {
             {t('Edit Product', 'تعديل المنتج')}
           </h2>
           <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">
-            {t('Two-stage product editing workflow', 'تعديل بيانات المنتج عبر مرحلتين (إنجليزية ثم عربية)')}
+            {t('Update product specifications in English & Arabic', 'تعديل مواصفات وبيانات المنتج باللغتين الإنجليزية والعربية')}
           </p>
         </div>
       </div>
@@ -141,7 +143,7 @@ export default function AdminEditProductPage() {
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] text-slate-950 font-extrabold">
             1
           </span>
-          <span>{t('Stage 1: English Info & Details', 'المرحلة 1: البيانات بالإنجليزية والأسعار')}</span>
+          <span>{t('Stage 1: English Info & Specs', 'المرحلة 1: البيانات والمواصفات بالإنجليزية')}</span>
         </button>
 
         <button
@@ -156,17 +158,17 @@ export default function AdminEditProductPage() {
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] text-slate-950 font-extrabold">
             2
           </span>
-          <span>{t('Stage 2: Arabic Info & Localization', 'المرحلة 2: البيانات باللغة العربية والترجمة')}</span>
+          <span>{t('Stage 2: Arabic Info & Localization', 'المرحلة 2: البيانات والترجمة باللغة العربية')}</span>
         </button>
       </div>
 
-      {/* STAGE 1: ENGLISH DETAILS */}
+      {/* STAGE 1: ENGLISH DETAILS & SPECS */}
       {stage === 1 && (
         <div className="glass-card rounded-2xl p-6 border border-slate-200/60 bg-white space-y-6 shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <Globe className="w-5 h-5 text-amber-500" />
             <h3 className="font-bold text-slate-800 text-sm">
-              {t('Stage 1: English Name, Category, Price & Details', 'المرحلة 1: الاسم بالإنجليزية، الفئة، السعر والمواصفات')}
+              {t('Stage 1: English Name, Category, Price & Specifications', 'المرحلة 1: الاسم بالإنجليزية، الفئة، السعر والمواصفات الفنية')}
             </h3>
           </div>
 
@@ -176,6 +178,7 @@ export default function AdminEditProductPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
+              isRequired
             />
 
             <Input
@@ -183,6 +186,7 @@ export default function AdminEditProductPage() {
               value={form.slug}
               onChange={(e) => setForm({ ...form, slug: e.target.value })}
               required
+              isRequired
             />
 
             <Input
@@ -191,6 +195,7 @@ export default function AdminEditProductPage() {
               value={form.price}
               onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
               required
+              isRequired
             />
 
             <Input
@@ -199,18 +204,21 @@ export default function AdminEditProductPage() {
               value={form.stockQuantity}
               onChange={(e) => setForm({ ...form, stockQuantity: Number(e.target.value) })}
               required
+              isRequired
             />
 
             <Input
-              label={t('SKU', 'رمز المنتج (SKU)')}
+              label={t('SKU (Stock Keeping Unit)', 'رمز المنتج (SKU)')}
               value={form.sku}
               onChange={(e) => setForm({ ...form, sku: e.target.value })}
+              placeholder="HL-SOL-550W"
             />
 
             <Input
-              label={t('Brand Name', 'اسم الماركة / العلامة التجارية')}
+              label={t('Brand / Manufacturer', 'الماركة / الشركة المصنعة')}
               value={form.brand}
               onChange={(e) => setForm({ ...form, brand: e.target.value })}
+              placeholder="Half Link Energy"
             />
 
             <Input
@@ -218,28 +226,43 @@ export default function AdminEditProductPage() {
               value={form.imageUrl}
               onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
               required
+              isRequired
             />
 
-            <label className="flex flex-col gap-1 text-xs font-semibold text-slate-700">
-              {t('Category', 'الفئة')}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-1 text-xs font-bold text-slate-700">
+                  <span>{t('Category', 'الفئة والتصنيف')}</span>
+                  <span className="text-rose-500 font-extrabold">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryModal(true)}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 hover:text-amber-700 hover:underline transition cursor-pointer"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span>{t('+ Add Category', '+ إضافة فئة جديدة')}</span>
+                </button>
+              </div>
               <select
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs focus:ring-2 focus:ring-amber-500/20"
+                className="rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition"
                 value={form.categoryId}
                 onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                required
               >
                 <option value="">{t('Select Category', 'اختر الفئة')}</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.name}
+                    {formatCategoryName(cat)} ({cat.name})
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
 
-            <label className="flex flex-col gap-1 text-xs font-semibold text-slate-700">
+            <label className="flex flex-col gap-1.5 text-xs font-bold text-slate-700">
               {t('Product Status', 'حالة المنتج')}
               <select
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs focus:ring-2 focus:ring-amber-500/20"
+                className="rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition"
                 value={form.productStatus}
                 onChange={(e) =>
                   setForm({
@@ -248,56 +271,45 @@ export default function AdminEditProductPage() {
                   })
                 }
               >
-                <option value="DRAFT">{t('Draft', 'مسودة')}</option>
-                <option value="COMPLIANCE_REVIEW">{t('Compliance Review', 'قيد مراجعة الغذاء والدواء')}</option>
-                <option value="APPROVED">{t('Approved for Sale', 'معتمد للبيع')}</option>
-                <option value="INACTIVE">{t('Inactive', 'غير نشط')}</option>
+                <option value="APPROVED">{t('Approved for Sale (معتمد للبيع)', 'معتمد للبيع ومتاح بالمتجر')}</option>
+                <option value="DRAFT">{t('Draft (مسودة)', 'مسودة')}</option>
+                <option value="COMPLIANCE_REVIEW">{t('Technical / Quality Review (مراجعة الجودة والمواصفات)', 'قيد المراجعة الفنية والجودة')}</option>
+                <option value="INACTIVE">{t('Inactive (غير نشط)', 'غير نشط')}</option>
               </select>
             </label>
-
-            <div className="flex flex-col justify-center gap-2 pt-2">
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                <input
-                  type="checkbox"
-                  checked={form.isActive}
-                  onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                  className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                />
-                {t('Active Product (Visible on Storefront)', 'منتج نشط (يظهر بالمتجر)')}
-              </label>
-            </div>
-
-            <label className="col-span-full flex flex-col gap-1 text-xs font-semibold text-slate-700">
-              {t('Description (English)', 'الوصف باللغة الإنجليزية')}
-              <textarea
-                className="rounded-xl border border-slate-200 p-3 text-xs focus:ring-2 focus:ring-amber-500/20"
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                rows={3}
-              />
-            </label>
-
-            <label className="col-span-full flex flex-col gap-1 text-xs font-semibold text-slate-700">
-              {t('Full Ingredients (English/Formula)', 'المكونات الكاملة')}
-              <textarea
-                className="rounded-xl border border-slate-200 p-3 text-xs focus:ring-2 focus:ring-amber-500/20"
-                value={form.ingredients}
-                onChange={(e) => setForm({ ...form, ingredients: e.target.value })}
-                rows={2}
-              />
-            </label>
-
-            <Input
-              label={t('SFDA Reference Number', 'رقم التسجيل بهيئة الغذاء والدواء (SFDA)')}
-              value={form.sfdaReference}
-              onChange={(e) => setForm({ ...form, sfdaReference: e.target.value })}
-            />
 
             <Input
               label={t('Country of Origin', 'بلد الصنع / المنشأ')}
               value={form.countryOfOrigin}
               onChange={(e) => setForm({ ...form, countryOfOrigin: e.target.value })}
+              placeholder="Saudi Arabia"
             />
+
+            <div className="flex flex-col justify-center gap-2 pt-2 md:col-span-2">
+              <label className="flex items-center gap-2.5 text-xs font-bold text-slate-800 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={form.isActive}
+                  onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                  className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4"
+                />
+                <span>{t('Active Product (Visible on Storefront)', 'منتج نشط (يظهر بالمتجر للعملاء)')}</span>
+              </label>
+            </div>
+
+            <label className="col-span-full flex flex-col gap-1.5 text-xs font-bold text-slate-700">
+              <span className="flex items-center gap-1">
+                <span>{t('Description & Specifications (English)', 'الوصف والمواصفات باللغة الإنجليزية')}</span>
+                <span className="text-rose-500 font-extrabold">*</span>
+              </span>
+              <textarea
+                className="rounded-xl border border-slate-300 p-3.5 text-xs focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition"
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                rows={4}
+                required
+              />
+            </label>
           </div>
 
           <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
@@ -324,7 +336,7 @@ export default function AdminEditProductPage() {
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
               <Sparkles className="w-5 h-5 text-emerald-500" />
               <h3 className="font-bold text-slate-800 text-sm">
-                {t('Stage 2: Arabic Name & Description', 'المرحلة 2: اسم المنتج والوصف باللغة العربية')}
+                {t('Stage 2: Arabic Name & Description', 'المرحلة 2: اسم المنتج والوصف والمواصفات باللغة العربية')}
               </h3>
             </div>
 
@@ -333,18 +345,18 @@ export default function AdminEditProductPage() {
                 label={t('Arabic Product Name (اسم المنتج باللغة العربية)', 'اسم المنتج باللغة العربية')}
                 value={form.arabicName}
                 onChange={(e) => setForm({ ...form, arabicName: e.target.value })}
-                placeholder="مثال: سيروم الأرغان الملكي لتجديد البشرة"
+                placeholder="مثال: لوح طاقة شمسية مونوكريستال 550 واط عالي الكفاءة"
                 required
+                isRequired
               />
 
-              <label className="flex flex-col gap-1 text-xs font-semibold text-slate-700">
-                {t('Arabic Description (وصف المنتج باللغة العربية)', 'الوصف والتعليمات باللغة العربية')}
+              <label className="flex flex-col gap-1.5 text-xs font-bold text-slate-700">
+                {t('Arabic Description (الوصف والمواصفات الفنية باللغة العربية)', 'الوصف والمواصفات الفنية باللغة العربية')}
                 <textarea
-                  className="rounded-xl border border-slate-200 p-3 text-xs focus:ring-2 focus:ring-emerald-500/20"
+                  className="rounded-xl border border-slate-300 p-3.5 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
                   value={form.arabicDescription}
                   onChange={(e) => setForm({ ...form, arabicDescription: e.target.value })}
                   rows={4}
-                  placeholder="سيروم فاخر يحتوي على خلاصات الأرغان العضوية وزيوت حمض الهيالورونيك لنضارة فائقة..."
                 />
               </label>
 

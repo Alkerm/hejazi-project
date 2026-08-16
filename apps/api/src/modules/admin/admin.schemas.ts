@@ -72,3 +72,10 @@ export const adminAuditLogsQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   pageSize: z.coerce.number().int().positive().max(50).default(20),
 });
+
+export const adminCreateCategorySchema = z.object({
+  name: z.string().min(2).max(120),
+  arabicName: z.string().max(120).optional().nullable(),
+  slug: z.string().min(2).max(140).optional(),
+});
+

@@ -16,11 +16,15 @@ interface LanguageContextType {
 }
 
 const CATEGORY_TRANSLATIONS: Record<string, string> = {
-  skincare: 'العناية بالبشرة',
-  makeup: 'المكياج والتجميل',
-  fragrance: 'العطور الفاخرة',
-  haircare: 'العناية بالشعر',
-  'body-bath': 'الجسم والاستحمام',
+  'monitoring-cameras': 'كاميرات المراقبة والأنظمة الأمنية',
+  'power-batteries': 'بطاريات الطاقة والتخزين',
+  'solar-energy': 'أنظمة الطاقة الشمسية',
+  'power-accessories': 'الملحقات والمحولات والكابلات',
+  'inverters': 'محولات الطاقة والإنفرتر',
+  'smart-security': 'الأجهزة والحساسات الذكية',
+  'mounting-structures': 'هياكل وقواعد التثبيت',
+  'solar-panels': 'ألواح الطاقة الشمسية',
+  'cctv-systems': 'أنظمة المراقبة CCTV',
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);

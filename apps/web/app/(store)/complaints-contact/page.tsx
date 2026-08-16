@@ -64,18 +64,24 @@ export default function ComplaintsContactPage() {
 
             <div className="space-y-4 text-xs text-slate-600">
               <div className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-amber-500 mt-0.5" />
+                <Mail className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                 <div>
                   <span className="font-bold text-slate-700 block">Email Support</span>
-                  <p>{storefrontSettings.email}</p>
+                  <a href={`mailto:${storefrontSettings.email}`} className="text-slate-800 hover:text-amber-600 underline">
+                    {storefrontSettings.email}
+                  </a>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-amber-500 mt-0.5" />
+                <Phone className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                 <div>
-                  <span className="font-bold text-slate-700 block">Phone Hotline</span>
-                  <p>{storefrontSettings.phone}</p>
+                  <span className="font-bold text-slate-700 block">Phone Hotline / WhatsApp</span>
+                  <a href={`tel:${storefrontSettings.phoneClean}`} className="text-slate-800 hover:text-amber-600">
+                    <span dir="ltr" className="inline-block font-mono font-bold">
+                      {storefrontSettings.phone}
+                    </span>
+                  </a>
                 </div>
               </div>
 
