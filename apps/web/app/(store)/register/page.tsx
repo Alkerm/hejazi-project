@@ -93,8 +93,14 @@ export default function RegisterPage() {
       }
       case 'phone': {
         const val = (value as string).trim();
-        if (val && !PHONE_REGEX.test(val.replace(/\s+/g, ''))) {
-          return t('Please enter a valid phone number (e.g. +966 50 123 4567)', 'يرجى إدخال رقم جوال صحيح (مثال: +966 50 123 4567)');
+        if (!val) {
+          return t('Phone number is required', 'رقم الجوال مطلوب');
+        }
+        if (!PHONE_REGEX.test(val.replace(/\s+/g, ''))) {
+          return t(
+            'Please enter a valid phone number (e.g. \u2066+966 50 123 4567\u2069)',
+            'يرجى إدخال رقم جوال صحيح (مثال: \u2066+966 50 123 4567\u2069)'
+          );
         }
         return undefined;
       }
@@ -305,22 +311,19 @@ export default function RegisterPage() {
           autoComplete="email"
         />
 
-        {/* Phone Field (Optional) */}
+        {/* Phone Field (Required) */}
         <Input
           label={t('Phone Number', 'رقم الجوال')}
-          badge={
-            <span className="text-[10px] font-normal text-slate-400">
-              ({t('Optional', 'اختياري')})
-            </span>
-          }
           type="tel"
           value={form.phone}
           onChange={(e) => handleChange('phone', e.target.value)}
           onBlur={() => handleBlur('phone')}
-          placeholder="+966 50 000 0000"
+          placeholder="050 000 0000 / +966 50 000 0000"
+          required
+          isRequired
           error={touched.phone ? errors.phone : undefined}
           leftIcon={<Phone className="w-4 h-4 text-slate-400" />}
-          className="bg-white/80"
+          className="bg-white/80 font-mono"
           autoComplete="tel"
         />
 
