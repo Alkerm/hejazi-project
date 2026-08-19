@@ -26,8 +26,7 @@ jobs:
             sudo chown -R ubuntu:ubuntu /var/www/hejazi
             git fetch origin main
             git reset --hard origin/main
-            sudo docker builder prune -af || true
-            sudo docker image prune -af || true
             sudo docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build
             sudo docker exec hejazi-staging-api npx prisma db push --schema=apps/api/prisma/schema.prisma --accept-data-loss
             sudo docker image prune -f || true
+            sudo docker builder prune --filter "until=48h" --keep-storage 1GB -f || true

@@ -1,13 +1,16 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy workspace setup
+# Copy workspace setup and package manifests for caching
 COPY package*.json ./
 COPY tsconfig.base.json ./
 COPY packages ./packages
-COPY apps/web ./apps/web
+COPY apps/web/package*.json ./apps/web/
 
 RUN npm ci
+
+# Copy application source code after dependencies are installed
+COPY apps/web ./apps/web
 
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}

@@ -1,15 +1,19 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy root workspace configs
+# Copy root workspace configs and manifests for caching
 COPY package*.json ./
 COPY tsconfig.base.json ./
 COPY packages ./packages
-COPY apps/api ./apps/api
+COPY apps/api/package*.json ./apps/api/
+COPY apps/api/prisma ./apps/api/prisma
 
 # Install dependencies and generate prisma
 RUN npm ci
 RUN npm run prisma:generate --workspace=@cosmetics/api
+
+# Copy API source code after dependencies are installed
+COPY apps/api ./apps/api
 
 FROM node:20-alpine AS runner
 WORKDIR /app
