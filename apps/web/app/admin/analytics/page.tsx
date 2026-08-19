@@ -635,78 +635,134 @@ export default function AdminAnalyticsPage() {
               )}
             </div>
 
-            {/* Bars Grid */}
+            {/* Bars Grid with Y-Axis and Gridlines */}
             <div className="relative pt-6 pb-2">
-              <div className="flex items-end gap-1.5 sm:gap-2 h-48 sm:h-56 w-full overflow-x-auto pb-4">
-                {timelineData.map((item, idx) => {
-                  const heightPct = Math.max(
-                    Math.round((item.revenue / maxTimelineRevenue) * 100),
-                    item.revenue > 0 ? 8 : 2
-                  );
-                  const isPeak =
-                    peakTimelineItem &&
-                    peakTimelineItem.period === item.period &&
-                    item.revenue > 0;
+              <div className="flex gap-2 sm:gap-3">
+                {/* Y-Axis Labels */}
+                <div className="flex flex-col justify-between h-44 sm:h-52 text-[10px] font-mono text-slate-400 select-none text-end shrink-0 py-0.5 min-w-[52px]">
+                  <span>
+                    {maxTimelineRevenue >= 1000
+                      ? `${(maxTimelineRevenue / 1000).toFixed(maxTimelineRevenue % 1000 === 0 ? 0 : 1)}k`
+                      : Math.round(maxTimelineRevenue)}{' '}
+                    SAR
+                  </span>
+                  <span>
+                    {maxTimelineRevenue * 0.75 >= 1000
+                      ? `${((maxTimelineRevenue * 0.75) / 1000).toFixed(1)}k`
+                      : Math.round(maxTimelineRevenue * 0.75)}{' '}
+                    SAR
+                  </span>
+                  <span>
+                    {maxTimelineRevenue * 0.5 >= 1000
+                      ? `${((maxTimelineRevenue * 0.5) / 1000).toFixed(1)}k`
+                      : Math.round(maxTimelineRevenue * 0.5)}{' '}
+                    SAR
+                  </span>
+                  <span>
+                    {maxTimelineRevenue * 0.25 >= 1000
+                      ? `${((maxTimelineRevenue * 0.25) / 1000).toFixed(1)}k`
+                      : Math.round(maxTimelineRevenue * 0.25)}{' '}
+                    SAR
+                  </span>
+                  <span>0 SAR</span>
+                </div>
 
-                  // Format label for x-axis
-                  let displayLabel = item.period;
-                  if (item.period.includes('-')) {
-                    const parts = item.period.split('-');
-                    if (parts.length === 3 && parts[2]) {
-                      // Day mode (e.g. 2026-08-15 -> 15)
-                      displayLabel = parts[2];
-                    } else if (parts.length === 2 && parts[1]) {
-                      // Month mode (e.g. 2026-08 -> Aug)
-                      const mIdx = parseInt(parts[1], 10) - 1;
-                      const matchedMonth = MONTHS[mIdx];
-                      displayLabel =
-                        isRtl && matchedMonth
-                          ? matchedMonth.nameAr.split(' - ')[1] || parts[1]
-                          : matchedMonth
-                          ? matchedMonth.nameEn.split(' - ')[0] || parts[1]
-                          : parts[1];
-                    }
-                  }
+                {/* Main Chart Area */}
+                <div className="relative flex-1 min-w-0">
+                  {/* Horizontal Gridlines */}
+                  <div className="absolute inset-x-0 top-0 h-44 sm:h-52 flex flex-col justify-between pointer-events-none">
+                    <div className="w-full border-b border-slate-100 border-dashed" />
+                    <div className="w-full border-b border-slate-100 border-dashed" />
+                    <div className="w-full border-b border-slate-100 border-dashed" />
+                    <div className="w-full border-b border-slate-100 border-dashed" />
+                    <div className="w-full border-b border-slate-200" />
+                  </div>
 
-                  return (
-                    <div
-                      key={item.period || idx}
-                      onMouseEnter={() => setActiveHoverBar(item)}
-                      onMouseLeave={() => setActiveHoverBar(null)}
-                      className="flex-1 min-w-[20px] max-w-[48px] flex flex-col items-center gap-1.5 group cursor-pointer h-full justify-end"
-                    >
-                      {/* Bar Container */}
-                      <div className="w-full h-full flex items-end justify-center relative">
-                        {isPeak && (
-                          <span className="absolute -top-6 text-[9px] font-black bg-amber-500 text-slate-950 px-1 py-0.5 rounded shadow-2xs uppercase whitespace-nowrap animate-bounce">
-                            ★ Peak
-                          </span>
-                        )}
-                        <div
-                          style={{ height: `${heightPct}%` }}
-                          className={`w-full rounded-t-md transition-all duration-300 ${
-                            isPeak
-                              ? 'bg-amber-500 group-hover:bg-amber-600 shadow-md shadow-amber-500/30'
-                              : item.revenue > 0
-                              ? 'bg-slate-800 group-hover:bg-amber-500'
-                              : 'bg-slate-200/70 group-hover:bg-slate-300'
-                          }`}
-                        />
-                      </div>
+                  {/* Scrollable Bars & X-Axis */}
+                  <div className="relative z-10 overflow-x-auto pb-1">
+                    {/* Bars */}
+                    <div className="flex items-end gap-1.5 sm:gap-2 h-44 sm:h-52 min-w-full">
+                      {timelineData.map((item, idx) => {
+                        const heightPct = Math.max(
+                          Math.round((item.revenue / maxTimelineRevenue) * 100),
+                          item.revenue > 0 ? 6 : 2
+                        );
+                        const isPeak =
+                          peakTimelineItem &&
+                          peakTimelineItem.period === item.period &&
+                          item.revenue > 0;
 
-                      {/* X-axis Label */}
-                      <span
-                        className={`text-[10px] font-mono text-center truncate w-full ${
-                          isPeak
-                            ? 'font-bold text-amber-700'
-                            : 'text-slate-400 group-hover:text-slate-800'
-                        }`}
-                      >
-                        {displayLabel}
-                      </span>
+                        return (
+                          <div
+                            key={item.period || idx}
+                            onMouseEnter={() => setActiveHoverBar(item)}
+                            onMouseLeave={() => setActiveHoverBar(null)}
+                            className="flex-1 min-w-[20px] max-w-[48px] h-full flex flex-col justify-end items-center group cursor-pointer"
+                          >
+                            <div className="w-full h-full flex items-end justify-center relative">
+                              {isPeak && (
+                                <span className="absolute -top-6 text-[9px] font-black bg-amber-500 text-slate-950 px-1 py-0.5 rounded shadow-2xs uppercase whitespace-nowrap animate-bounce">
+                                  ★ Peak
+                                </span>
+                              )}
+                              <div
+                                style={{ height: `${heightPct}%` }}
+                                className={`w-full rounded-t-md transition-all duration-300 ${
+                                  isPeak
+                                    ? 'bg-amber-500 group-hover:bg-amber-600 shadow-md shadow-amber-500/30'
+                                    : item.revenue > 0
+                                    ? 'bg-slate-800 group-hover:bg-amber-500'
+                                    : 'bg-slate-200/70 group-hover:bg-slate-300'
+                                }`}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+
+                    {/* X-axis Labels */}
+                    <div className="flex gap-1.5 sm:gap-2 min-w-full pt-2">
+                      {timelineData.map((item, idx) => {
+                        let displayLabel = item.period;
+                        if (item.period.includes('-')) {
+                          const parts = item.period.split('-');
+                          if (parts.length === 3 && parts[2]) {
+                            // Day mode (e.g. 2026-08-15 -> 15)
+                            displayLabel = parts[2];
+                          } else if (parts.length === 2 && parts[1]) {
+                            // Month mode (e.g. 2026-08 -> Aug)
+                            const mIdx = parseInt(parts[1], 10) - 1;
+                            const matchedMonth = MONTHS[mIdx];
+                            displayLabel =
+                              isRtl && matchedMonth
+                                ? matchedMonth.nameAr.split(' - ')[1] || parts[1]
+                                : matchedMonth
+                                ? matchedMonth.nameEn.split(' - ')[0] || parts[1]
+                                : parts[1];
+                          }
+                        }
+                        const isPeak =
+                          peakTimelineItem &&
+                          peakTimelineItem.period === item.period &&
+                          item.revenue > 0;
+
+                        return (
+                          <span
+                            key={`label-${item.period || idx}`}
+                            className={`flex-1 min-w-[20px] max-w-[48px] text-[10px] font-mono text-center truncate ${
+                              isPeak
+                                ? 'font-bold text-amber-700'
+                                : 'text-slate-400 group-hover:text-slate-800'
+                            }`}
+                          >
+                            {displayLabel}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

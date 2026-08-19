@@ -49,9 +49,25 @@ export default function AdminInventoryPage() {
   const loadInventory = async () => {
     setLoading(true);
     try {
-      // Fetch all products to monitor complete warehouse stock
-      const res = await api.adminProducts('?page=1&pageSize=100');
-      setProducts(res.items);
+      // Fetch products (pageSize=50 works reliably across all API deployments)
+      const res = await api.adminProducts('?page=1&pageSize=50');
+      let allItems = res?.items || [];
+
+      // If total items exceed first page, fetch remaining pages concurrently
+      if (res?.meta?.totalPages && res.meta.totalPages > 1) {
+        const extraPages = [];
+        for (let p = 2; p <= res.meta.totalPages; p++) {
+          extraPages.push(api.adminProducts(`?page=${p}&pageSize=50`));
+        }
+        const extraResults = await Promise.all(extraPages);
+        extraResults.forEach((r) => {
+          if (r?.items) {
+            allItems = allItems.concat(r.items);
+          }
+        });
+      }
+
+      setProducts(allItems);
     } catch (e: any) {
       toast.error(e.message || 'Failed to load inventory');
     } finally {

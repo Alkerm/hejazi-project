@@ -1,17 +1,17 @@
-﻿import { FastifyInstance } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { ZodError } from 'zod';
 import { AppError } from '../utils/app-error';
 
 export const registerErrorHandler = (app: FastifyInstance) => {
-  app.setErrorHandler((error, request, reply) => {
-    if (error instanceof ZodError) {
+  app.setErrorHandler((error: any, request, reply) => {
+    if (error instanceof ZodError || error?.name === 'ZodError' || error?.issues) {
       return reply.status(400).send({
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Validation failed',
           requestId: request.id,
-          details: error.flatten(),
+          details: error instanceof ZodError ? error.flatten() : error?.issues || error?.message,
         },
       });
     }

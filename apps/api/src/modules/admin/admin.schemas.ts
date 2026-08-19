@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const adminListProductsQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-  pageSize: z.coerce.number().int().positive().max(50).default(10),
+  pageSize: z.coerce.number().int().positive().max(200).default(10),
   search: z.string().trim().min(1).max(120).optional(),
   categoryId: z.string().optional(),
   minStock: z.coerce.number().int().min(0).optional(),
@@ -62,7 +62,7 @@ export const adminAdjustStockSchema = z.object({
 
 export const adminListOrdersQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-  pageSize: z.coerce.number().int().positive().max(50).default(10),
+  pageSize: z.coerce.number().int().positive().max(200).default(10),
   status: z
     .enum(['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'])
     .optional(),
@@ -79,7 +79,7 @@ export const adminUpdateOrderStatusSchema = z.object({
 export const adminLowStockQuerySchema = z.object({
   threshold: z.coerce.number().int().positive().max(100).optional(),
   page: z.coerce.number().int().positive().default(1),
-  pageSize: z.coerce.number().int().positive().max(50).default(10),
+  pageSize: z.coerce.number().int().positive().max(200).default(10),
 });
 
 export const adminSalesQuerySchema = z.object({
@@ -93,7 +93,7 @@ export const adminSalesQuerySchema = z.object({
 
 export const adminAuditLogsQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-  pageSize: z.coerce.number().int().positive().max(50).default(20),
+  pageSize: z.coerce.number().int().positive().max(200).default(20),
 });
 
 export const adminCreateCategorySchema = z.object({
@@ -104,7 +104,7 @@ export const adminCreateCategorySchema = z.object({
 
 export const adminListCustomersQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-  pageSize: z.coerce.number().int().positive().max(100).default(20),
+  pageSize: z.coerce.number().int().positive().max(200).default(20),
   search: z.string().trim().optional(),
   sortBy: z.enum(['spending', 'orders', 'newest', 'name']).default('spending'),
   role: z.enum(['USER', 'ADMIN', 'DRIVER']).optional(),
