@@ -12,7 +12,7 @@ RUN npm ci
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 
-RUN npm run build --workspace=@cosmetics/web
+RUN npm run build --workspace=@cosmetics/web && rm -rf /app/apps/web/.next/cache
 
 FROM node:20-alpine AS runner
 WORKDIR /app
