@@ -20,6 +20,7 @@ export const adminProductUpsertSchema = z.object({
   description: z.string().min(5).max(2000),
   arabicDescription: z.string().max(2000).optional().nullable(),
   price: z.coerce.number().positive(),
+  costPrice: z.coerce.number().min(0).default(0),
   stockQuantity: z.coerce.number().int().min(0),
   sku: z.string().max(120).optional().nullable(),
   brand: z.string().max(120).optional().nullable(),
@@ -36,6 +37,17 @@ export const adminProductUpsertSchema = z.object({
   imageUrl: z.string().url(),
   isActive: z.boolean().default(true),
   categoryId: z.string().min(1),
+});
+
+export const adminUpdateProductFinancialsSchema = z.object({
+  costPrice: z.coerce.number().min(0).optional(),
+  price: z.coerce.number().positive().optional(),
+});
+
+export const adminFinancialsQuerySchema = z.object({
+  search: z.string().trim().optional(),
+  categoryId: z.string().optional(),
+  sortBy: z.enum(['profit', 'margin', 'revenue', 'stock', 'cost', 'price', 'name']).default('profit'),
 });
 
 export const adminProductIdSchema = z.object({
@@ -77,5 +89,26 @@ export const adminCreateCategorySchema = z.object({
   name: z.string().min(2).max(120),
   arabicName: z.string().max(120).optional().nullable(),
   slug: z.string().min(2).max(140).optional(),
+});
+
+export const adminListCustomersQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().positive().max(100).default(20),
+  search: z.string().trim().optional(),
+  sortBy: z.enum(['spending', 'orders', 'newest', 'name']).default('spending'),
+  role: z.enum(['USER', 'ADMIN', 'DRIVER']).optional(),
+  marketingOnly: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === 'true')),
+});
+
+export const adminBroadcastEmailSchema = z.object({
+  audience: z.enum(['ALL', 'MARKETING_ONLY', 'VIP_ONLY']),
+  subject: z.string().min(3).max(180),
+  title: z.string().min(2).max(180),
+  message: z.string().min(5).max(10000),
+  callToActionUrl: z.string().optional(),
+  callToActionLabel: z.string().max(80).optional(),
 });
 

@@ -12,6 +12,10 @@ import {
   adminProductUpsertSchema,
   adminSalesQuerySchema,
   adminUpdateOrderStatusSchema,
+  adminListCustomersQuerySchema,
+  adminBroadcastEmailSchema,
+  adminFinancialsQuerySchema,
+  adminUpdateProductFinancialsSchema,
 } from './admin.schemas';
 import {
   createAdminCategory,
@@ -26,6 +30,10 @@ import {
   getAdminOrders,
   getAdminProducts,
   getAdminSalesAnalytics,
+  getAdminCustomersOverview,
+  sendAdminAnnouncementBroadcast,
+  getAdminFinancialOverview,
+  updateAdminProductFinancials,
   updateAdminOrderStatus,
   updateAdminPaymentStatus,
   updateAdminProduct,
@@ -134,5 +142,34 @@ export const adminAuditLogsHandler = async (request: FastifyRequest, reply: Fast
   await requireAdmin(request, reply);
   const query = adminAuditLogsQuerySchema.parse(request.query);
   const data = await getAdminAuditLogs(query);
+  return ok(reply, data);
+};
+
+export const adminCustomersOverviewHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAdmin(request, reply);
+  const query = adminListCustomersQuerySchema.parse(request.query);
+  const data = await getAdminCustomersOverview(query);
+  return ok(reply, data);
+};
+
+export const adminBroadcastEmailHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAdmin(request, reply);
+  const body = adminBroadcastEmailSchema.parse(request.body);
+  const data = await sendAdminAnnouncementBroadcast(request.auth!.userId, body);
+  return ok(reply, data, 201);
+};
+
+export const adminFinancialsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAdmin(request, reply);
+  const query = adminFinancialsQuerySchema.parse(request.query);
+  const data = await getAdminFinancialOverview(query);
+  return ok(reply, data);
+};
+
+export const adminUpdateProductFinancialsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAdmin(request, reply);
+  const { id } = adminProductIdSchema.parse(request.params);
+  const payload = adminUpdateProductFinancialsSchema.parse(request.body);
+  const data = await updateAdminProductFinancials(request.auth!.userId, id, payload);
   return ok(reply, data);
 };

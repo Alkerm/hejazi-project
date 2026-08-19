@@ -18,9 +18,40 @@ const webhookSchema = z.object({
   rawResponse: z.record(z.unknown()).optional(),
 });
 
+const verifySchema = z.object({
+  orderId: z.string().min(1),
+  paymentMethod: z.nativeEnum(PaymentMethodType),
+  transactionId: z.string().optional(),
+  gateway: z.string().optional(),
+  status: z.enum(['PAID', 'FAILED']),
+  rawResponse: z.record(z.unknown()).optional(),
+});
+
 const refundSchema = z.object({
   reason: z.string().optional(),
 });
+
+export const verifyPaymentHandler = async (req: FastifyRequest, reply: FastifyReply) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return reply.status(401).send({ error: 'Unauthorized' });
+  }
+
+  const parseResult = verifySchema.safeParse(req.body);
+  if (!parseResult.success) {
+    return reply.status(400).send({ error: 'Invalid request body', details: parseResult.error.format() });
+  }
+
+  try {
+    const result = await PaymentsService.verifyPayment({
+      ...parseResult.data,
+      userId,
+    });
+    return reply.send({ success: true, data: result });
+  } catch (err: any) {
+    return reply.status(400).send({ error: err.message || 'Payment verification failed' });
+  }
+};
 
 export const createPaymentIntentHandler = async (req: FastifyRequest, reply: FastifyReply) => {
   const userId = req.user?.id;

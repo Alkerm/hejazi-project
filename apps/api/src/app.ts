@@ -15,6 +15,7 @@ import { couponsRoutes } from './modules/coupons/coupons.routes';
 import { supportRoutes } from './modules/support/support.routes';
 import { uploadRoutes } from './modules/upload/upload.routes';
 import { driverRoutes } from './modules/driver/driver.routes';
+import { policiesRoutes } from './modules/policies/policies.routes';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
@@ -56,6 +57,8 @@ export const buildApp = async () => {
       await v1.register(supportRoutes, { prefix: '/support' });
       await v1.register(uploadRoutes, { prefix: '/admin/upload' });
       await v1.register(driverRoutes, { prefix: '/driver' });
+      await v1.register(policiesRoutes, { prefix: '/policies' });
+      await v1.register(policiesRoutes, { prefix: '/admin/policies' });
     },
     { prefix: '/api/v1' },
   );

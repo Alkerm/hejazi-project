@@ -34,6 +34,7 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -52,6 +53,7 @@ export default function ProfilePage() {
     event.preventDefault();
     if (!profile) return;
     setSaving(true);
+    setSuccessMessage(null);
 
     const emailChanged = initialProfile ? profile.email !== initialProfile.email : false;
 
@@ -68,9 +70,16 @@ export default function ProfilePage() {
       });
       setProfile(next);
       setInitialProfile(next);
-      toast.success(t('Profile updated successfully.', 'تم تحديث الملف الشخصي بنجاح.'));
+      const msg = t('Your profile information has been saved successfully!', 'تم حفظ وتحديث بيانات ملفك الشخصي بنجاح!');
+      setSuccessMessage(msg);
+      toast.success(msg);
       setCurrentPassword('');
       setNewPassword('');
+
+      // Auto-hide the success banner after 5 seconds
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -153,7 +162,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Quick Action Navigation Grid (Market Standard Hub) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link
           href="/orders"
           className="glass-card rounded-2xl p-5 border border-slate-200/60 hover:shadow-md hover:border-amber-300 transition-all flex items-center justify-between group bg-white"
@@ -167,7 +176,7 @@ export default function ProfilePage() {
               <p className="text-xs text-slate-500 font-medium">{t('Track status & history', 'متابعة شحناتك الحالية')}</p>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+          <ChevronRight className={`w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform ${lang === 'ar' ? 'rotate-180' : ''}`} />
         </Link>
 
         <Link
@@ -183,22 +192,8 @@ export default function ProfilePage() {
               <p className="text-xs text-slate-500 font-medium">{t('View saved items', 'عرض المنتجات المفضلة')}</p>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+          <ChevronRight className={`w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform ${lang === 'ar' ? 'rotate-180' : ''}`} />
         </Link>
-
-        <div className="glass-card rounded-2xl p-5 border border-slate-200/60 flex items-center justify-between bg-white">
-          <div className="flex items-center gap-3.5">
-            <div className="p-3 rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
-              <MapPin className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-slate-800">{t('Default City', 'المدينة الرئيسية')}</h3>
-              <p className="text-xs text-slate-500 font-medium">
-                {profile.defaultAddress?.city || t('Not set', 'غير محددة')}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Account Settings Management Card */}
@@ -247,6 +242,22 @@ export default function ProfilePage() {
 
         {/* Tab Form Body */}
         <form onSubmit={submit} className="p-6 sm:p-8 space-y-6">
+          {successMessage && (
+            <div className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 animate-fade-in shadow-2xs">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-none" />
+                <span className="text-xs font-bold">{successMessage}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSuccessMessage(null)}
+                className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 uppercase"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {activeTab === 'DETAILS' && (
             <div className="space-y-6 animate-fade-in">
               <div className="space-y-1">
@@ -279,6 +290,18 @@ export default function ProfilePage() {
                   value={profile.email}
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                 />
+                <div className="sm:col-span-2">
+                  <Input
+                    label={t('National ID / Iqama Number', 'رقم الهوية الوطنية / الإقامة')}
+                    value={profile.nationalId ?? ''}
+                    onChange={(e) => setProfile({ ...profile, nationalId: e.target.value.replace(/\D/g, '').substring(0, 10) })}
+                    placeholder="10XXXXXXXX / 20XXXXXXXX (10 digits)"
+                    maxLength={10}
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    {t('Used for order verification and Saudi courier delivery compliance.', 'يستخدم للتحقق ومطابقة أنظمة الشحن والتوصيل بالمملكة.')}
+                  </p>
+                </div>
               </div>
 
               {profile.role === 'USER' && (
@@ -291,8 +314,8 @@ export default function ProfilePage() {
                   />
                   <span>
                     {t(
-                      'I consent to receive exclusive promotional offers, news, and setup guides from Half Link Energy & Security.',
-                      'أوافق على استلام العروض الحصرية والأخبار ونشرات كاميرات المراقبة وحلول الطاقة من هالف لينـك.'
+                      'I consent to receive exclusive promotional offers, news, and setup guides from Hejazi Cosmetics.',
+                      'أوافق على استلام العروض الحصرية والأخبار ونشرات الخصومات من متجر حجازي.'
                     )}
                   </span>
                 </label>
@@ -305,52 +328,14 @@ export default function ProfilePage() {
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-slate-800">{t('Default Delivery Address', 'عنوان التوصيل الرئيسي')}</h3>
                 <p className="text-xs text-slate-500 font-medium">
-                  {t('Your orders will be dispatched to this default location.', 'سيتم شحن طلباتك تلقائياً إلى هذا العنوان.')}
+                  {t('Specify your 3 location fields for dispatching orders across Saudi Arabia.', 'حدد بيانات الموقع الثلاثة لشحن وتوصيل طلباتك داخل المملكة.')}
                 </p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <Input
-                    label={t('Street Line', 'اسم الشارع / الحي / البناية')}
-                    value={profile.defaultAddress?.line1 ?? ''}
-                    onChange={(e) =>
-                      setProfile({
-                        ...profile,
-                        defaultAddress: {
-                          line1: e.target.value,
-                          line2: profile.defaultAddress?.line2 ?? null,
-                          city: profile.defaultAddress?.city ?? '',
-                          country: profile.defaultAddress?.country ?? '',
-                          postalCode: profile.defaultAddress?.postalCode ?? '',
-                        },
-                      })
-                    }
-                    placeholder="e.g. King Fahd Road, Villa 12"
-                  />
-                </div>
-
                 <Input
-                  label={t('City', 'المدينة')}
-                  value={profile.defaultAddress?.city ?? ''}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      defaultAddress: {
-                        line1: profile.defaultAddress?.line1 ?? '',
-                        line2: profile.defaultAddress?.line2 ?? null,
-                        city: e.target.value,
-                        country: profile.defaultAddress?.country ?? '',
-                        postalCode: profile.defaultAddress?.postalCode ?? '',
-                      },
-                    })
-                  }
-                  placeholder="Riyadh, Jeddah, etc."
-                />
-
-                <Input
-                  label={t('Country', 'الدولة')}
-                  value={profile.defaultAddress?.country ?? ''}
+                  label={t('1. Country', '1. الدولة')}
+                  value={profile.defaultAddress?.country ?? 'المملكة العربية السعودية'}
                   onChange={(e) =>
                     setProfile({
                       ...profile,
@@ -359,30 +344,50 @@ export default function ProfilePage() {
                         line2: profile.defaultAddress?.line2 ?? null,
                         city: profile.defaultAddress?.city ?? '',
                         country: e.target.value,
-                        postalCode: profile.defaultAddress?.postalCode ?? '',
+                        postalCode: profile.defaultAddress?.postalCode ?? '00000',
                       },
                     })
                   }
-                  placeholder="Saudi Arabia"
+                  placeholder="المملكة العربية السعودية / Saudi Arabia"
                 />
 
                 <Input
-                  label={t('Postal Code', 'الرمز البريدي')}
-                  value={profile.defaultAddress?.postalCode ?? ''}
+                  label={t('2. City', '2. المدينة')}
+                  value={profile.defaultAddress?.city ?? ''}
                   onChange={(e) =>
                     setProfile({
                       ...profile,
                       defaultAddress: {
                         line1: profile.defaultAddress?.line1 ?? '',
                         line2: profile.defaultAddress?.line2 ?? null,
-                        city: profile.defaultAddress?.city ?? '',
-                        country: profile.defaultAddress?.country ?? '',
-                        postalCode: e.target.value,
+                        city: e.target.value,
+                        country: profile.defaultAddress?.country ?? 'المملكة العربية السعودية',
+                        postalCode: profile.defaultAddress?.postalCode ?? '00000',
                       },
                     })
                   }
-                  placeholder="12211"
+                  placeholder="الرياض، جدة، الدمام... / Riyadh, Jeddah..."
                 />
+
+                <div className="sm:col-span-2">
+                  <Input
+                    label={t('3. Address Info (District, Street, Building)', '3. تفاصيل العنوان (اسم الحي، الشارع، رقم المبنى)')}
+                    value={profile.defaultAddress?.line1 ?? ''}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        defaultAddress: {
+                          line1: e.target.value,
+                          line2: profile.defaultAddress?.line2 ?? null,
+                          city: profile.defaultAddress?.city ?? '',
+                          country: profile.defaultAddress?.country ?? 'المملكة العربية السعودية',
+                          postalCode: profile.defaultAddress?.postalCode ?? '00000',
+                        },
+                      })
+                    }
+                    placeholder="مثال: حي النرجس، شارع عثمان بن عفان، فيلا 12"
+                  />
+                </div>
               </div>
             </div>
           )}

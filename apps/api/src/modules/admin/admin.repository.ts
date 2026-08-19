@@ -281,3 +281,204 @@ export const listAdminAuditLogsRepo = (skip: number, take: number) =>
     }),
     prisma.adminAuditLog.count(),
   ]);
+
+export const getTopCustomersByOrdersRepo = async (take: number) => {
+  const grouped = await prisma.order.groupBy({
+    by: ['userId'],
+    _sum: { total: true },
+    _count: { _all: true },
+    orderBy: {
+      _count: {
+        userId: 'desc',
+      },
+    },
+    take,
+  });
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: grouped.map((row) => row.userId) } },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      createdAt: true,
+      addresses: {
+        where: { isDefault: true },
+        take: 1,
+      },
+    },
+  });
+
+  const usersById = new Map(users.map((user) => [user.id, user]));
+
+  return grouped.map((row) => ({
+    userId: row.userId,
+    customer: usersById.get(row.userId),
+    totalSpent: Number(row._sum.total ?? 0),
+    ordersCount: row._count._all,
+  }));
+};
+
+export const listAdminCustomersDirectoryRepo = async (input: {
+  skip: number;
+  take: number;
+  search?: string;
+  role?: 'USER' | 'ADMIN' | 'DRIVER';
+  marketingOnly?: boolean;
+}) => {
+  const where: Prisma.UserWhereInput = {
+    ...(input.role ? { role: input.role } : { role: 'USER' }),
+    ...(input.marketingOnly ? { marketingConsent: true } : {}),
+    ...(input.search
+      ? {
+          OR: [
+            { firstName: { contains: input.search, mode: 'insensitive' } },
+            { lastName: { contains: input.search, mode: 'insensitive' } },
+            { email: { contains: input.search, mode: 'insensitive' } },
+            { phone: { contains: input.search, mode: 'insensitive' } },
+          ],
+        }
+      : {}),
+  };
+
+  const [users, total] = await prisma.$transaction([
+    prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        role: true,
+        marketingConsent: true,
+        createdAt: true,
+        addresses: {
+          where: { isDefault: true },
+          take: 1,
+          select: {
+            city: true,
+            country: true,
+            line1: true,
+          },
+        },
+        orders: {
+          select: {
+            id: true,
+            total: true,
+            paymentStatus: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: input.skip,
+      take: input.take,
+    }),
+    prisma.user.count({ where }),
+  ]);
+
+  return { users, total };
+};
+
+export const getBroadcastTargetUsersRepo = async (audience: 'ALL' | 'MARKETING_ONLY' | 'VIP_ONLY') => {
+  const where: Prisma.UserWhereInput = {
+    ...(audience === 'MARKETING_ONLY' ? { marketingConsent: true } : {}),
+    ...(audience === 'VIP_ONLY' ? { orders: { some: {} } } : {}),
+  };
+
+  return prisma.user.findMany({
+    where,
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      marketingConsent: true,
+    },
+  });
+};
+
+export const getAdminFinancialProductsRepo = async (filters: {
+  search?: string;
+  categoryId?: string;
+}) => {
+  const where: Prisma.ProductWhereInput = {
+    ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
+    ...(filters.search
+      ? {
+          OR: [
+            { name: { contains: filters.search, mode: 'insensitive' } },
+            { arabicName: { contains: filters.search, mode: 'insensitive' } },
+            { sku: { contains: filters.search, mode: 'insensitive' } },
+            { id: { contains: filters.search, mode: 'insensitive' } },
+          ],
+        }
+      : {}),
+  };
+
+  return prisma.product.findMany({
+    where,
+    select: {
+      id: true,
+      name: true,
+      arabicName: true,
+      slug: true,
+      sku: true,
+      price: true,
+      costPrice: true,
+      stockQuantity: true,
+      imageUrl: true,
+      isActive: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          arabicName: true,
+        },
+      },
+      orderItems: {
+        where: {
+          order: {
+            status: { not: 'CANCELLED' },
+          },
+        },
+        select: {
+          quantity: true,
+          unitPriceSnapshot: true,
+          costPriceSnapshot: true,
+          lineTotal: true,
+          order: {
+            select: {
+              paymentStatus: true,
+              status: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+};
+
+export const updateProductFinancialsRepo = (
+  id: string,
+  data: { costPrice?: number; price?: number }
+) => {
+  const updateData: Prisma.ProductUpdateInput = {};
+  if (data.costPrice !== undefined) {
+    updateData.costPrice = new Prisma.Decimal(data.costPrice);
+  }
+  if (data.price !== undefined) {
+    updateData.price = new Prisma.Decimal(data.price);
+  }
+
+  return prisma.product.update({
+    where: { id },
+    data: updateData,
+    include: {
+      category: true,
+    },
+  });
+};

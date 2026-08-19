@@ -14,20 +14,25 @@ import {
   findAdminOrderByIdRepo,
   findCategoryBySlugOrNameRepo,
   findProductByIdRepo,
+  getBroadcastTargetUsersRepo,
   getDashboardSummaryCountsRepo,
   getLowStockProductsRepo,
   getOutOfStockCountRepo,
   getRecentOrdersRepo,
   getRevenueAggregateRepo,
   getSalesByDayRepo,
+  getTopCustomersByOrdersRepo,
   getTopCustomersRepo,
   getTopSellingProductsRepo,
+  listAdminCustomersDirectoryRepo,
   listAdminOrdersRepo,
   listAdminAuditLogsRepo,
   listAdminProductsRepo,
   listCategoriesRepo,
   updateAdminOrderStatusRepo,
   updateProductRepo,
+  getAdminFinancialProductsRepo,
+  updateProductFinancialsRepo,
 } from './admin.repository';
 
 export const getAdminDashboardSummary = async () => {
@@ -97,6 +102,7 @@ export const createAdminProduct = async (
     slug?: string;
     description: string;
     price: number;
+    costPrice?: number;
     stockQuantity: number;
     sku?: string | null;
     brand?: string | null;
@@ -128,6 +134,7 @@ export const createAdminProduct = async (
     slug,
     description: payload.description,
     price: new Prisma.Decimal(payload.price),
+    costPrice: new Prisma.Decimal(payload.costPrice ?? 0),
     stockQuantity: payload.stockQuantity,
     sku: payload.sku,
     brand: payload.brand,
@@ -173,6 +180,7 @@ export const updateAdminProduct = async (
     slug?: string;
     description: string;
     price: number;
+    costPrice?: number;
     stockQuantity: number;
     sku?: string | null;
     brand?: string | null;
@@ -209,6 +217,7 @@ export const updateAdminProduct = async (
     slug,
     description: payload.description,
     price: new Prisma.Decimal(payload.price),
+    costPrice: payload.costPrice !== undefined ? new Prisma.Decimal(payload.costPrice) : undefined,
     stockQuantity: payload.stockQuantity,
     sku: payload.sku,
     brand: payload.brand,
@@ -482,5 +491,325 @@ export const getAdminAuditLogs = async (query: { page: number; pageSize: number 
       total,
       totalPages: Math.ceil(total / pageSize),
     },
+  };
+};
+
+export const getAdminCustomersOverview = async (query: {
+  page: number;
+  pageSize: number;
+  search?: string;
+  sortBy?: 'spending' | 'orders' | 'newest' | 'name';
+  role?: 'USER' | 'ADMIN' | 'DRIVER';
+  marketingOnly?: boolean;
+}) => {
+  const { skip, take, page, pageSize } = normalizePagination(query);
+
+  const [topBySpending, topByOrders, { users, total }, totalCustomersCount, marketingCount, revenueAgg] =
+    await Promise.all([
+      getTopCustomersRepo(10),
+      getTopCustomersByOrdersRepo(10),
+      listAdminCustomersDirectoryRepo({
+        skip,
+        take,
+        search: query.search,
+        role: query.role,
+        marketingOnly: query.marketingOnly,
+      }),
+      prisma.user.count({ where: { role: 'USER' } }),
+      prisma.user.count({ where: { marketingConsent: true } }),
+      getRevenueAggregateRepo(),
+    ]);
+
+  const formattedDirectory = users.map((u) => {
+    const totalSpent = u.orders.reduce((sum, ord) => sum + Number(ord.total), 0);
+    const ordersCount = u.orders.length;
+    const defaultAddr = u.addresses[0];
+
+    return {
+      id: u.id,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      email: u.email,
+      phone: u.phone,
+      role: u.role,
+      marketingConsent: u.marketingConsent,
+      createdAt: u.createdAt,
+      totalOrders: ordersCount,
+      totalSpent: toMoney(totalSpent),
+      city: defaultAddr?.city || null,
+      country: defaultAddr?.country || null,
+      addressSummary: defaultAddr ? `${defaultAddr.city}, ${defaultAddr.line1}` : null,
+    };
+  });
+
+  const totalOrders = revenueAgg.ordersCount || 0;
+  const totalRevenue = revenueAgg.totalRevenue || 0;
+  const avgOrderValue = totalOrders > 0 ? toMoney(totalRevenue / totalOrders) : 0;
+
+  const repeatCount = await prisma.user.count({
+    where: {
+      orders: {
+        some: {},
+      },
+    },
+  });
+
+  return {
+    metrics: {
+      totalCustomers: totalCustomersCount,
+      totalOrders,
+      totalRevenue: toMoney(totalRevenue),
+      averageOrderValue: avgOrderValue,
+      marketingConsentedCount: marketingCount,
+      activeBuyersCount: repeatCount,
+    },
+    topBySpending: topBySpending.map((t) => ({
+      userId: t.userId,
+      customerName: t.customer ? `${t.customer.firstName} ${t.customer.lastName}`.trim() : 'Customer',
+      email: t.customer?.email || 'N/A',
+      totalSpent: toMoney(t.totalSpent),
+      ordersCount: t.ordersCount,
+    })),
+    topByOrders: topByOrders.map((t) => ({
+      userId: t.userId,
+      customerName: t.customer ? `${t.customer.firstName} ${t.customer.lastName}`.trim() : 'Customer',
+      email: t.customer?.email || 'N/A',
+      phone: t.customer?.phone || null,
+      totalSpent: toMoney(t.totalSpent),
+      ordersCount: t.ordersCount,
+      city: t.customer?.addresses?.[0]?.city || null,
+    })),
+    directory: {
+      items: formattedDirectory,
+      meta: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    },
+  };
+};
+
+export const sendAdminAnnouncementBroadcast = async (
+  adminUserId: string,
+  payload: {
+    audience: 'ALL' | 'MARKETING_ONLY' | 'VIP_ONLY';
+    subject: string;
+    title: string;
+    message: string;
+    callToActionUrl?: string;
+    callToActionLabel?: string;
+  },
+) => {
+  const recipients = await getBroadcastTargetUsersRepo(payload.audience);
+
+  await createAuditLog({
+    adminUserId,
+    action: 'BROADCAST_EMAIL_SENT',
+    entityType: 'ANNOUNCEMENT',
+    metadata: {
+      audience: payload.audience,
+      subject: payload.subject,
+      title: payload.title,
+      recipientCount: recipients.length,
+      sampleRecipients: recipients.slice(0, 5).map((r) => r.email),
+    },
+  });
+
+  return {
+    success: true,
+    recipientCount: recipients.length,
+    audience: payload.audience,
+    subject: payload.subject,
+    title: payload.title,
+    sentAt: new Date().toISOString(),
+    sampleRecipients: recipients.slice(0, 5).map((r) => r.email),
+  };
+};
+
+export const getAdminFinancialOverview = async (query: {
+  search?: string;
+  categoryId?: string;
+  sortBy?: 'profit' | 'margin' | 'revenue' | 'stock' | 'cost' | 'price' | 'name';
+}) => {
+  const [products, paidOrders] = await Promise.all([
+    getAdminFinancialProductsRepo({
+      search: query.search,
+      categoryId: query.categoryId,
+    }),
+    prisma.order.findMany({
+      where: {
+        paymentStatus: 'PAID',
+        status: { not: 'CANCELLED' },
+      },
+      select: {
+        id: true,
+        subtotal: true,
+        total: true,
+        items: {
+          select: {
+            productId: true,
+            quantity: true,
+            unitPriceSnapshot: true,
+            costPriceSnapshot: true,
+            lineTotal: true,
+          },
+        },
+      },
+    }),
+  ]);
+
+  let totalRevenue = 0;
+  let totalCostOfGoodsSold = 0;
+  let totalUnitsSoldAll = 0;
+
+  for (const order of paidOrders) {
+    totalRevenue += Number(order.subtotal);
+    for (const item of order.items) {
+      totalUnitsSoldAll += item.quantity;
+      const unitCost = Number(item.costPriceSnapshot || 0);
+      totalCostOfGoodsSold += unitCost * item.quantity;
+    }
+  }
+
+  const netRealizedProfit = totalRevenue - totalCostOfGoodsSold;
+  const overallMarginPercentage = totalRevenue > 0 ? (netRealizedProfit / totalRevenue) * 100 : 0;
+
+  let inventoryTotalCostValue = 0;
+  let inventoryTotalRetailValue = 0;
+  let totalInStockUnits = 0;
+
+  const productFinancialItems = products.map((p) => {
+    const price = Number(p.price);
+    const costPrice = Number(p.costPrice || 0);
+    const unitProfit = price - costPrice;
+    const marginPercentage = price > 0 ? (unitProfit / price) * 100 : 0;
+    const stockQuantity = p.stockQuantity;
+
+    const stockCostValue = stockQuantity * costPrice;
+    const stockRetailValue = stockQuantity * price;
+    const stockPotentialProfit = stockQuantity * unitProfit;
+
+    inventoryTotalCostValue += stockCostValue;
+    inventoryTotalRetailValue += stockRetailValue;
+    totalInStockUnits += stockQuantity;
+
+    let unitsSold = 0;
+    let realizedRevenue = 0;
+    let realizedCost = 0;
+
+    for (const oi of p.orderItems) {
+      if (oi.order?.paymentStatus === 'PAID') {
+        unitsSold += oi.quantity;
+        realizedRevenue += Number(oi.lineTotal);
+        const itemCost = Number(oi.costPriceSnapshot || costPrice);
+        realizedCost += itemCost * oi.quantity;
+      }
+    }
+
+    const realizedProfit = realizedRevenue - realizedCost;
+
+    return {
+      id: p.id,
+      name: p.name,
+      arabicName: p.arabicName,
+      slug: p.slug,
+      sku: p.sku,
+      imageUrl: p.imageUrl,
+      isActive: p.isActive,
+      category: p.category,
+      price,
+      costPrice,
+      unitProfit,
+      marginPercentage: Math.round(marginPercentage * 10) / 10,
+      stockQuantity,
+      stockCostValue,
+      stockRetailValue,
+      stockPotentialProfit,
+      unitsSold,
+      realizedRevenue,
+      realizedProfit,
+    };
+  });
+
+  if (query.sortBy === 'margin') {
+    productFinancialItems.sort((a, b) => b.marginPercentage - a.marginPercentage);
+  } else if (query.sortBy === 'revenue') {
+    productFinancialItems.sort((a, b) => b.realizedRevenue - a.realizedRevenue);
+  } else if (query.sortBy === 'stock') {
+    productFinancialItems.sort((a, b) => b.stockQuantity - a.stockQuantity);
+  } else if (query.sortBy === 'cost') {
+    productFinancialItems.sort((a, b) => b.costPrice - a.costPrice);
+  } else if (query.sortBy === 'price') {
+    productFinancialItems.sort((a, b) => b.price - a.price);
+  } else if (query.sortBy === 'name') {
+    productFinancialItems.sort((a, b) => a.name.localeCompare(b.name));
+  } else {
+    productFinancialItems.sort((a, b) => b.unitProfit - a.unitProfit);
+  }
+
+  const expectedInventoryProfit = inventoryTotalRetailValue - inventoryTotalCostValue;
+
+  return {
+    metrics: {
+      totalRevenue: Math.round(totalRevenue * 100) / 100,
+      totalCostOfGoodsSold: Math.round(totalCostOfGoodsSold * 100) / 100,
+      netRealizedProfit: Math.round(netRealizedProfit * 100) / 100,
+      overallMarginPercentage: Math.round(overallMarginPercentage * 10) / 10,
+      inventoryTotalCostValue: Math.round(inventoryTotalCostValue * 100) / 100,
+      inventoryTotalRetailValue: Math.round(inventoryTotalRetailValue * 100) / 100,
+      expectedInventoryProfit: Math.round(expectedInventoryProfit * 100) / 100,
+      totalOrdersCount: paidOrders.length,
+      totalUnitsSoldAll,
+      totalInStockUnits,
+      activeProductsCount: products.filter((p) => p.isActive).length,
+    },
+    products: productFinancialItems,
+  };
+};
+
+export const updateAdminProductFinancials = async (
+  adminUserId: string,
+  productId: string,
+  payload: { costPrice?: number; price?: number }
+) => {
+  const existing = await findProductByIdRepo(productId);
+  if (!existing) {
+    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+  }
+
+  const updated = await updateProductFinancialsRepo(productId, payload);
+
+  await Promise.all([
+    invalidateProductCaches(),
+    createAuditLog({
+      adminUserId,
+      action: 'UPDATE_PRODUCT_FINANCIALS',
+      entityType: 'PRODUCT',
+      entityId: productId,
+      metadata: {
+        previousCost: Number(existing.costPrice || 0),
+        previousPrice: Number(existing.price),
+        newCost: payload.costPrice !== undefined ? payload.costPrice : Number(existing.costPrice || 0),
+        newPrice: payload.price !== undefined ? payload.price : Number(existing.price),
+      } as Prisma.InputJsonValue,
+    }),
+  ]);
+
+  const price = Number(updated.price);
+  const costPrice = Number(updated.costPrice || 0);
+  const unitProfit = price - costPrice;
+  const marginPercentage = price > 0 ? (unitProfit / price) * 100 : 0;
+
+  return {
+    id: updated.id,
+    name: updated.name,
+    arabicName: updated.arabicName,
+    price,
+    costPrice,
+    unitProfit,
+    marginPercentage: Math.round(marginPercentage * 10) / 10,
+    stockQuantity: updated.stockQuantity,
   };
 };

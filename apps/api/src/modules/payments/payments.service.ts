@@ -102,6 +102,65 @@ export class PaymentsService {
   }
 
   /**
+   * Client-side or gateway verification to confirm order payment
+   */
+  static async verifyPayment(input: {
+    orderId: string;
+    userId: string;
+    paymentMethod: PaymentMethodType;
+    transactionId?: string;
+    gateway?: string;
+    status: 'PAID' | 'FAILED';
+    rawResponse?: Record<string, unknown>;
+  }) {
+    const { orderId, userId, paymentMethod, transactionId, gateway = 'MOYASAR', status, rawResponse } = input;
+
+    return await prisma.$transaction(async (tx) => {
+      const order = await tx.order.findFirst({
+        where: { id: orderId, userId },
+      });
+
+      if (!order) {
+        throw new Error('Order not found');
+      }
+
+      const txnId = transactionId || `txn_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const targetPaymentStatus = status === 'PAID' ? PaymentStatus.PAID : PaymentStatus.FAILED;
+
+      const transaction = await tx.paymentTransaction.create({
+        data: {
+          orderId: order.id,
+          gateway,
+          transactionId: txnId,
+          amount: order.total,
+          currency: order.currency,
+          status: targetPaymentStatus,
+          rawResponse: rawResponse as any,
+        },
+      });
+
+      const updatedOrder = await tx.order.update({
+        where: { id: order.id },
+        data: {
+          paymentStatus: targetPaymentStatus,
+          paymentMethod,
+          paymentMethodLabel: paymentMethod.replace('_', ' '),
+          status: targetPaymentStatus === PaymentStatus.PAID ? 'CONFIRMED' : order.status,
+        },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+
+      return { success: targetPaymentStatus === PaymentStatus.PAID, transaction, order: updatedOrder };
+    });
+  }
+
+  /**
    * Process payment provider webhook callbacks idempotently
    */
   static async processWebhookCallback(input: WebhookCallbackInput) {

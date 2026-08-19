@@ -343,9 +343,13 @@ export default function ProductDetailsPage() {
             />
           </div>
 
-          <Button type="submit" disabled={submittingReview} className="bg-slate-950 text-amber-400 hover:bg-amber-400 hover:text-slate-950 border border-amber-500/30 font-bold text-xs px-5 py-2 flex items-center gap-2">
-            <Send className="w-3.5 h-3.5" />
-            {submittingReview ? t('Submitting...', 'جاري النشر...') : t('Post Review', 'نشر التقييم')}
+          <Button
+            type="submit"
+            disabled={submittingReview}
+            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-5 py-2.5 rounded-xl shadow-md flex items-center gap-2 cursor-pointer"
+          >
+            <Send className="w-3.5 h-3.5 text-slate-950" />
+            <span>{submittingReview ? t('Submitting...', 'جاري النشر...') : t('Post Review', 'نشر التقييم')}</span>
           </Button>
         </form>
 

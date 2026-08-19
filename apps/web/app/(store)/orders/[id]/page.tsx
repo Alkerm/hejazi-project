@@ -137,31 +137,10 @@ export default function OrderDetailsPage() {
         <OrderTrackerStepper status={order.status} driverName={order.driverName} driverPhone={order.driverPhone} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass-card rounded-2xl p-5 border border-slate-200/40 space-y-3 text-xs text-slate-600 bg-white">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2">
-            {t('Payment & Delivery Info', 'معلومات الدفع والتوصيل')}
-          </h2>
-          <p><strong className="text-slate-700">{t('Payment Status:', 'حالة الدفع:')}</strong> {order.paymentStatus}</p>
-          <p><strong className="text-slate-700">{t('Payment Method:', 'طريقة الدفع:')}</strong> {order.paymentMethodLabel ?? t('Cash on Delivery', 'الدفع عند الاستلام')}</p>
-          <p><strong className="text-slate-700">{t('Delivery Estimate:', 'موعد التوصيل المتوقع:')}</strong> {order.deliveryEstimate ?? t('3 to 5 business days', 'من 3 إلى 5 أيام عمل')}</p>
-          <p><strong className="text-slate-700">{t('Invoice Number:', 'رقم الفاتورة:')}</strong> {order.invoiceNumber ?? t('Pending', 'قيد الاصدار')}</p>
-        </div>
-
-        <div className="glass-card rounded-2xl p-5 border border-slate-200/40 space-y-3 text-xs text-slate-600 bg-white">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2">
-            {t('Shipping Address', 'عنوان الشحن والتسليم')}
-          </h2>
-          <p className="font-semibold text-slate-800">{order.shippingAddressSnapshot.line1}</p>
-          {order.shippingAddressSnapshot.line2 && <p>{order.shippingAddressSnapshot.line2}</p>}
-          <p>{order.shippingAddressSnapshot.city}, {order.shippingAddressSnapshot.country} {order.shippingAddressSnapshot.postalCode}</p>
-        </div>
-      </div>
-
-      {/* Items List */}
-      <div className="glass-card rounded-2xl p-5 border border-slate-200/40 space-y-4 bg-white">
+      {/* 1. Ordered Products & Financial Summary Box (Appears First) */}
+      <div className="glass-card rounded-2xl p-6 border border-slate-200/50 space-y-4 bg-white shadow-xs">
         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2">
-          {t('Ordered Energy & Security Products', 'المنتجات المطلوبة')}
+          {t('Ordered Products & Summary', 'المنتجات المطلوبة وملخص الفاتورة')}
         </h2>
         <div className="space-y-3">
           {order.items.map((item) => (
@@ -190,9 +169,55 @@ export default function OrderDetailsPage() {
             <span>{formatMoney(order.shippingAmount, order.currency)}</span>
           </div>
           <div className="flex justify-between font-bold text-sm text-slate-900 border-t border-slate-200/50 pt-2">
-            <span>{t('Total', 'الإجمالي النهائى')}</span>
+            <span>{t('Total', 'الإجمالي النهائي')}</span>
             <span className="text-slate-950 font-black">{formatMoney(order.total, order.currency)}</span>
           </div>
+        </div>
+      </div>
+
+      {/* 2. Payment Info & Shipping Address Boxes Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="glass-card rounded-2xl p-5 border border-slate-200/40 space-y-3 text-xs text-slate-600 bg-white">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2">
+            {t('Payment & Delivery Info', 'معلومات الدفع والتوصيل')}
+          </h2>
+          <p><strong className="text-slate-700">{t('Payment Status:', 'حالة الدفع:')}</strong>{' '}
+            <span className={order.paymentStatus === 'PAID' ? 'text-emerald-700 font-bold' : 'text-amber-700 font-bold'}>
+              {order.paymentStatus}
+            </span>
+          </p>
+          <p><strong className="text-slate-700">{t('Payment Method:', 'طريقة الدفع:')}</strong> {order.paymentMethodLabel ?? t('Cash on Delivery', 'الدفع عند الاستلام')}</p>
+          <p><strong className="text-slate-700">{t('Delivery Estimate:', 'موعد التوصيل المتوقع:')}</strong> {order.deliveryEstimate ?? t('3 to 5 business days', 'من 3 إلى 5 أيام عمل')}</p>
+          <p><strong className="text-slate-700">{t('Invoice Number:', 'رقم الفاتورة:')}</strong> {order.invoiceNumber ?? t('Pending', 'قيد الاصدار')}</p>
+
+          {order.paymentStatus !== 'PAID' && order.status !== 'CANCELLED' && (
+            <div className="pt-2">
+              <Link href={`/orders/${order.id}/payment`}>
+                <Button className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs py-2.5 rounded-xl shadow-md">
+                  {t('Complete Payment Now', 'سداد قيمة الطلب الآن')}
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {order.paymentStatus === 'PAID' && (
+            <div className="pt-2">
+              <Link href={`/orders/${order.id}/success`}>
+                <Button variant="secondary" className="w-full border-slate-200 hover:bg-slate-50 text-slate-800 font-bold text-xs py-2 rounded-xl">
+                  {t('View Tax Invoice (ZATCA)', 'عرض الفاتورة الضريبية')}
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        <div className="glass-card rounded-2xl p-5 border border-slate-200/40 space-y-3 text-xs text-slate-600 bg-white">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2">
+            {t('Shipping Address', 'عنوان الشحن والتسليم')}
+          </h2>
+          <p className="font-semibold text-slate-800">{order.shippingAddressSnapshot.line1}</p>
+          {order.shippingAddressSnapshot.line2 && <p>{order.shippingAddressSnapshot.line2}</p>}
+          <p>{order.shippingAddressSnapshot.city}, {order.shippingAddressSnapshot.country} {order.shippingAddressSnapshot.postalCode}</p>
         </div>
       </div>
     </div>

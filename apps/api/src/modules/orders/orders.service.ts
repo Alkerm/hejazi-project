@@ -68,6 +68,7 @@ export const createOrderFromCart = async (
         }
 
         const unitPrice = Number(item.product.price);
+        const unitCost = Number(item.product.costPrice || 0);
         const lineTotal = toMoney(unitPrice * item.quantity);
         subtotal += lineTotal;
 
@@ -75,6 +76,7 @@ export const createOrderFromCart = async (
           productId: item.productId,
           productNameSnapshot: item.product.name,
           unitPriceSnapshot: new Prisma.Decimal(unitPrice),
+          costPriceSnapshot: new Prisma.Decimal(unitCost),
           quantity: item.quantity,
           lineTotal: new Prisma.Decimal(lineTotal),
         });

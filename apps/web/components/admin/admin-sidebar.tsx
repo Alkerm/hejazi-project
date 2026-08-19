@@ -17,9 +17,16 @@ import {
   Store,
   LogOut,
   User,
+  Users,
+  Megaphone,
+  Wallet,
   Globe,
   X,
   ShieldAlert,
+  ScrollText,
+  ShieldCheck,
+  RotateCcw,
+  FileText,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/language-context';
 import { UserProfile } from '@/lib/types';
@@ -54,6 +61,7 @@ export function AdminSidebar({ user, isOpen, onClose }: AdminSidebarProps) {
       title: t('Overview', 'نظرة عامة'),
       items: [
         { href: '/admin', label: t('Dashboard', 'لوحة التحكم'), icon: LayoutDashboard },
+        { href: '/admin/financials', label: t('Financial Wallet', 'محفظة مالية'), icon: Wallet },
         { href: '/admin/analytics', label: t('Analytics', 'التحليلات'), icon: BarChart3 },
         { href: '/admin/audit-logs', label: t('Audit Logs', 'سجل العمليات'), icon: History },
       ],
@@ -63,9 +71,20 @@ export function AdminSidebar({ user, isOpen, onClose }: AdminSidebarProps) {
       items: [
         { href: '/admin/products', label: t('Products', 'المنتجات'), icon: Package },
         { href: '/admin/orders', label: t('Orders', 'الطلبات'), icon: ShoppingBag },
+        { href: '/admin/customers', label: t('Customers & Announcements', 'العملاء والرسائل العامة'), icon: Users },
         { href: '/admin/drivers', label: t('Drivers & Deliveries', 'إدارة السائقين والشحنات'), icon: Truck },
         { href: '/driver', label: t('Driver Portal', 'بوابة السائقين'), icon: Truck },
         { href: '/admin/inventory', label: t('Inventory', 'المخزون'), icon: Boxes },
+      ],
+    },
+    {
+      title: t('Store Policies & Content', 'سياسات المتجر والمحتوى'),
+      items: [
+        { href: '/admin/policies/terms', label: t('Terms & Conditions', 'الشروط والأحكام'), icon: ScrollText },
+        { href: '/admin/policies/privacy', label: t('Privacy Policy', 'سياسة الخصوصية'), icon: ShieldCheck },
+        { href: '/admin/policies/shipping-delivery', label: t('Shipping & Delivery', 'الشحن والتوصيل'), icon: Truck },
+        { href: '/admin/policies/returns-refunds', label: t('Returns & Warranty', 'الإرجاع والضمان'), icon: RotateCcw },
+        { href: '/admin/policies/complaints-contact', label: t('Complaints & Customer Care', 'الشكاوى وخدمة العملاء'), icon: Headphones },
       ],
     },
     {

@@ -1,7 +1,23 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Truck, UserPlus, ShieldCheck, CheckCircle2, Clock, MapPin, Phone, Mail, AlertCircle, RefreshCw, Search } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Truck,
+  UserPlus,
+  ShieldCheck,
+  CheckCircle2,
+  Clock,
+  MapPin,
+  Phone,
+  Mail,
+  AlertCircle,
+  RefreshCw,
+  Search,
+  Package,
+  ExternalLink,
+  X,
+} from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 import { api } from '@/lib/api';
 import { DriverAccount, Order } from '@/lib/types';
@@ -18,6 +34,7 @@ export default function AdminDriversPage() {
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'DRIVERS'>('OVERVIEW');
   const [deliverySearch, setDeliverySearch] = useState('');
   const [driverSearch, setDriverSearch] = useState('');
+  const [viewingDriver, setViewingDriver] = useState<DriverAccount | null>(null);
 
   // Modal State for New Driver Account Creation
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -489,7 +506,15 @@ export default function AdminDriversPage() {
                     <span>
                       {t('Total Deliveries:', 'إجمالي التوصيلات:')} <strong className="text-slate-700">{drv._count?.driverOrders || 0}</strong>
                     </span>
-                    <span>{new Date(drv.createdAt).toLocaleDateString()}</span>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setViewingDriver(drv)}
+                      className="border-amber-300 bg-amber-50/70 hover:bg-amber-100 text-amber-950 text-[10px] font-extrabold py-1 px-3 rounded-xl flex items-center gap-1.5 shadow-2xs cursor-pointer transition"
+                    >
+                      <Package className="w-3.5 h-3.5 text-amber-600" />
+                      <span>{t('Driver Orders', 'طلبات السائق')}</span>
+                    </Button>
                   </div>
                 </div>
               ))
@@ -579,6 +604,220 @@ export default function AdminDriversPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DRIVER ORDERS MODAL (CURRENT + COMPLETED SECTIONS) */}
+      {viewingDriver && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-3xl glass-card rounded-3xl bg-white p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-200 animate-fade-in max-h-[90vh] overflow-y-auto">
+            {/* Driver Profile Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-slate-950 font-mono font-bold text-base shadow-sm">
+                  {viewingDriver.firstName.charAt(0)}{viewingDriver.lastName.charAt(0)}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-extrabold text-slate-900 text-base">
+                      {viewingDriver.firstName} {viewingDriver.lastName}
+                    </h3>
+                    <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[9px] font-extrabold text-emerald-700 uppercase tracking-wider border border-emerald-200">
+                      {t('Authorized Driver', 'سائق معتمد')}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1 font-mono">
+                    <span className="flex items-center gap-1">
+                      <Mail className="w-3.5 h-3.5 text-slate-400" /> {viewingDriver.email}
+                    </span>
+                    {viewingDriver.phone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="w-3.5 h-3.5 text-slate-400" /> <span dir="ltr">{viewingDriver.phone}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setViewingDriver(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Quick Metrics Bar */}
+            {(() => {
+              const driverOrders = deliveries.filter(
+                (d) =>
+                  d.driverId === viewingDriver.id ||
+                  (d.driverName &&
+                    d.driverName.toLowerCase() === `${viewingDriver.firstName} ${viewingDriver.lastName}`.toLowerCase())
+              );
+              const currentOrders = driverOrders.filter((d) => d.status !== 'DELIVERED' && d.status !== 'CANCELLED');
+              const completedOrders = driverOrders.filter((d) => d.status === 'DELIVERED');
+
+              return (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-xs">
+                      <span className="text-[10px] font-bold text-amber-800 uppercase block">
+                        {t('Active / In-Transit', 'الطلبات الحالية')}
+                      </span>
+                      <span className="text-xl font-black text-amber-950 font-mono">{currentOrders.length}</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 text-xs">
+                      <span className="text-[10px] font-bold text-emerald-800 uppercase block">
+                        {t('Completed Deliveries', 'الطلبات المسلمة')}
+                      </span>
+                      <span className="text-xl font-black text-emerald-950 font-mono">{completedOrders.length}</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs col-span-2 sm:col-span-1">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">
+                        {t('Total Assigned', 'إجمالي الطلبات')}
+                      </span>
+                      <span className="text-xl font-black text-slate-900 font-mono">{driverOrders.length}</span>
+                    </div>
+                  </div>
+
+                  {/* SECTION 1: ACTIVE / CURRENT DELIVERIES */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                        <Clock className="w-4 h-4 text-amber-500" />
+                        <span>{t('1. Current & Active Deliveries', '1. الطلبات الحالية قيد التوصيل')}</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-900 font-bold ml-1">
+                          {currentOrders.length}
+                        </span>
+                      </h4>
+                    </div>
+
+                    {currentOrders.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400 font-medium">
+                        {t('No active deliveries in progress for this driver.', 'لا توجد طلبات جارية قيد التوصيل لهذا السائق حالياً.')}
+                      </div>
+                    ) : (
+                      <div className="grid gap-3">
+                        {currentOrders.map((ord) => (
+                          <div
+                            key={ord.id}
+                            className="p-4 rounded-2xl border border-amber-200/70 bg-gradient-to-r from-amber-50/40 via-white to-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs hover:shadow-xs transition"
+                          >
+                            <div className="space-y-1 text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-bold text-slate-900">
+                                  #{ord.id.slice(-6).toUpperCase()}
+                                </span>
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 uppercase">
+                                  {ord.status === 'SHIPPED' ? t('Out for Delivery', 'جاري التوصيل') : ord.status}
+                                </span>
+                                <span className="font-mono font-black text-slate-900">
+                                  {formatMoney(ord.total, ord.currency)}
+                                </span>
+                              </div>
+
+                              <p className="font-medium text-slate-700">
+                                {ord.user ? `${ord.user.firstName} ${ord.user.lastName}` : ord.customerNameSnapshot || 'Customer'}
+                                {ord.user?.phone && (
+                                  <span className="text-slate-400 font-mono text-[11px] ml-2">({ord.user.phone})</span>
+                                )}
+                              </p>
+
+                              <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                <MapPin className="w-3 h-3 text-amber-500 shrink-0" />
+                                <span>
+                                  {ord.shippingAddressSnapshot?.city}, {ord.shippingAddressSnapshot?.line1}
+                                </span>
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-2 self-end sm:self-auto">
+                              <Link
+                                href={`/admin/orders/${ord.id}`}
+                                className="text-[11px] font-bold text-slate-700 hover:text-amber-600 flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition shadow-2xs"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                <span>{t('View Order', 'عرض الطلب')}</span>
+                              </Link>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* SECTION 2: COMPLETED DELIVERIES */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span>{t('2. Completed Deliveries History', '2. سجل الطلبات المسلمة بنجاح')}</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-900 font-bold ml-1">
+                          {completedOrders.length}
+                        </span>
+                      </h4>
+                    </div>
+
+                    {completedOrders.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400 font-medium">
+                        {t('No completed deliveries recorded yet.', 'لم يقم السائق بتسليم أي طلبات بعد.')}
+                      </div>
+                    ) : (
+                      <div className="grid gap-2.5 max-h-64 overflow-y-auto pr-1">
+                        {completedOrders.map((ord) => (
+                          <div
+                            key={ord.id}
+                            className="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 flex items-center justify-between text-xs hover:bg-white transition"
+                          >
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-bold text-slate-900">
+                                  #{ord.id.slice(-6).toUpperCase()}
+                                </span>
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  {t('Delivered', 'تم التوصيل')}
+                                </span>
+                                <span className="font-mono font-bold text-slate-700">
+                                  {formatMoney(ord.total, ord.currency)}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500">
+                                {ord.user ? `${ord.user.firstName} ${ord.user.lastName}` : ord.customerNameSnapshot} •{' '}
+                                {ord.shippingAddressSnapshot?.city}
+                              </p>
+                            </div>
+
+                            <Link
+                              href={`/admin/orders/${ord.id}`}
+                              className="text-[10px] font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1"
+                            >
+                              <span>{t('Details', 'تفاصيل')}</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </Link>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
+
+            {/* Modal Footer */}
+            <div className="pt-3 border-t border-slate-100 flex justify-end">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setViewingDriver(null)}
+                className="text-xs px-5 py-2 border-slate-200 cursor-pointer"
+              >
+                {t('Close', 'إغلاق')}
+              </Button>
+            </div>
           </div>
         </div>
       )}

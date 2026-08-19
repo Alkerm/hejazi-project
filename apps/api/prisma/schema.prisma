@@ -120,6 +120,7 @@ model Product {
   description         String
   arabicDescription   String?
   price               Decimal       @db.Decimal(10, 2)
+  costPrice           Decimal       @default(0) @db.Decimal(10, 2)
   stockQuantity       Int
   sku                 String?
   brand               String?
@@ -225,7 +226,8 @@ model OrderItem {
   orderId             String
   productId           String
   productNameSnapshot String
-  unitPriceSnapshot   Decimal @db.Decimal(10, 2)
+  unitPriceSnapshot   Decimal  @db.Decimal(10, 2)
+  costPriceSnapshot   Decimal? @default(0) @db.Decimal(10, 2)
   quantity            Int
   lineTotal           Decimal @db.Decimal(10, 2)
 
@@ -360,4 +362,19 @@ model AdminAuditLog {
   @@index([adminUserId])
   @@index([entityType])
   @@index([createdAt])
+}
+
+model StorePolicy {
+  id        String   @id
+  slug      String   @unique
+  titleEn   String
+  titleAr   String
+  summaryEn String?
+  summaryAr String?
+  contentEn String
+  contentAr String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([slug])
 }

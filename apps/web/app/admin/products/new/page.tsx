@@ -19,6 +19,7 @@ const initialForm = {
   description: '',
   arabicDescription: '',
   price: 0,
+  costPrice: 0,
   stockQuantity: 0,
   sku: '',
   brand: '',
@@ -161,14 +162,42 @@ export default function AdminCreateProductPage() {
               isRequired
             />
 
-            <Input
-              label={t('Price (SAR)', 'السعر (ر.س)')}
-              type="number"
-              value={form.price}
-              onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-              required
-              isRequired
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input
+                label={t('Cost Price (SAR) - سعر التكلفة', 'سعر التكلفة (ر.س)')}
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.costPrice}
+                onChange={(e) => setForm({ ...form, costPrice: Number(e.target.value) })}
+                placeholder="0.00"
+              />
+
+              <Input
+                label={t('Selling Price (SAR) - سعر البيع', 'سعر البيع للعميل (ر.س)')}
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                required
+                isRequired
+              />
+            </div>
+
+            {/* Live Profit Preview */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span className="text-slate-600 font-medium">{t('Expected Unit Profit & Margin:', 'الربح المتوقع للقطعة:')}</span>
+              <div className="flex items-center gap-2 font-mono font-bold">
+                <span className={form.price - (form.costPrice || 0) >= 0 ? 'text-emerald-700 font-extrabold' : 'text-rose-600 font-extrabold'}>
+                  {(form.price - (form.costPrice || 0)).toFixed(2)} SAR
+                </span>
+                <span className="text-slate-300">|</span>
+                <span className="text-slate-700 font-bold">
+                  {form.price > 0 ? `${(((form.price - (form.costPrice || 0)) / form.price) * 100).toFixed(1)}% margin` : '0%'}
+                </span>
+              </div>
+            </div>
 
             <Input
               label={t('Stock Quantity', 'الكمية في المخزون')}

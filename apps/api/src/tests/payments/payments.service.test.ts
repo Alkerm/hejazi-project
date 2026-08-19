@@ -95,4 +95,56 @@ describe('PaymentsService Unit Tests', () => {
     expect(result.success).toBe(true);
     expect(result.duplicate).toBe(true);
   });
+
+  it('should verify client payment transaction and confirm order', async () => {
+    const mockOrder = {
+      id: 'ord_456',
+      userId: 'usr_456',
+      total: 299.0,
+      currency: 'SAR',
+      paymentStatus: PaymentStatus.PENDING,
+      status: 'PENDING',
+    };
+
+    const mockTransaction = {
+      id: 'tx_456',
+      orderId: 'ord_456',
+      gateway: 'MOYASAR_SANDBOX',
+      amount: 299.0,
+      status: PaymentStatus.PAID,
+    };
+
+    vi.mocked(prisma.$transaction).mockImplementation(async (cb: any) => {
+      return cb({
+        order: {
+          findFirst: vi.fn().mockResolvedValue(mockOrder),
+          update: vi.fn().mockResolvedValue({
+            ...mockOrder,
+            paymentStatus: PaymentStatus.PAID,
+            status: 'CONFIRMED',
+            paymentMethod: 'MADA',
+            paymentMethodLabel: 'MADA',
+            items: [],
+          }),
+        },
+        paymentTransaction: {
+          create: vi.fn().mockResolvedValue(mockTransaction),
+        },
+      });
+    });
+
+    const result = await PaymentsService.verifyPayment({
+      orderId: 'ord_456',
+      userId: 'usr_456',
+      paymentMethod: PaymentMethodType.MADA,
+      transactionId: 'txn_test_789',
+      gateway: 'MOYASAR_SANDBOX',
+      status: 'PAID',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.order.paymentStatus).toBe(PaymentStatus.PAID);
+    expect(result.order.status).toBe('CONFIRMED');
+  });
 });
+

@@ -90,10 +90,12 @@ export default function WishlistPage() {
                 <ProductCard product={item.product} initialWishlisted={true} />
                 <div className="mt-2 flex gap-2">
                   <Button
+                    type="button"
                     onClick={() => handleAddToCart(item.product.id, item.product.name)}
-                    className="w-full bg-slate-950 hover:bg-amber-400 text-amber-400 hover:text-slate-950 border border-amber-500/30 text-xs py-2 flex items-center justify-center gap-1.5 font-bold transition shadow-xs"
+                    className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs py-2.5 rounded-xl shadow-md flex items-center justify-center gap-1.5 transition"
                   >
-                    <ShoppingBag className="w-3.5 h-3.5" /> {t('Move to Cart', 'إضافة للسلة')}
+                    <ShoppingBag className="w-3.5 h-3.5 text-slate-950" />
+                    <span>{t('Move to Cart', 'إضافة للسلة')}</span>
                   </Button>
                 </div>
               </motion.div>

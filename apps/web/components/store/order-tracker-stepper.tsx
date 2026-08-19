@@ -78,19 +78,25 @@ export function OrderTrackerStepper({
                     <div className="flex-1 h-1 bg-transparent" />
                   )}
 
-                  {/* Step Circle Node */}
-                  <div
-                    className={`flex items-center justify-center rounded-full font-black transition-all flex-none z-10 ${
-                      compact ? 'h-7 w-7 text-[10px]' : 'h-8 w-8 text-xs'
-                    } ${
-                      isCompleted
-                        ? 'bg-amber-500 text-slate-950 shadow-xs'
-                        : 'bg-slate-200 text-slate-500'
-                    } ${
-                      isCurrent ? 'ring-4 ring-amber-200 animate-pulse scale-105' : ''
-                    }`}
-                  >
-                    {idx + 1}
+                  {/* Step Circle Node with Pulsing Outer Ring Only */}
+                  <div className="relative flex items-center justify-center flex-none z-10">
+                    {/* Outer Orange Pulsing Ring/Halo (Only this pulses) */}
+                    {isCurrent && (
+                      <span className="absolute -inset-1 sm:-inset-1.5 rounded-full bg-amber-400/50 animate-pulse pointer-events-none" />
+                    )}
+
+                    {/* Original Solid Base Circle around the Number (Steady, No pulse) */}
+                    <div
+                      className={`relative flex items-center justify-center rounded-full font-black transition-all ${
+                        compact ? 'h-7 w-7 text-[10px]' : 'h-8 w-8 text-xs'
+                      } ${
+                        isCompleted
+                          ? 'bg-amber-500 text-slate-950 shadow-xs'
+                          : 'bg-slate-200 text-slate-500'
+                      }`}
+                    >
+                      {idx + 1}
+                    </div>
                   </div>
 
                   {/* Right Line Half */}

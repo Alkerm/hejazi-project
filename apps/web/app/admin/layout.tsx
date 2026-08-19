@@ -34,8 +34,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   const getPageTitle = (path: string) => {
     if (!path || path === '/admin') return t('Dashboard Overview', 'نظرة عامة على لوحة التحكم');
+    if (path.startsWith('/admin/financials')) return t('Financial Wallet & Profit Analysis', 'المحفظة المالية وتحليلات الأرباح');
+    if (path.startsWith('/admin/policies')) return t('Store Policies & Legal Management', 'إدارة سياسات المتجر والمحتوى القانوني');
     if (path.startsWith('/admin/products')) return t('Products Management', 'إدارة المنتجات');
     if (path.startsWith('/admin/orders')) return t('Orders Management', 'إدارة الطلبات');
+    if (path.startsWith('/admin/customers')) return t('Customer Base & Broadcast Announcements', 'قاعدة العملاء والرسائل الجماعية');
     if (path.startsWith('/admin/drivers')) return t('Driver & Delivery Operations', 'إدارة السائقين وتوزيع الشحنات');
     if (path.startsWith('/admin/inventory')) return t('Inventory & Low Stock', 'إدارة المخزون والتنبيهات');
     if (path.startsWith('/admin/reviews')) return t('Reviews Moderation', 'إدارة التقييمات');

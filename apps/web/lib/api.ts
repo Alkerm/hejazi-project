@@ -17,6 +17,14 @@ import type {
   Coupon,
   AppliedCouponResponse,
   SupportTicket,
+  AdminCustomersOverviewResponse,
+  AdminBroadcastEmailPayload,
+  AdminBroadcastEmailResponse,
+  AdminFinancialOverviewResponse,
+  ProductFinancialItem,
+  UpdateProductFinancialsPayload,
+  StorePolicy,
+  UpdateStorePolicyPayload,
 } from './types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1';
@@ -122,6 +130,7 @@ export const api = {
     lastName: string;
     email?: string;
     phone?: string | null;
+    nationalId?: string | null;
     marketingConsent?: boolean;
     currentPassword?: string;
     newPassword?: string;
@@ -193,6 +202,7 @@ export const api = {
     description: string;
     arabicDescription?: string | null;
     price: number;
+    costPrice?: number;
     stockQuantity: number;
     sku?: string | null;
     brand?: string | null;
@@ -223,6 +233,7 @@ export const api = {
       description: string;
       arabicDescription?: string | null;
       price: number;
+      costPrice?: number;
       stockQuantity: number;
       sku?: string | null;
       brand?: string | null;
@@ -377,6 +388,96 @@ export const api = {
     request<Order>(`/driver/${id}/complete`, {
       method: 'POST',
       body: JSON.stringify({ driverName }),
+    }),
+
+  createPaymentIntent: (payload: { orderId: string; paymentMethod: string }) =>
+    request<{
+      paymentStatus: string;
+      paymentMethod: string;
+      transactionId?: string;
+      gatewayReference?: string;
+      clientSecret?: string;
+      redirectUrl?: string | null;
+    }>('/payments/create-intent', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  verifyPayment: (payload: {
+    orderId: string;
+    paymentMethod: string;
+    transactionId?: string;
+    gateway?: string;
+    status: 'PAID' | 'FAILED';
+    rawResponse?: Record<string, unknown>;
+  }) =>
+    request<{
+      success: boolean;
+      transaction: any;
+      order: Order;
+    }>('/payments/verify', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  adminCustomersOverview: (query?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    sortBy?: 'spending' | 'orders' | 'newest' | 'name';
+    role?: 'USER' | 'ADMIN' | 'DRIVER';
+    marketingOnly?: boolean;
+  }) => {
+    const params = new URLSearchParams();
+    if (query?.page) params.set('page', String(query.page));
+    if (query?.pageSize) params.set('pageSize', String(query.pageSize));
+    if (query?.search) params.set('search', query.search);
+    if (query?.sortBy) params.set('sortBy', query.sortBy);
+    if (query?.role) params.set('role', query.role);
+    if (query?.marketingOnly !== undefined) params.set('marketingOnly', String(query.marketingOnly));
+
+    const qs = params.toString();
+    return request<AdminCustomersOverviewResponse>(`/admin/customers${qs ? `?${qs}` : ''}`);
+  },
+
+  adminSendBroadcastEmail: (payload: AdminBroadcastEmailPayload) =>
+    request<AdminBroadcastEmailResponse>('/admin/customers/broadcast-email', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  adminGetFinancials: (query?: {
+    search?: string;
+    categoryId?: string;
+    sortBy?: 'profit' | 'margin' | 'revenue' | 'stock' | 'cost' | 'price' | 'name';
+  }) => {
+    const params = new URLSearchParams();
+    if (query?.search) params.set('search', query.search);
+    if (query?.categoryId) params.set('categoryId', query.categoryId);
+    if (query?.sortBy) params.set('sortBy', query.sortBy);
+    const qs = params.toString();
+    return request<AdminFinancialOverviewResponse>(`/admin/financials${qs ? `?${qs}` : ''}`);
+  },
+
+  adminUpdateProductFinancials: (
+    id: string,
+    payload: UpdateProductFinancialsPayload
+  ) =>
+    request<ProductFinancialItem>(`/admin/financials/products/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+
+  getPolicies: () => request<StorePolicy[]>('/policies'),
+  getPolicyBySlug: (slug: string) => request<StorePolicy>(`/policies/${slug}`),
+  adminUpdatePolicy: (slug: string, payload: UpdateStorePolicyPayload) =>
+    request<StorePolicy>(`/admin/policies/${slug}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+  adminResetPolicy: (slug: string) =>
+    request<StorePolicy>(`/admin/policies/${slug}/reset`, {
+      method: 'POST',
     }),
 };
 

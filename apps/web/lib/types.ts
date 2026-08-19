@@ -13,6 +13,7 @@ export interface Product {
   description: string;
   arabicDescription?: string | null;
   price: number;
+  costPrice?: number;
   stockQuantity: number;
   sku?: string | null;
   brand?: string | null;
@@ -61,6 +62,7 @@ export interface UserProfile {
   lastName: string;
   email: string;
   phone: string | null;
+  nationalId?: string | null;
   marketingConsent: boolean;
   role: 'USER' | 'ADMIN' | 'DRIVER';
   defaultAddress: {
@@ -303,6 +305,139 @@ export interface SupportTicket {
     lastName: string;
     email: string;
   } | null;
+}
+
+export interface CustomerDirectoryItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string | null;
+  role: 'USER' | 'ADMIN' | 'DRIVER';
+  marketingConsent: boolean;
+  createdAt: string;
+  totalOrders: number;
+  totalSpent: number;
+  city?: string | null;
+  country?: string | null;
+  addressSummary?: string | null;
+}
+
+export interface TopCustomerItem {
+  userId: string;
+  customerName: string;
+  email: string;
+  phone?: string | null;
+  totalSpent: number;
+  ordersCount: number;
+  city?: string | null;
+}
+
+export interface AdminCustomersOverviewResponse {
+  metrics: {
+    totalCustomers: number;
+    totalOrders: number;
+    totalRevenue: number;
+    averageOrderValue: number;
+    marketingConsentedCount: number;
+    activeBuyersCount: number;
+  };
+  topBySpending: TopCustomerItem[];
+  topByOrders: TopCustomerItem[];
+  directory: {
+    items: CustomerDirectoryItem[];
+    meta: {
+      page: number;
+      pageSize: number;
+      total: number;
+      totalPages: number;
+    };
+  };
+}
+
+export interface AdminBroadcastEmailPayload {
+  audience: 'ALL' | 'MARKETING_ONLY' | 'VIP_ONLY';
+  subject: string;
+  title: string;
+  message: string;
+  callToActionUrl?: string;
+  callToActionLabel?: string;
+}
+
+export interface AdminBroadcastEmailResponse {
+  success: boolean;
+  recipientCount: number;
+  audience: 'ALL' | 'MARKETING_ONLY' | 'VIP_ONLY';
+  subject: string;
+  title: string;
+  sentAt: string;
+  sampleRecipients: string[];
+}
+
+export interface ProductFinancialItem {
+  id: string;
+  name: string;
+  arabicName?: string | null;
+  slug: string;
+  sku?: string | null;
+  imageUrl: string;
+  isActive: boolean;
+  category: Category;
+  price: number;
+  costPrice: number;
+  unitProfit: number;
+  marginPercentage: number;
+  stockQuantity: number;
+  stockCostValue: number;
+  stockRetailValue: number;
+  stockPotentialProfit: number;
+  unitsSold: number;
+  realizedRevenue: number;
+  realizedProfit: number;
+}
+
+export interface AdminFinancialOverviewResponse {
+  metrics: {
+    totalRevenue: number;
+    totalCostOfGoodsSold: number;
+    netRealizedProfit: number;
+    overallMarginPercentage: number;
+    inventoryTotalCostValue: number;
+    inventoryTotalRetailValue: number;
+    expectedInventoryProfit: number;
+    totalOrdersCount: number;
+    totalUnitsSoldAll: number;
+    totalInStockUnits: number;
+    activeProductsCount: number;
+  };
+  products: ProductFinancialItem[];
+}
+
+export interface UpdateProductFinancialsPayload {
+  costPrice?: number;
+  price?: number;
+}
+
+export interface StorePolicy {
+  id: string;
+  slug: string;
+  titleEn: string;
+  titleAr: string;
+  summaryEn?: string | null;
+  summaryAr?: string | null;
+  contentEn: string;
+  contentAr: string;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface UpdateStorePolicyPayload {
+  titleEn: string;
+  titleAr: string;
+  summaryEn?: string | null;
+  summaryAr?: string | null;
+  contentEn: string;
+  contentAr: string;
 }
 
 

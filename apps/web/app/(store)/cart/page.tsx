@@ -12,6 +12,7 @@ import { formatMoney } from '@/lib/format';
 import { getStockStatus } from '@/lib/stock';
 import Link from 'next/link';
 import { PaymentSelector, PaymentMethod } from '@/components/store/payment-selector';
+import { MapLocationPickerModal } from '@/components/store/map-location-picker-modal';
 import { useLanguage } from '@/lib/language-context';
 import {
   calculateOrderTotal,
@@ -20,6 +21,7 @@ import {
   DEFAULT_SHIPPING_FEE,
   VAT_RATE,
 } from '@/lib/storefront';
+import { MapPin, Navigation, ShieldCheck, UserCheck } from 'lucide-react';
 
 export default function CartPage() {
   const router = useRouter();
@@ -29,6 +31,13 @@ export default function CartPage() {
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>('MADA');
   const [placing, setPlacing] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+
+  // Required Checkout Fields: 1- Country, 2- City, 3- Address Info + National ID
+  const [country, setCountry] = useState('المملكة العربية السعودية');
+  const [city, setCity] = useState('');
+  const [addressInfo, setAddressInfo] = useState('');
+  const [nationalId, setNationalId] = useState('');
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   // Coupon state
   const [couponInput, setCouponInput] = useState('');
@@ -40,6 +49,16 @@ export default function CartPage() {
       .then(([cartData, profileData]) => {
         setCart(cartData);
         setProfile(profileData);
+        if (profileData) {
+          if (profileData.defaultAddress) {
+            setCountry(profileData.defaultAddress.country || 'المملكة العربية السعودية');
+            setCity(profileData.defaultAddress.city || '');
+            setAddressInfo(profileData.defaultAddress.line1 || '');
+          }
+          if (profileData.nationalId) {
+            setNationalId(profileData.nationalId);
+          }
+        }
       })
       .catch((err: Error) => toast.error(err.message));
   }, []);
@@ -92,27 +111,55 @@ export default function CartPage() {
       router.push('/login');
       return;
     }
-    if (!profile?.defaultAddress) {
-      toast.error(t('Please add a delivery address before placing order', 'يرجى تحديد عنوان التوصيل قبل تقديم الطلب'));
+
+    // Validation for the required checkout fields
+    if (!nationalId.trim() || nationalId.replace(/\D/g, '').length < 10) {
+      toast.error(t('Please enter a valid 10-digit National ID / Iqama number', 'يرجى إدخال رقم هوية وطنية أو إقامة صحيح (10 أرقام)'));
       return;
     }
+    if (!country.trim()) {
+      toast.error(t('Please specify the Country', 'يرجى تحديد الدولة'));
+      return;
+    }
+    if (!city.trim()) {
+      toast.error(t('Please specify the City', 'يرجى إدخال المدينة'));
+      return;
+    }
+    if (!addressInfo.trim()) {
+      toast.error(t('Please provide the Address Info (District, Street, Building)', 'يرجى إدخال تفاصيل العنوان (الحي، الشارع، المبنى)'));
+      return;
+    }
+
     setPlacing(true);
 
     try {
+      // Save address & national ID to profile in background
+      api.updateProfile({
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        phone: profile.phone,
+        nationalId: nationalId.trim(),
+        address: {
+          line1: addressInfo.trim(),
+          city: city.trim(),
+          country: country.trim(),
+          postalCode: '00000',
+        },
+      }).catch(() => {});
+
       const order = await api.createOrder({
         customerName: profile ? `${profile.firstName} ${profile.lastName}`.trim() : undefined,
         customerPhone: profile?.phone || undefined,
         shippingAddress: {
-          line1: profile.defaultAddress.line1,
-          line2: profile.defaultAddress.line2 || undefined,
-          city: profile.defaultAddress.city,
-          country: profile.defaultAddress.country,
-          postalCode: profile.defaultAddress.postalCode,
+          line1: addressInfo.trim(),
+          city: city.trim(),
+          country: country.trim(),
+          postalCode: '00000',
         },
         currency: 'SAR',
       });
-      toast.success(t('Order placed successfully!', 'تم إرسال طلبك بنجاح!'));
-      router.push(`/orders/${order.id}`);
+      toast.success(t('Order created! Proceeding to payment...', 'تم تجهيز الطلب! جاري الانتقال إلى الدفع...'));
+      router.push(`/orders/${order.id}/payment?method=${selectedPayment}`);
     } catch (err: any) {
       toast.error(err.message || 'Failed to place order');
     } finally {
@@ -275,7 +322,11 @@ export default function CartPage() {
                     placeholder={t('Enter coupon code (e.g. HALFLINK)', 'أدخل رمز الكوبون (مثال: HALFLINK)')}
                     className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 uppercase font-semibold"
                   />
-                  <Button type="submit" disabled={applyingCoupon} className="text-xs bg-slate-950 text-amber-400 hover:bg-amber-400 hover:text-slate-950 border border-amber-500/30 px-4 font-bold">
+                  <Button
+                    type="submit"
+                    disabled={applyingCoupon}
+                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-5 py-2 rounded-xl shadow-md cursor-pointer"
+                  >
                     {applyingCoupon ? '...' : t('Apply', 'تطبيق')}
                   </Button>
                 </form>
@@ -324,40 +375,115 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Delivery Address Block */}
-            <div className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-4">
-              <div>
-                <h2 className="text-xs uppercase tracking-widest font-bold text-slate-800">{t('Delivery Address', 'عنوان التوصيل')}</h2>
-                <p className="text-[10px] text-slate-400 mt-1">{t('Orders will be shipped to your default address.', 'سيتم شحن طلبك إلى عنوانك الرئيسي.')}</p>
+            {/* Required Checkout Delivery & National ID Block */}
+            <div className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-4 bg-white shadow-xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h2 className="text-xs uppercase tracking-widest font-bold text-slate-800 flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-amber-500" />
+                    {t('Delivery Location & National ID', 'بيانات التوصيل والهوية الوطنية')}
+                  </h2>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    {t('All fields below are required for Saudi shipping compliance.', 'كافة الحقول أدناه مطلوبة لضمان دقة الشحن والتوصيل.')}
+                  </p>
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200/60">
+                  {t('Required', 'إلزامي')}
+                </span>
               </div>
 
-              {profile?.defaultAddress ? (
-                <div className="space-y-3">
-                  <div className="text-xs text-slate-600 leading-relaxed font-light">
-                    <p className="font-medium text-slate-700">{profile.defaultAddress.line1}</p>
-                    {profile.defaultAddress.line2 && <p>{profile.defaultAddress.line2}</p>}
-                    <p>{profile.defaultAddress.city}, {profile.defaultAddress.country} {profile.defaultAddress.postalCode}</p>
+              <div className="space-y-3.5 text-xs">
+                {/* National ID */}
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-slate-700">
+                    {t('National ID / Iqama Number *', 'رقم الهوية الوطنية / الإقامة *')}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={10}
+                    placeholder="10XXXXXXXX / 20XXXXXXXX (10 digits)"
+                    value={nationalId}
+                    onChange={(e) => setNationalId(e.target.value.replace(/\D/g, '').substring(0, 10))}
+                    className="w-full text-xs font-mono font-bold px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-slate-50/50"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* 1. Country */}
+                  <div className="space-y-1">
+                    <label className="block text-[11px] font-bold text-slate-700">
+                      {t('1. Country *', '1. الدولة *')}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="المملكة العربية السعودية"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-slate-50/50"
+                    />
                   </div>
-                  <Link href="/cart/address" className="inline-block">
-                    <Button type="button" variant="secondary" className="border-slate-200 hover:border-slate-300 py-2 text-[10px]">
-                      {t('Change Address', 'تغيير العنوان')}
-                    </Button>
-                  </Link>
+
+                  {/* 2. City */}
+                  <div className="space-y-1">
+                    <label className="block text-[11px] font-bold text-slate-700">
+                      {t('2. City *', '2. المدينة *')}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="الرياض، جدة، الدمام... / Riyadh"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-slate-50/50"
+                    />
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-xs text-slate-500 italic">{t('No delivery address specified.', 'لم يتم تحديد عنوان التوصيل.')}</p>
-                  <Link href="/cart/address" className="inline-block">
-                    <Button type="button" variant="secondary" className="border-slate-200 hover:border-slate-300 py-2 text-[10px]">
-                      {t('Add Delivery Address', 'إضافة عنوان التوصيل')}
-                    </Button>
-                  </Link>
+
+                {/* 3. Address Info + Pin on Map button */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[11px] font-bold text-slate-700">
+                      {t('3. Address Info (District, Street, Building) *', '3. تفاصيل العنوان (الحي، الشارع، المبنى) *')}
+                    </label>
+
+                    {/* PIN MAP LOCATION BUTTON */}
+                    <button
+                      type="button"
+                      onClick={() => setIsMapModalOpen(true)}
+                      className="text-[10px] font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1 transition shadow-2xs"
+                    >
+                      <Navigation className="w-3 h-3 text-amber-600 animate-pulse" />
+                      <span>{t('📍 Pin on Map (GPS)', '📍 تحديد من الخريطة')}</span>
+                    </button>
+                  </div>
+
+                  <textarea
+                    required
+                    rows={2}
+                    placeholder={t('e.g. Al-Narjis District, Othman Bin Affan St, Building 14', 'مثال: حي النرجس، شارع عثمان بن عفان، مبنى 14، فيلا 2')}
+                    value={addressInfo}
+                    onChange={(e) => setAddressInfo(e.target.value)}
+                    className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-slate-50/50 leading-relaxed resize-none"
+                  />
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Map Location Picker Modal */}
+      <MapLocationPickerModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        onSelectLocation={(loc) => {
+          setCountry(loc.country);
+          setCity(loc.city);
+          setAddressInfo(loc.addressInfo);
+        }}
+      />
     </div>
   );
 }
