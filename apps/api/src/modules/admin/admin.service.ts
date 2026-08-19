@@ -633,13 +633,14 @@ export const getAdminFinancialOverview = async (query: {
   categoryId?: string;
   sortBy?: 'profit' | 'margin' | 'revenue' | 'stock' | 'cost' | 'price' | 'name';
 }) => {
-  const [products, activeOrders] = await Promise.all([
+  const [products, paidOrders] = await Promise.all([
     getAdminFinancialProductsRepo({
       search: query.search,
       categoryId: query.categoryId,
     }),
     prisma.order.findMany({
       where: {
+        paymentStatus: 'PAID',
         status: { not: 'CANCELLED' },
       },
       select: {
@@ -670,7 +671,7 @@ export const getAdminFinancialOverview = async (query: {
   let totalCostOfGoodsSold = 0;
   let totalUnitsSoldAll = 0;
 
-  for (const order of activeOrders) {
+  for (const order of paidOrders) {
     totalRevenue += Number(order.subtotal);
     for (const item of order.items) {
       totalUnitsSoldAll += item.quantity;
@@ -707,10 +708,12 @@ export const getAdminFinancialOverview = async (query: {
     let realizedCost = 0;
 
     for (const oi of p.orderItems) {
-      unitsSold += oi.quantity;
-      realizedRevenue += Number(oi.lineTotal);
-      const itemCost = Number(oi.costPriceSnapshot || 0) > 0 ? Number(oi.costPriceSnapshot) : costPrice;
-      realizedCost += itemCost * oi.quantity;
+      if (oi.order?.paymentStatus === 'PAID' && oi.order?.status !== 'CANCELLED') {
+        unitsSold += oi.quantity;
+        realizedRevenue += Number(oi.lineTotal);
+        const itemCost = Number(oi.costPriceSnapshot || 0) > 0 ? Number(oi.costPriceSnapshot) : costPrice;
+        realizedCost += itemCost * oi.quantity;
+      }
     }
 
     const realizedProfit = realizedRevenue - realizedCost;
@@ -765,7 +768,7 @@ export const getAdminFinancialOverview = async (query: {
       inventoryTotalCostValue: Math.round(inventoryTotalCostValue * 100) / 100,
       inventoryTotalRetailValue: Math.round(inventoryTotalRetailValue * 100) / 100,
       expectedInventoryProfit: Math.round(expectedInventoryProfit * 100) / 100,
-      totalOrdersCount: activeOrders.length,
+      totalOrdersCount: paidOrders.length,
       totalUnitsSoldAll,
       totalInStockUnits,
       activeProductsCount: products.filter((p) => p.isActive).length,
