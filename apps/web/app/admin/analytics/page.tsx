@@ -639,7 +639,7 @@ export default function AdminAnalyticsPage() {
             <div className="relative pt-6 pb-2">
               <div className="flex gap-2 sm:gap-3">
                 {/* Y-Axis Labels */}
-                <div className="flex flex-col justify-between h-44 sm:h-52 text-[10px] font-mono text-slate-400 select-none text-end shrink-0 py-0.5 min-w-[52px]">
+                <div dir="ltr" className="flex flex-col justify-between h-44 sm:h-52 text-[10px] font-mono text-slate-400 select-none text-right shrink-0 py-0.5 min-w-[56px]">
                   <span>
                     {maxTimelineRevenue >= 1000
                       ? `${(maxTimelineRevenue / 1000).toFixed(maxTimelineRevenue % 1000 === 0 ? 0 : 1)}k`

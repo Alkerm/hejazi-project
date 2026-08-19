@@ -39,12 +39,9 @@ export default function AdminInventoryPage() {
 
   // Restock Modal State
   const [restockProduct, setRestockProduct] = useState<Product | null>(null);
-  const [quantityToAdd, setQuantityToAdd] = useState<number>(20);
+  const [quantityToAdd, setQuantityToAdd] = useState<number>(0);
   const [restockNote, setRestockNote] = useState<string>('');
   const [submittingRestock, setSubmittingRestock] = useState(false);
-
-  // Quick Inline Restock Loading Tracker (productId -> boolean)
-  const [quickUpdatingId, setQuickUpdatingId] = useState<string | null>(null);
 
   const loadInventory = async () => {
     setLoading(true);
@@ -133,9 +130,9 @@ export default function AdminInventoryPage() {
   }, [products, activeTab, selectedCategory, search]);
 
   // Open Restock Modal with Initial Values
-  const handleOpenRestockModal = (product: Product, defaultQuantity = 20) => {
+  const handleOpenRestockModal = (product: Product) => {
     setRestockProduct(product);
-    setQuantityToAdd(defaultQuantity);
+    setQuantityToAdd(0);
     setRestockNote('');
   };
 
@@ -174,32 +171,6 @@ export default function AdminInventoryPage() {
       toast.error(err.message || 'Failed to adjust stock');
     } finally {
       setSubmittingRestock(false);
-    }
-  };
-
-  // Quick Direct Stepper Adjustment (+5, +10)
-  const handleQuickAdd = async (product: Product, amount: number) => {
-    setQuickUpdatingId(product.id);
-    try {
-      const res = await api.adminAdjustProductStock(product.id, {
-        quantityToAdd: amount,
-        note: 'Quick stock restock',
-      });
-
-      setProducts((prev) =>
-        prev.map((p) => (p.id === product.id ? { ...p, stockQuantity: res.newStock } : p))
-      );
-
-      toast.success(
-        t(
-          `+${amount} units added. Stock is now ${res.newStock}.`,
-          `تمت إضافة +${amount} قطعة. إجمالي المخزون الآن ${res.newStock} قطعة.`
-        )
-      );
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to adjust stock');
-    } finally {
-      setQuickUpdatingId(null);
     }
   };
 
@@ -465,7 +436,6 @@ export default function AdminInventoryPage() {
                   const stock = product.stockQuantity || 0;
                   const isOut = stock === 0;
                   const isLow = stock > 0 && stock < 10;
-                  const isUpdating = quickUpdatingId === product.id;
 
                   return (
                     <tr
@@ -522,43 +492,28 @@ export default function AdminInventoryPage() {
                       {/* Stock Status Badge */}
                       <td className="py-3.5 px-3 text-center">
                         {isOut ? (
-                          <Badge variant="danger" className="font-bold text-[10px] px-2 py-0.5">
-                            {t('Out of Stock', 'نافذ (0)')}
+                          <Badge variant="danger" className="font-bold text-[10px] px-2.5 py-0.5">
+                            {t('Out of Stock', 'نافذ')}
                           </Badge>
                         ) : isLow ? (
-                          <Badge variant="warning" className="font-bold text-[10px] px-2 py-0.5">
-                            {t('Low Stock', 'منخفض')} ({stock})
+                          <Badge variant="warning" className="font-bold text-[10px] px-2.5 py-0.5">
+                            {t('Low Stock', 'منخفض')}
                           </Badge>
                         ) : (
-                          <Badge variant="success" className="font-bold text-[10px] px-2 py-0.5">
-                            {t('In Stock', 'متوفر')} ({stock})
+                          <Badge variant="success" className="font-bold text-[10px] px-2.5 py-0.5">
+                            {t('In Stock', 'متوفر')}
                           </Badge>
                         )}
                       </td>
 
                       {/* Restock Actions */}
                       <td className="py-3.5 px-4 text-right rtl:text-left">
-                        <div className="flex items-center justify-end rtl:justify-start gap-1.5">
-                          {/* Quick +10 Stepper Button */}
-                          <button
-                            type="button"
-                            disabled={isUpdating}
-                            onClick={() => handleQuickAdd(product, 10)}
-                            className="text-[11px] font-bold px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer border border-slate-200 flex items-center gap-1 disabled:opacity-50"
-                            title={t('Quickly add +10 units', 'إضافة سريعة +10 قطع')}
-                          >
-                            {isUpdating ? (
-                              <Loader2 className="w-3 h-3 animate-spin text-slate-600" />
-                            ) : (
-                              <span>+10</span>
-                            )}
-                          </button>
-
+                        <div className="flex items-center justify-end rtl:justify-start">
                           {/* Primary "Add Stock from Provider" Modal Trigger Button */}
                           <Button
                             type="button"
-                            onClick={() => handleOpenRestockModal(product, 20)}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+                            onClick={() => handleOpenRestockModal(product)}
+                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span>{t('Add Stock', 'توريد مخزون')}</span>
@@ -649,10 +604,10 @@ export default function AdminInventoryPage() {
                     type="number"
                     min={1}
                     max={100000}
-                    value={quantityToAdd}
-                    onChange={(e) => setQuantityToAdd(Math.max(1, parseInt(e.target.value, 10) || 0))}
+                    value={quantityToAdd === 0 ? '' : quantityToAdd}
+                    onChange={(e) => setQuantityToAdd(parseInt(e.target.value, 10) || 0)}
                     className="w-full font-mono text-lg font-bold px-4 py-2.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white"
-                    placeholder="20"
+                    placeholder="0"
                     required
                   />
                   <span className="absolute right-4 rtl:left-4 rtl:right-auto top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
@@ -660,26 +615,6 @@ export default function AdminInventoryPage() {
                   </span>
                 </div>
 
-                {/* Quick Selection Chips */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
-                  <span className="text-slate-400 font-medium text-[11px] mr-1">
-                    {t('Quick add:', 'إضافة سريعة:')}
-                  </span>
-                  {[5, 10, 20, 50, 100].map((chip) => (
-                    <button
-                      key={chip}
-                      type="button"
-                      onClick={() => setQuantityToAdd(chip)}
-                      className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer border ${
-                        quantityToAdd === chip
-                          ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-2xs'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
-                      }`}
-                    >
-                      +{chip}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               {/* Optional Supplier / Batch Note */}
