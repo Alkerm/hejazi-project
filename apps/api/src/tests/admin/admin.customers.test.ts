@@ -13,6 +13,7 @@ vi.mock('../../prisma/client', () => ({
     },
     orderItem: {
       groupBy: vi.fn(),
+      aggregate: vi.fn(),
     },
     adminAuditLog: {
       findMany: vi.fn(),

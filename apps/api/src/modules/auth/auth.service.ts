@@ -1,5 +1,6 @@
 import { AppError } from '../../utils/app-error';
 import { comparePassword, hashPassword } from '../../utils/password';
+import { generateSecureToken } from '../../utils/generators';
 import { createUser, findUserByEmail, findUserById } from '../users/users.repository';
 import { createSession, deleteSession } from './session.service';
 
@@ -73,7 +74,7 @@ export const requestPasswordReset = async (email: string) => {
     return { success: true, message: 'If email exists, reset instructions have been sent.' };
   }
 
-  const token = `rst_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+  const token = generateSecureToken('rst', 32);
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
   const { prisma } = await import('../../prisma/client');

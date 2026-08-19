@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { pipeline } from 'stream/promises';
+import { generateSanitizedFilename } from '../../utils/generators';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
 
@@ -19,8 +20,7 @@ export class UploadService {
       throw new Error('Only image files (JPEG, PNG, WebP, GIF) are permitted');
     }
 
-    const ext = path.extname(fileData.filename) || '.jpg';
-    const sanitizedFilename = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}${ext}`;
+    const sanitizedFilename = generateSanitizedFilename(fileData.filename, 'img');
     const targetPath = path.join(UPLOAD_DIR, sanitizedFilename);
 
     await pipeline(fileData.file, fs.createWriteStream(targetPath));

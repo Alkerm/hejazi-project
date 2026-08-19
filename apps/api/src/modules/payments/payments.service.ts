@@ -1,6 +1,7 @@
 import { prisma } from '../../prisma/client';
 import { PaymentStatus } from '@prisma/client';
 import { PaymentMethodType } from './payments.types';
+import { generateTransactionReference, generateRefundNoteNumber } from '../../utils/generators';
 
 export interface CreatePaymentIntentInput {
   orderId: string;
@@ -69,7 +70,7 @@ export class PaymentsService {
 
     // Online Gateways (Moyasar / Stripe / Tap)
     // Generate transaction intent
-    const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const transactionId = generateTransactionReference('txn');
 
     const transaction = await prisma.paymentTransaction.create({
       data: {
@@ -124,7 +125,7 @@ export class PaymentsService {
         throw new Error('Order not found');
       }
 
-      const txnId = transactionId || `txn_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const txnId = transactionId || generateTransactionReference('txn');
       const targetPaymentStatus = status === 'PAID' ? PaymentStatus.PAID : PaymentStatus.FAILED;
 
       const transaction = await tx.paymentTransaction.create({
@@ -222,7 +223,7 @@ export class PaymentsService {
         throw new Error('Only paid orders can be refunded');
       }
 
-      const refundNoteNumber = `REF-${Date.now()}`;
+      const refundNoteNumber = generateRefundNoteNumber();
 
       const updatedOrder = await tx.order.update({
         where: { id: orderId },

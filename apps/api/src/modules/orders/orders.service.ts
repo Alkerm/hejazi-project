@@ -3,13 +3,13 @@ import { prisma } from '../../prisma/client';
 import { AppError } from '../../utils/app-error';
 import { toMoney } from '../../utils/money';
 import { normalizePagination } from '../../utils/pagination';
+import { generateInvoiceNumber } from '../../utils/generators';
 import { findOrderByUser, getCartWithItems, listOrdersByUser } from './orders.repository';
 
 const VAT_RATE = 0.15;
 const DEFAULT_SHIPPING_AMOUNT = 0;
 const DEFAULT_PAYMENT_METHOD_LABEL = 'Payment method to be confirmed';
 const DEFAULT_DELIVERY_ESTIMATE = '3 to 5 business days';
-const createInvoiceNumber = () => `INV-${Date.now()}`;
 
 export const createOrderFromCart = async (
   userId: string,
@@ -96,7 +96,7 @@ export const createOrderFromCart = async (
           userId,
           status: 'PENDING',
           paymentStatus: 'UNPAID',
-          invoiceNumber: createInvoiceNumber(),
+          invoiceNumber: generateInvoiceNumber(),
           invoiceIssuedAt: new Date(),
           subtotal: new Prisma.Decimal(subtotalRounded),
           vatAmount: new Prisma.Decimal(vatAmount),
