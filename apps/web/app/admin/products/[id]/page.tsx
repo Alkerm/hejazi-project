@@ -90,7 +90,10 @@ export default function AdminEditProductPage() {
     setMessage(null);
 
     try {
-      await api.adminUpdateProduct(productId, form);
+      await api.adminUpdateProduct(productId, {
+        ...form,
+        isActive: form.productStatus === 'APPROVED',
+      });
       router.push('/admin/products?updated=1');
       router.refresh();
     } catch (e) {
@@ -338,18 +341,6 @@ export default function AdminEditProductPage() {
               onChange={(e) => setForm({ ...form, countryOfOrigin: e.target.value })}
               placeholder="Saudi Arabia"
             />
-
-            <div className="flex flex-col justify-center gap-2 pt-2 md:col-span-2">
-              <label className="flex items-center gap-2.5 text-xs font-bold text-slate-800 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={form.isActive}
-                  onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                  className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4"
-                />
-                <span>{t('Active Product (Visible on Storefront)', 'منتج نشط (يظهر بالمتجر للعملاء)')}</span>
-              </label>
-            </div>
 
             <label className="col-span-full flex flex-col gap-1.5 text-xs font-bold text-slate-700">
               <span className="flex items-center gap-1">

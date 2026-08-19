@@ -35,7 +35,7 @@ export const adminProductUpsertSchema = z.object({
   expiryDateRequired: z.boolean().default(false),
   productStatus: z.enum(['DRAFT', 'COMPLIANCE_REVIEW', 'APPROVED', 'INACTIVE']).default('DRAFT'),
   imageUrl: z.string().url(),
-  isActive: z.boolean().default(true),
+  isActive: z.boolean().optional(),
   categoryId: z.string().min(1),
 });
 

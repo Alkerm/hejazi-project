@@ -528,15 +528,25 @@ export default function AdminProductsPage() {
 
                   {/* Status Indicator Badge */}
                   <div className="absolute top-3 right-3 rtl:left-3 rtl:right-auto z-10">
-                    {product.isActive ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/80 text-emerald-400 backdrop-blur-xs flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        {t('Live', 'معروض')}
+                    {product.productStatus === 'APPROVED' ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/80 text-emerald-400 backdrop-blur-xs flex items-center gap-1 shadow-xs">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                        {t('Approved for Sale', 'معتمد للبيع ومتاح')}
+                      </span>
+                    ) : product.productStatus === 'COMPLIANCE_REVIEW' ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/80 text-amber-300 backdrop-blur-xs flex items-center gap-1 shadow-xs">
+                        <AlertTriangle className="w-3 h-3 text-amber-400" />
+                        {t('In Review', 'قيد المراجعة')}
+                      </span>
+                    ) : product.productStatus === 'INACTIVE' ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/80 text-rose-300 backdrop-blur-xs flex items-center gap-1 shadow-xs">
+                        <EyeOff className="w-3 h-3 text-rose-400" />
+                        {t('Inactive', 'غير نشط')}
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/80 text-slate-300 backdrop-blur-xs flex items-center gap-1">
-                        <EyeOff className="w-3 h-3" />
-                        {t('Hidden', 'مخفي')}
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/80 text-slate-300 backdrop-blur-xs flex items-center gap-1 shadow-xs">
+                        <Tag className="w-3 h-3 text-slate-400" />
+                        {t('Draft', 'مسودة')}
                       </span>
                     )}
                   </div>
@@ -727,15 +737,25 @@ export default function AdminProductsPage() {
 
                       {/* Visibility / Status */}
                       <td className="py-3 px-3 text-center whitespace-nowrap">
-                        {product.isActive ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
-                            <Eye className="w-3 h-3" />
-                            {t('Active', 'نشط')}
+                        {product.productStatus === 'APPROVED' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 whitespace-nowrap shadow-2xs">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            {t('Approved for Sale', 'معتمد للبيع ومتاح')}
+                          </span>
+                        ) : product.productStatus === 'COMPLIANCE_REVIEW' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200 whitespace-nowrap shadow-2xs">
+                            <AlertTriangle className="w-3 h-3 text-amber-600" />
+                            {t('In Review', 'قيد المراجعة')}
+                          </span>
+                        ) : product.productStatus === 'INACTIVE' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200 whitespace-nowrap shadow-2xs">
+                            <EyeOff className="w-3 h-3 text-rose-600" />
+                            {t('Inactive', 'غير نشط')}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
-                            <EyeOff className="w-3 h-3" />
-                            {t('Hidden', 'مخفي')}
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap shadow-2xs">
+                            <Tag className="w-3 h-3 text-slate-500" />
+                            {t('Draft', 'مسودة')}
                           </span>
                         )}
                       </td>

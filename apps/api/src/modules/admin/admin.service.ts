@@ -129,7 +129,7 @@ export const createAdminProduct = async (
     expiryDateRequired: boolean;
     productStatus: 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
     imageUrl: string;
-    isActive: boolean;
+    isActive?: boolean;
     categoryId: string;
   },
 ) => {
@@ -161,7 +161,7 @@ export const createAdminProduct = async (
     expiryDateRequired: payload.expiryDateRequired,
     productStatus: payload.productStatus,
     imageUrl: payload.imageUrl,
-    isActive: payload.isActive,
+    isActive: payload.isActive !== undefined ? payload.isActive : payload.productStatus === 'APPROVED',
     category: { connect: { id: payload.categoryId } },
   });
 
@@ -207,7 +207,7 @@ export const updateAdminProduct = async (
     expiryDateRequired: boolean;
     productStatus: 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
     imageUrl: string;
-    isActive: boolean;
+    isActive?: boolean;
     categoryId: string;
   },
 ) => {
@@ -244,7 +244,7 @@ export const updateAdminProduct = async (
     expiryDateRequired: payload.expiryDateRequired,
     productStatus: payload.productStatus,
     imageUrl: payload.imageUrl,
-    isActive: payload.isActive,
+    isActive: payload.isActive !== undefined ? payload.isActive : payload.productStatus === 'APPROVED',
     category: {
       connect: {
         id: payload.categoryId,
