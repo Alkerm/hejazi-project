@@ -14,5 +14,11 @@ export function Badge({
   variant = 'default',
   className = '',
 }: PropsWithChildren<{ variant?: BadgeVariant; className?: string }>) {
-  return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${styles[variant]} ${className}`}>{children}</span>;
+  return (
+    <span
+      className={`inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${styles[variant]} ${className}`}
+    >
+      {children}
+    </span>
+  );
 }

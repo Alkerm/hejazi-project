@@ -637,12 +637,12 @@ export default function AdminProductsPage() {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-200/80 bg-slate-50/70 text-slate-600">
-                  <th className="py-3.5 px-4 font-bold">{t('Product', 'المنتج')}</th>
-                  <th className="py-3.5 px-3 font-bold">{t('Category & SKU', 'الفئة والرمز')}</th>
-                  <th className="py-3.5 px-3 font-bold">{t('Price & Cost', 'السعر والتكلفة')}</th>
-                  <th className="py-3.5 px-3 font-bold text-center">{t('Stock Level', 'المخزون')}</th>
-                  <th className="py-3.5 px-3 font-bold text-center">{t('Status', 'الحالة')}</th>
-                  <th className="py-3.5 px-4 font-bold text-right rtl:text-left">{t('Actions', 'الإجراءات')}</th>
+                  <th className="py-3.5 px-4 font-bold min-w-[220px]">{t('Product', 'المنتج')}</th>
+                  <th className="py-3.5 px-3 font-bold whitespace-nowrap">{t('Category & SKU', 'الفئة والرمز')}</th>
+                  <th className="py-3.5 px-3 font-bold whitespace-nowrap">{t('Price & Cost', 'السعر والتكلفة')}</th>
+                  <th className="py-3.5 px-3 font-bold text-center whitespace-nowrap">{t('Stock Level', 'المخزون')}</th>
+                  <th className="py-3.5 px-3 font-bold text-center whitespace-nowrap">{t('Status', 'الحالة')}</th>
+                  <th className="py-3.5 px-4 font-bold text-right rtl:text-left whitespace-nowrap">{t('Actions', 'الإجراءات')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -680,7 +680,7 @@ export default function AdminProductsPage() {
                       </td>
 
                       {/* Category & SKU */}
-                      <td className="py-3 px-3">
+                      <td className="py-3 px-3 whitespace-nowrap">
                         <span className="font-semibold text-slate-800 block">
                           {formatCategoryName(product.category)}
                         </span>
@@ -692,7 +692,7 @@ export default function AdminProductsPage() {
                       </td>
 
                       {/* Pricing */}
-                      <td className="py-3 px-3">
+                      <td className="py-3 px-3 whitespace-nowrap">
                         <span className="font-mono font-black text-slate-900 block">
                           {formatMoney(product.price)}
                         </span>
@@ -704,31 +704,36 @@ export default function AdminProductsPage() {
                       </td>
 
                       {/* Stock Quantity */}
-                      <td className="py-3 px-3 text-center">
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
                         {isOut ? (
-                          <Badge variant="danger" className="font-bold text-[10px] px-2 py-0.5">
-                            {t('Out (0)', 'نافذ (0)')}
-                          </Badge>
+                          <span className="inline-flex items-center justify-center gap-1 font-bold text-[11px] px-2.5 py-1 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs whitespace-nowrap">
+                            <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                            <span>{t('Out of Stock (0)', 'نافذ (0)')}</span>
+                          </span>
                         ) : isLow ? (
-                          <Badge variant="warning" className="font-bold text-[10px] px-2 py-0.5">
-                            {product.stockQuantity} {t('units', 'قطع')}
-                          </Badge>
+                          <span className="inline-flex items-center justify-center gap-1.5 font-bold text-[11px] px-2.5 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-200/90 shadow-2xs whitespace-nowrap font-mono">
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            <span>{product.stockQuantity}</span>
+                            <span className="font-sans font-normal text-[10px] text-amber-700">{t('units', 'قطع')}</span>
+                          </span>
                         ) : (
-                          <Badge variant="success" className="font-bold text-[10px] px-2 py-0.5">
-                            {product.stockQuantity} {t('units', 'قطعة')}
-                          </Badge>
+                          <span className="inline-flex items-center justify-center gap-1.5 font-bold text-[11px] px-3 py-1 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200/90 shadow-2xs whitespace-nowrap font-mono">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>{product.stockQuantity}</span>
+                            <span className="font-sans font-normal text-[10px] text-emerald-700">{t('units', 'قطعة')}</span>
+                          </span>
                         )}
                       </td>
 
                       {/* Visibility / Status */}
-                      <td className="py-3 px-3 text-center">
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
                         {product.isActive ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
                             <Eye className="w-3 h-3" />
                             {t('Active', 'نشط')}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
                             <EyeOff className="w-3 h-3" />
                             {t('Hidden', 'مخفي')}
                           </span>
@@ -736,7 +741,7 @@ export default function AdminProductsPage() {
                       </td>
 
                       {/* Action Buttons */}
-                      <td className="py-3 px-4 text-right rtl:text-left">
+                      <td className="py-3 px-4 text-right rtl:text-left whitespace-nowrap">
                         <div className="flex items-center justify-end rtl:justify-start gap-1.5">
                           <Link href={`/admin/products/${product.id}`}>
                             <Button variant="secondary" className="text-xs py-1.5 px-3 rounded-xl border-slate-200">
