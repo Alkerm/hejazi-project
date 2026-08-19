@@ -16,6 +16,7 @@ import {
   adminBroadcastEmailSchema,
   adminFinancialsQuerySchema,
   adminUpdateProductFinancialsSchema,
+  adminAdjustStockSchema,
 } from './admin.schemas';
 import {
   createAdminCategory,
@@ -37,6 +38,7 @@ import {
   updateAdminOrderStatus,
   updateAdminPaymentStatus,
   updateAdminProduct,
+  adjustAdminProductStock,
 } from './admin.service';
 
 export const adminDashboardSummaryHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -134,7 +136,7 @@ export const adminLowStockHandler = async (request: FastifyRequest, reply: Fasti
 export const adminSalesAnalyticsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   await requireAdmin(request, reply);
   const query = adminSalesQuerySchema.parse(request.query);
-  const data = await getAdminSalesAnalytics(query.days);
+  const data = await getAdminSalesAnalytics(query);
   return ok(reply, data);
 };
 
@@ -173,3 +175,12 @@ export const adminUpdateProductFinancialsHandler = async (request: FastifyReques
   const data = await updateAdminProductFinancials(request.auth!.userId, id, payload);
   return ok(reply, data);
 };
+
+export const adminAdjustProductStockHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  await requireAdmin(request, reply);
+  const { id } = adminProductIdSchema.parse(request.params);
+  const payload = adminAdjustStockSchema.parse(request.body);
+  const data = await adjustAdminProductStock(request.auth!.userId, id, payload);
+  return ok(reply, data);
+};
+

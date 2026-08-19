@@ -54,6 +54,12 @@ export const adminProductIdSchema = z.object({
   id: z.string().min(1),
 });
 
+export const adminAdjustStockSchema = z.object({
+  quantityToAdd: z.coerce.number().int().min(1).max(100000),
+  costPrice: z.coerce.number().min(0).optional(),
+  note: z.string().max(300).optional(),
+});
+
 export const adminListOrdersQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   pageSize: z.coerce.number().int().positive().max(50).default(10),
@@ -77,7 +83,12 @@ export const adminLowStockQuerySchema = z.object({
 });
 
 export const adminSalesQuerySchema = z.object({
-  days: z.coerce.number().int().positive().max(365).default(30),
+  period: z.enum(['MONTH', 'YEAR', 'ALL_TIME', 'CUSTOM', 'DAYS']).default('MONTH').optional(),
+  year: z.coerce.number().int().min(2020).max(2100).optional(),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  days: z.coerce.number().int().positive().max(3650).optional(),
 });
 
 export const adminAuditLogsQuerySchema = z.object({

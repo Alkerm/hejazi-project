@@ -177,9 +177,21 @@ export interface AdminDashboardSummary {
 }
 
 export interface AdminSalesAnalytics {
-  periodDays: number;
+  periodType: 'MONTH' | 'YEAR' | 'ALL_TIME' | 'CUSTOM' | 'DAYS';
+  periodLabel: {
+    en: string;
+    ar: string;
+  };
+  selectedYear?: number;
+  selectedMonth?: number;
+  startDate?: string | null;
+  endDate?: string | null;
   totalRevenue: number;
   totalOrders: number;
+  totalUnitsSold: number;
+  averageOrderValue: number;
+  previousPeriodRevenue?: number | null;
+  growthRate?: number | null;
   topProducts: Array<{
     productId: string;
     productName: string;
@@ -193,6 +205,19 @@ export interface AdminSalesAnalytics {
     ordersCount: number;
     totalSpent: number;
   }>;
+  paymentMethods: Array<{
+    method: string;
+    label: string;
+    revenue: number;
+    ordersCount: number;
+    percentage: number;
+  }>;
+  timeline: Array<{
+    period: string;
+    revenue: number;
+    orders: number;
+  }>;
+  periodDays?: number;
   salesByDay: Array<{
     day: string;
     revenue: number;

@@ -276,6 +276,19 @@ export const api = {
 
   adminInventoryLowStock: (query = '') =>
     request<AdminInventoryResponse>(`/admin/inventory/low-stock${query}`),
+  adminAdjustProductStock: (
+    productId: string,
+    payload: { quantityToAdd: number; costPrice?: number; note?: string },
+  ) =>
+    request<{
+      product: Product;
+      previousStock: number;
+      quantityAdded: number;
+      newStock: number;
+    }>(`/admin/inventory/products/${productId}/stock`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
   adminSalesAnalytics: (query = '') => request<AdminSalesAnalytics>(`/admin/analytics/sales${query}`),
   adminAuditLogs: (query = '') => request<Paginated<AdminAuditLog>>(`/admin/audit-logs${query}`),
 

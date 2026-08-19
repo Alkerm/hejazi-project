@@ -19,6 +19,7 @@ import {
   adminBroadcastEmailHandler,
   adminFinancialsHandler,
   adminUpdateProductFinancialsHandler,
+  adminAdjustProductStockHandler,
 } from './admin.controller';
 
 export const adminRoutes = async (app: FastifyInstance) => {
@@ -44,6 +45,7 @@ export const adminRoutes = async (app: FastifyInstance) => {
   app.patch('/financials/products/:id', adminUpdateProductFinancialsHandler);
 
   app.get('/inventory/low-stock', adminLowStockHandler);
+  app.patch('/inventory/products/:id/stock', adminAdjustProductStockHandler);
   app.get('/analytics/sales', adminSalesAnalyticsHandler);
   app.get('/audit-logs', adminAuditLogsHandler);
 };

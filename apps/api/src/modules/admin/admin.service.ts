@@ -21,6 +21,9 @@ import {
   getRecentOrdersRepo,
   getRevenueAggregateRepo,
   getSalesByDayRepo,
+  getSalesTimelineByDayRepo,
+  getSalesTimelineByMonthRepo,
+  getPaymentMethodsBreakdownRepo,
   getTopCustomersByOrdersRepo,
   getTopCustomersRepo,
   getTopSellingProductsRepo,
@@ -34,6 +37,15 @@ import {
   getAdminFinancialProductsRepo,
   updateProductFinancialsRepo,
 } from './admin.repository';
+
+export interface AdminSalesAnalyticsQuery {
+  period?: 'MONTH' | 'YEAR' | 'ALL_TIME' | 'CUSTOM' | 'DAYS';
+  year?: number;
+  month?: number;
+  startDate?: string;
+  endDate?: string;
+  days?: number;
+}
 
 export const getAdminDashboardSummary = async () => {
   const [{ productsCount, lowStockCount, pendingOrdersCount, usersCount }, revenue, recentOrders, topProducts] =
@@ -396,21 +408,139 @@ export const getAdminLowStock = async (query: { threshold?: number; page: number
   };
 };
 
-export const getAdminSalesAnalytics = async (days: number) => {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
+export const getAdminSalesAnalytics = async (params: AdminSalesAnalyticsQuery = {}) => {
+  const period = params.period || (params.days ? 'DAYS' : 'MONTH');
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1-12
 
-  const [revenueAggregate, topProducts, topCustomers, salesByDay] = await Promise.all([
-    getRevenueAggregateRepo(startDate),
-    getTopSellingProductsRepo(10, startDate),
-    getTopCustomersRepo(startDate, 10),
-    getSalesByDayRepo(startDate),
-  ]);
+  let startDate: Date | undefined;
+  let endDate: Date | undefined;
+  let prevStartDate: Date | undefined;
+  let prevEndDate: Date | undefined;
+  let groupBy: 'DAY' | 'MONTH' = 'DAY';
+  let targetYear = params.year ?? currentYear;
+  let targetMonth = params.month ?? currentMonth;
+  let labelEn = '';
+  let labelAr = '';
+
+  const monthNamesEn = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const monthNamesAr = [
+    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+  ];
+
+  if (period === 'MONTH') {
+    targetYear = params.year ?? currentYear;
+    targetMonth = params.month ?? currentMonth;
+    if (targetMonth < 1 || targetMonth > 12) targetMonth = currentMonth;
+
+    startDate = new Date(Date.UTC(targetYear, targetMonth - 1, 1, 0, 0, 0, 0));
+    endDate = new Date(Date.UTC(targetYear, targetMonth, 0, 23, 59, 59, 999));
+    groupBy = 'DAY';
+
+    const prevYear = targetMonth === 1 ? targetYear - 1 : targetYear;
+    const prevMonth = targetMonth === 1 ? 12 : targetMonth - 1;
+    prevStartDate = new Date(Date.UTC(prevYear, prevMonth - 1, 1, 0, 0, 0, 0));
+    prevEndDate = new Date(Date.UTC(prevYear, prevMonth, 0, 23, 59, 59, 999));
+
+    labelEn = `${monthNamesEn[targetMonth - 1]} ${targetYear}`;
+    labelAr = `${monthNamesAr[targetMonth - 1]} ${targetYear}`;
+  } else if (period === 'YEAR') {
+    targetYear = params.year ?? currentYear;
+    startDate = new Date(Date.UTC(targetYear, 0, 1, 0, 0, 0, 0));
+    endDate = new Date(Date.UTC(targetYear, 11, 31, 23, 59, 59, 999));
+    groupBy = 'MONTH';
+
+    prevStartDate = new Date(Date.UTC(targetYear - 1, 0, 1, 0, 0, 0, 0));
+    prevEndDate = new Date(Date.UTC(targetYear - 1, 11, 31, 23, 59, 59, 999));
+
+    labelEn = `Year ${targetYear}`;
+    labelAr = `عام ${targetYear}`;
+  } else if (period === 'ALL_TIME') {
+    startDate = undefined;
+    endDate = new Date();
+    groupBy = 'MONTH';
+
+    labelEn = 'All Time (Store Inception to Present)';
+    labelAr = 'منذ انطلاق المتجر حتى اليوم';
+  } else if (period === 'CUSTOM') {
+    if (params.startDate) {
+      startDate = new Date(params.startDate);
+      startDate.setHours(0, 0, 0, 0);
+    }
+    if (params.endDate) {
+      endDate = new Date(params.endDate);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      endDate = new Date();
+    }
+    const diffDays = startDate && endDate ? Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) : 90;
+    groupBy = diffDays <= 62 ? 'DAY' : 'MONTH';
+
+    labelEn = `Custom Period (${params.startDate || 'Start'} to ${params.endDate || 'Now'})`;
+    labelAr = `فترة مخصصة (${params.startDate || 'البداية'} إلى ${params.endDate || 'الآن'})`;
+  } else {
+    // DAYS
+    const days = params.days ?? 30;
+    endDate = new Date();
+    startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    groupBy = 'DAY';
+
+    labelEn = `Last ${days} Days`;
+    labelAr = `آخر ${days} يوماً`;
+  }
+
+  const [revenueAggregate, topProducts, topCustomers, timelineRaw, paymentMethods, prevRevenueAggregate] =
+    await Promise.all([
+      getRevenueAggregateRepo(startDate, endDate),
+      getTopSellingProductsRepo(10, startDate, endDate),
+      getTopCustomersRepo(startDate, 10, endDate),
+      groupBy === 'DAY'
+        ? getSalesTimelineByDayRepo(startDate, endDate)
+        : getSalesTimelineByMonthRepo(startDate, endDate),
+      getPaymentMethodsBreakdownRepo(startDate, endDate),
+      prevStartDate && prevEndDate ? getRevenueAggregateRepo(prevStartDate, prevEndDate) : Promise.resolve(null),
+    ]);
+
+  let growthRate: number | null = null;
+  if (prevRevenueAggregate && prevRevenueAggregate.totalRevenue > 0) {
+    growthRate = Number(
+      (((revenueAggregate.totalRevenue - prevRevenueAggregate.totalRevenue) / prevRevenueAggregate.totalRevenue) * 100).toFixed(1)
+    );
+  } else if (prevRevenueAggregate && prevRevenueAggregate.totalRevenue === 0 && revenueAggregate.totalRevenue > 0) {
+    growthRate = 100;
+  }
+
+  const totalRev = Number(revenueAggregate.totalRevenue);
+  const totalOrders = Number(revenueAggregate.ordersCount);
+  const aov = totalOrders > 0 ? toMoney(totalRev / totalOrders) : 0;
+
+  const timeline = timelineRaw.map((row) => ({
+    period: row.period,
+    revenue: toMoney(Number(row.revenue)),
+    orders: Number(row.orders),
+  }));
 
   return {
-    periodDays: days,
-    totalRevenue: toMoney(revenueAggregate.totalRevenue),
-    totalOrders: revenueAggregate.ordersCount,
+    periodType: period,
+    periodLabel: {
+      en: labelEn,
+      ar: labelAr,
+    },
+    selectedYear: targetYear,
+    selectedMonth: targetMonth,
+    startDate: startDate?.toISOString() ?? null,
+    endDate: endDate?.toISOString() ?? null,
+    totalRevenue: toMoney(totalRev),
+    totalOrders,
+    totalUnitsSold: revenueAggregate.totalUnitsSold,
+    averageOrderValue: aov,
+    previousPeriodRevenue: prevRevenueAggregate ? toMoney(prevRevenueAggregate.totalRevenue) : null,
+    growthRate,
     topProducts: topProducts.map((item) => ({
       productId: item.productId,
       productName: item.productNameSnapshot,
@@ -426,10 +556,20 @@ export const getAdminSalesAnalytics = async (days: number) => {
       ordersCount: item.ordersCount,
       totalSpent: toMoney(item.totalSpent),
     })),
-    salesByDay: salesByDay.map((row) => ({
-      day: row.day,
-      revenue: toMoney(Number(row.revenue)),
-      orders: Number(row.orders),
+    paymentMethods: paymentMethods.map((pm) => ({
+      method: pm.method,
+      label: pm.label,
+      revenue: toMoney(pm.revenue),
+      ordersCount: pm.ordersCount,
+      percentage: totalRev > 0 ? Number(((pm.revenue / totalRev) * 100).toFixed(1)) : 0,
+    })),
+    timeline,
+    // Backward compatibility fields
+    periodDays: params.days ?? 30,
+    salesByDay: timeline.map((row) => ({
+      day: row.period,
+      revenue: row.revenue,
+      orders: row.orders,
     })),
   };
 };
@@ -821,3 +961,57 @@ export const updateAdminProductFinancials = async (
     stockQuantity: updated.stockQuantity,
   };
 };
+
+export const adjustAdminProductStock = async (
+  adminUserId: string,
+  productId: string,
+  payload: {
+    quantityToAdd: number;
+    costPrice?: number;
+    note?: string;
+  },
+) => {
+  const product = await findProductByIdRepo(productId);
+  if (!product) {
+    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+  }
+
+  const previousStock = product.stockQuantity;
+  const newStock = previousStock + payload.quantityToAdd;
+
+  const updateData: Prisma.ProductUpdateInput = {
+    stockQuantity: newStock,
+  };
+
+  if (payload.costPrice !== undefined && payload.costPrice >= 0) {
+    updateData.costPrice = new Prisma.Decimal(payload.costPrice);
+  }
+
+  const updated = await updateProductRepo(productId, updateData);
+
+  await Promise.all([
+    invalidateProductCaches(),
+    createAuditLog({
+      adminUserId,
+      action: 'RESTOCK_PRODUCT',
+      entityType: 'PRODUCT',
+      entityId: productId,
+      metadata: {
+        productName: product.name,
+        previousStock,
+        quantityAdded: payload.quantityToAdd,
+        newStock,
+        costPrice: payload.costPrice,
+        note: payload.note,
+      } as Prisma.InputJsonValue,
+    }),
+  ]);
+
+  return {
+    product: updated,
+    previousStock,
+    quantityAdded: payload.quantityToAdd,
+    newStock,
+  };
+};
+

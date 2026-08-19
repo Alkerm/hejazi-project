@@ -148,16 +148,22 @@ export const getLowStockProductsRepo = (threshold: number, skip: number, take: n
 export const getOutOfStockCountRepo = () =>
   prisma.product.count({ where: { stockQuantity: 0, isActive: true } });
 
-export const getTopSellingProductsRepo = (take = 5, startDate?: Date) =>
+export const getTopSellingProductsRepo = (take = 5, startDate?: Date, endDate?: Date) =>
   prisma.orderItem.groupBy({
     by: ['productId', 'productNameSnapshot'],
-    where: startDate
-      ? {
-          order: {
-            createdAt: { gte: startDate },
-          },
-        }
-      : undefined,
+    where: {
+      order: {
+        status: { not: 'CANCELLED' },
+        ...(startDate || endDate
+          ? {
+              createdAt: {
+                ...(startDate ? { gte: startDate } : {}),
+                ...(endDate ? { lte: endDate } : {}),
+              },
+            }
+          : {}),
+      },
+    },
     _sum: { quantity: true, lineTotal: true },
     orderBy: {
       _sum: {
@@ -167,36 +173,51 @@ export const getTopSellingProductsRepo = (take = 5, startDate?: Date) =>
     take,
   });
 
-export const getRevenueAggregateRepo = async (startDate?: Date) => {
+export const getRevenueAggregateRepo = async (startDate?: Date, endDate?: Date) => {
   const where: Prisma.OrderWhereInput = {
-    ...(startDate ? { createdAt: { gte: startDate } } : {}),
+    status: { not: 'CANCELLED' },
+    ...(startDate || endDate
+      ? {
+          createdAt: {
+            ...(startDate ? { gte: startDate } : {}),
+            ...(endDate ? { lte: endDate } : {}),
+          },
+        }
+      : {}),
   };
-  const [ordersCount, salesAggregate] = await prisma.$transaction([
-    prisma.order.count({
-      where: {
-        ...where,
-        paymentStatus: { in: ['UNPAID', 'PENDING', 'PAID'] },
-      },
-    }),
+  const [ordersCount, salesAggregate, unitsAggregate] = await prisma.$transaction([
+    prisma.order.count({ where }),
     prisma.order.aggregate({
       where,
       _sum: { total: true },
-      _count: { _all: true },
+    }),
+    prisma.orderItem.aggregate({
+      where: {
+        order: where,
+      },
+      _sum: { quantity: true },
     }),
   ]);
 
   return {
     ordersCount: ordersCount ?? 0,
     totalRevenue: Number(salesAggregate?._sum?.total ?? 0),
+    totalUnitsSold: Number(unitsAggregate?._sum?.quantity ?? 0),
   };
 };
 
-export const getTopCustomersRepo = async (startDate: Date = new Date(0), take = 5) => {
+export const getTopCustomersRepo = async (startDate: Date = new Date(0), take = 5, endDate?: Date) => {
+  const where: Prisma.OrderWhereInput = {
+    status: { not: 'CANCELLED' },
+    createdAt: {
+      gte: startDate,
+      ...(endDate ? { lte: endDate } : {}),
+    },
+  };
+
   const grouped = await prisma.order.groupBy({
     by: ['userId'],
-    where: {
-      createdAt: { gte: startDate },
-    },
+    where,
     _sum: { total: true },
     _count: { id: true },
     orderBy: {
@@ -229,17 +250,113 @@ export const getTopCustomersRepo = async (startDate: Date = new Date(0), take = 
   }));
 };
 
-export const getSalesByDayRepo = (startDate: Date) =>
-  prisma.$queryRaw<Array<{ day: string; revenue: Prisma.Decimal; orders: bigint }>>`
+export const getPaymentMethodsBreakdownRepo = async (startDate?: Date, endDate?: Date) => {
+  const where: Prisma.OrderWhereInput = {
+    status: { not: 'CANCELLED' },
+    ...(startDate || endDate
+      ? {
+          createdAt: {
+            ...(startDate ? { gte: startDate } : {}),
+            ...(endDate ? { lte: endDate } : {}),
+          },
+        }
+      : {}),
+  };
+
+  const grouped = await prisma.order.groupBy({
+    by: ['paymentMethod', 'paymentMethodLabel'],
+    where,
+    _sum: { total: true },
+    _count: { id: true },
+  });
+
+  return grouped.map((row) => ({
+    method: row.paymentMethod,
+    label: row.paymentMethodLabel || row.paymentMethod,
+    revenue: Number(row._sum.total ?? 0),
+    ordersCount: row._count.id,
+  }));
+};
+
+export const getSalesTimelineByDayRepo = (startDate?: Date, endDate?: Date) => {
+  if (startDate && endDate) {
+    return prisma.$queryRaw<Array<{ period: string; revenue: Prisma.Decimal; orders: bigint }>>`
+      SELECT
+        TO_CHAR(DATE_TRUNC('day', "createdAt"), 'YYYY-MM-DD') AS period,
+        COALESCE(SUM("total"), 0) AS revenue,
+        COUNT(*)::bigint AS orders
+      FROM "Order"
+      WHERE "createdAt" >= ${startDate} AND "createdAt" <= ${endDate}
+        AND "status" != 'CANCELLED'
+      GROUP BY DATE_TRUNC('day', "createdAt")
+      ORDER BY DATE_TRUNC('day', "createdAt") ASC
+    `;
+  }
+  if (startDate) {
+    return prisma.$queryRaw<Array<{ period: string; revenue: Prisma.Decimal; orders: bigint }>>`
+      SELECT
+        TO_CHAR(DATE_TRUNC('day', "createdAt"), 'YYYY-MM-DD') AS period,
+        COALESCE(SUM("total"), 0) AS revenue,
+        COUNT(*)::bigint AS orders
+      FROM "Order"
+      WHERE "createdAt" >= ${startDate}
+        AND "status" != 'CANCELLED'
+      GROUP BY DATE_TRUNC('day', "createdAt")
+      ORDER BY DATE_TRUNC('day', "createdAt") ASC
+    `;
+  }
+  return prisma.$queryRaw<Array<{ period: string; revenue: Prisma.Decimal; orders: bigint }>>`
     SELECT
-      TO_CHAR(DATE_TRUNC('day', "createdAt"), 'YYYY-MM-DD') AS day,
+      TO_CHAR(DATE_TRUNC('day', "createdAt"), 'YYYY-MM-DD') AS period,
       COALESCE(SUM("total"), 0) AS revenue,
       COUNT(*)::bigint AS orders
     FROM "Order"
-    WHERE "createdAt" >= ${startDate}
+    WHERE "status" != 'CANCELLED'
     GROUP BY DATE_TRUNC('day', "createdAt")
     ORDER BY DATE_TRUNC('day', "createdAt") ASC
   `;
+};
+
+export const getSalesTimelineByMonthRepo = (startDate?: Date, endDate?: Date) => {
+  if (startDate && endDate) {
+    return prisma.$queryRaw<Array<{ period: string; revenue: Prisma.Decimal; orders: bigint }>>`
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', "createdAt"), 'YYYY-MM') AS period,
+        COALESCE(SUM("total"), 0) AS revenue,
+        COUNT(*)::bigint AS orders
+      FROM "Order"
+      WHERE "createdAt" >= ${startDate} AND "createdAt" <= ${endDate}
+        AND "status" != 'CANCELLED'
+      GROUP BY DATE_TRUNC('month', "createdAt")
+      ORDER BY DATE_TRUNC('month', "createdAt") ASC
+    `;
+  }
+  if (startDate) {
+    return prisma.$queryRaw<Array<{ period: string; revenue: Prisma.Decimal; orders: bigint }>>`
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', "createdAt"), 'YYYY-MM') AS period,
+        COALESCE(SUM("total"), 0) AS revenue,
+        COUNT(*)::bigint AS orders
+      FROM "Order"
+      WHERE "createdAt" >= ${startDate}
+        AND "status" != 'CANCELLED'
+      GROUP BY DATE_TRUNC('month', "createdAt")
+      ORDER BY DATE_TRUNC('month', "createdAt") ASC
+    `;
+  }
+  return prisma.$queryRaw<Array<{ period: string; revenue: Prisma.Decimal; orders: bigint }>>`
+    SELECT
+      TO_CHAR(DATE_TRUNC('month', "createdAt"), 'YYYY-MM') AS period,
+      COALESCE(SUM("total"), 0) AS revenue,
+      COUNT(*)::bigint AS orders
+    FROM "Order"
+    WHERE "status" != 'CANCELLED'
+    GROUP BY DATE_TRUNC('month', "createdAt")
+    ORDER BY DATE_TRUNC('month', "createdAt") ASC
+  `;
+};
+
+export const getSalesByDayRepo = (startDate: Date) => getSalesTimelineByDayRepo(startDate);
 
 export const getDashboardSummaryCountsRepo = async (lowStockThreshold: number) => {
   const [productsCount, lowStockCount, pendingOrdersCount, usersCount] = await prisma.$transaction([

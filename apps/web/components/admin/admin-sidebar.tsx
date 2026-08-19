@@ -80,11 +80,7 @@ export function AdminSidebar({ user, isOpen, onClose }: AdminSidebarProps) {
     {
       title: t('Store Policies & Content', 'سياسات المتجر والمحتوى'),
       items: [
-        { href: '/admin/policies/terms', label: t('Terms & Conditions', 'الشروط والأحكام'), icon: ScrollText },
-        { href: '/admin/policies/privacy', label: t('Privacy Policy', 'سياسة الخصوصية'), icon: ShieldCheck },
-        { href: '/admin/policies/shipping-delivery', label: t('Shipping & Delivery', 'الشحن والتوصيل'), icon: Truck },
-        { href: '/admin/policies/returns-refunds', label: t('Returns & Warranty', 'الإرجاع والضمان'), icon: RotateCcw },
-        { href: '/admin/policies/complaints-contact', label: t('Complaints & Customer Care', 'الشكاوى وخدمة العملاء'), icon: Headphones },
+        { href: '/admin/policies', label: t('Store Policies & Legal', 'سياسات المتجر والوثائق'), icon: ScrollText },
       ],
     },
     {

@@ -155,111 +155,96 @@ export default function AdminCustomersPage() {
       </div>
 
       {/* Top Value-Add Insight KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {/* Total Registered Customers */}
-        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
               {t('Customers', 'إجمالي العملاء')}
             </span>
-            <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-600 shrink-0">
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900">
+          <p className="text-xl sm:text-2xl font-black text-slate-900 truncate">
             {data?.metrics.totalCustomers ?? (loading ? '...' : 0)}
           </p>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[10px] text-slate-400 font-medium truncate">
             {t('Registered Accounts', 'حساب مسجل')}
           </p>
         </div>
 
         {/* Total Orders Placed */}
-        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
               {t('Total Orders', 'إجمالي الطلبات')}
             </span>
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+            <div className="p-2 rounded-xl bg-blue-50 text-blue-600 shrink-0">
               <ShoppingBag className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900">
+          <p className="text-xl sm:text-2xl font-black text-slate-900 truncate">
             {data?.metrics.totalOrders ?? (loading ? '...' : 0)}
           </p>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[10px] text-slate-400 font-medium truncate">
             {t('All time orders', 'طلب منفذ')}
           </p>
         </div>
 
-        {/* Total Customer Revenue */}
-        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              {t('Total Sales', 'إجمالي المبيعات')}
-            </span>
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
-              <DollarSign className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-black text-slate-900 font-mono">
-            {data?.metrics.totalRevenue ? formatMoney(data.metrics.totalRevenue) : '0 SAR'}
-          </p>
-          <p className="text-[10px] text-slate-400 font-medium">
-            {t('Lifetime revenue', 'مبيعات محققة')}
-          </p>
-        </div>
-
         {/* Average Order Value (AOV) */}
-        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
               {t('Avg Order (AOV)', 'متوسط الطلب')}
             </span>
-            <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
+            <div className="p-2 rounded-xl bg-purple-50 text-purple-600 shrink-0">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900 font-mono">
+          <p
+            className="text-base sm:text-lg lg:text-xl font-black text-slate-900 tracking-tight truncate"
+            title={data?.metrics.averageOrderValue ? formatMoney(data.metrics.averageOrderValue) : '0 SAR'}
+          >
             {data?.metrics.averageOrderValue ? formatMoney(data.metrics.averageOrderValue) : '0 SAR'}
           </p>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[10px] text-slate-400 font-medium truncate">
             {t('Per basket average', 'متوسط قيمة السلة')}
           </p>
         </div>
 
         {/* Marketing Consented Opt-Ins */}
-        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
               {t('Newsletter Reach', 'مشتركو النشرات')}
             </span>
-            <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-600 shrink-0">
               <Mail className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900">
+          <p className="text-xl sm:text-2xl font-black text-slate-900 truncate">
             {data?.metrics.marketingConsentedCount ?? (loading ? '...' : 0)}
           </p>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[10px] text-slate-400 font-medium truncate">
             {t('Opted-in for emails', 'موافقون على العروض')}
           </p>
         </div>
 
         {/* Active Buyers */}
-        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="glass-card rounded-2xl p-4 border border-slate-200/60 bg-white shadow-xs space-y-2 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
               {t('Active Buyers', 'العملاء المشترون')}
             </span>
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900">
+          <p className="text-xl sm:text-2xl font-black text-slate-900 truncate">
             {data?.metrics.activeBuyersCount ?? (loading ? '...' : 0)}
           </p>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[10px] text-slate-400 font-medium truncate">
             {t('Completed >= 1 order', 'قاموا بالطلب')}
           </p>
         </div>
