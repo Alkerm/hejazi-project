@@ -435,7 +435,7 @@ export const getAdminFinancialProductsRepo = async (filters: {
         select: {
           id: true,
           name: true,
-          arabicName: true,
+          slug: true,
         },
       },
       orderItems: {
