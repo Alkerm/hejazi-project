@@ -736,50 +736,45 @@ export default function AdminAnalyticsPage() {
               {t('No product sales recorded in this period', 'لا توجد منتجات مباعة في هذه الفترة')}
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-2.5">
               {data.topProducts.map((item, index) => {
-                const widthPct = Math.min((item.revenue / maxProductRevenue) * 100, 100);
                 const rank = index + 1;
                 const isTop1 = rank === 1;
 
                 return (
-                  <div key={item.productId || index} className="space-y-1.5 text-xs">
-                    <div className="flex justify-between items-center font-medium">
-                      <div className="flex items-center gap-2 min-w-0 pr-2">
-                        <span
-                          className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ${
-                            isTop1
-                              ? 'bg-amber-400 text-slate-950 shadow-2xs'
-                              : rank === 2
-                              ? 'bg-slate-200 text-slate-800'
-                              : rank === 3
-                              ? 'bg-amber-700/80 text-white'
-                              : 'bg-slate-100 text-slate-500'
-                          }`}
-                        >
-                          {rank}
-                        </span>
-                        <span className="text-slate-800 font-bold truncate">
+                  <div
+                    key={item.productId || index}
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/60 transition-colors text-xs gap-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <span
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0 ${
+                          isTop1
+                            ? 'bg-amber-400 text-slate-950 shadow-2xs'
+                            : rank === 2
+                            ? 'bg-slate-200 text-slate-800'
+                            : rank === 3
+                            ? 'bg-amber-700/80 text-white'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {rank}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-slate-900 font-bold truncate block">
                           {item.productName}
                         </span>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="font-bold text-slate-900 font-mono">
-                          {formatMoney(item.revenue)}
-                        </span>
-                        <span className="text-slate-400 font-medium text-[11px] block">
-                          {item.unitsSold} {t('units', 'قطعة')}
+                        <span className="text-slate-400 font-medium text-[11px] font-mono block mt-0.5">
+                          {formatMoney(item.revenue)} {t('sales volume', 'إجمالي المبيعات')}
                         </span>
                       </div>
                     </div>
 
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          isTop1 ? 'bg-amber-500' : 'bg-slate-700'
-                        }`}
-                        style={{ width: `${widthPct}%` }}
-                      />
+                    <div className="text-right shrink-0">
+                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-100/80 text-amber-950 border border-amber-300/60 shadow-2xs font-mono">
+                        <span>{item.unitsSold}</span>
+                        <span className="font-sans font-medium text-[10px] text-amber-800">{t('units sold', 'قطعة مباعة')}</span>
+                      </span>
                     </div>
                   </div>
                 );
@@ -809,37 +804,43 @@ export default function AdminAnalyticsPage() {
               {t('No customer orders in this period', 'لا توجد طلبات عملاء في هذه الفترة')}
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-2.5">
               {data.topCustomers.map((customer, index) => {
-                const widthPct = Math.min((customer.totalSpent / maxCustomerSpend) * 100, 100);
                 const rank = index + 1;
+                const isTop1 = rank === 1;
 
                 return (
-                  <div key={customer.userId || index} className="space-y-1.5 text-xs">
-                    <div className="flex justify-between items-center font-medium">
-                      <div className="min-w-0 pr-2">
-                        <span className="text-slate-800 font-bold truncate block">
-                          #{rank} {customer.customerName}
+                  <div
+                    key={customer.userId || index}
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/60 transition-colors text-xs gap-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <span
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0 ${
+                          isTop1
+                            ? 'bg-blue-600 text-white shadow-2xs'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {rank}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-slate-900 font-bold truncate block">
+                          {customer.customerName}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-mono truncate block">
+                        <span className="text-[10px] text-slate-400 font-mono truncate block mt-0.5">
                           {customer.email ?? t('No email', 'بدون بريد')}
-                        </span>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="font-bold text-slate-900 font-mono">
-                          {formatMoney(customer.totalSpent)}
-                        </span>
-                        <span className="text-slate-400 font-medium text-[11px] block">
-                          {customer.ordersCount} {t('orders', 'طلب')}
                         </span>
                       </div>
                     </div>
 
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-600 rounded-full transition-all duration-500"
-                        style={{ width: `${widthPct}%` }}
-                      />
+                    <div className="text-right shrink-0">
+                      <span className="font-bold text-slate-900 font-mono block">
+                        {formatMoney(customer.totalSpent)}
+                      </span>
+                      <span className="text-slate-400 font-medium text-[10px] block mt-0.5">
+                        {customer.ordersCount} {t('orders', 'طلب')}
+                      </span>
                     </div>
                   </div>
                 );

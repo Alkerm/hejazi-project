@@ -8,7 +8,9 @@ import { Category } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CreateCategoryModal } from '@/components/admin/create-category-modal';
+import { ProductImageUploader } from '@/components/admin/product-image-uploader';
 import { useLanguage } from '@/lib/language-context';
+import { Toaster } from 'sonner';
 
 type ProductStatus = 'DRAFT' | 'COMPLIANCE_REVIEW' | 'APPROVED' | 'INACTIVE';
 
@@ -278,13 +280,14 @@ export default function AdminEditProductPage() {
               placeholder="Half Link Energy"
             />
 
-            <Input
-              label={t('Image URL', 'رابط الصورة (Image URL)')}
-              value={form.imageUrl}
-              onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-              required
-              isRequired
-            />
+            <div className="col-span-full">
+              <ProductImageUploader
+                value={form.imageUrl}
+                onChange={(url) => setForm({ ...form, imageUrl: url })}
+                label={t('Product Image (Upload from Device or URL)', 'صورة المنتج (رفع من الجهاز أو رابط)')}
+                required
+              />
+            </div>
 
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">

@@ -289,6 +289,21 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(payload),
     }),
+  adminUploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${API_BASE}/admin/upload`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Upload failed' }));
+      throw new Error(err.error || 'Failed to upload image');
+    }
+    const json = await res.json();
+    return json.data as { filename: string; mimetype: string; url: string };
+  },
   adminSalesAnalytics: (query = '') => request<AdminSalesAnalytics>(`/admin/analytics/sales${query}`),
   adminAuditLogs: (query = '') => request<Paginated<AdminAuditLog>>(`/admin/audit-logs${query}`),
 
