@@ -633,20 +633,21 @@ export const getAdminFinancialOverview = async (query: {
   categoryId?: string;
   sortBy?: 'profit' | 'margin' | 'revenue' | 'stock' | 'cost' | 'price' | 'name';
 }) => {
-  const [products, paidOrders] = await Promise.all([
+  const [products, activeOrders] = await Promise.all([
     getAdminFinancialProductsRepo({
       search: query.search,
       categoryId: query.categoryId,
     }),
     prisma.order.findMany({
       where: {
-        paymentStatus: 'PAID',
         status: { not: 'CANCELLED' },
       },
       select: {
         id: true,
         subtotal: true,
         total: true,
+        status: true,
+        paymentStatus: true,
         items: {
           select: {
             productId: true,
@@ -654,6 +655,11 @@ export const getAdminFinancialOverview = async (query: {
             unitPriceSnapshot: true,
             costPriceSnapshot: true,
             lineTotal: true,
+            product: {
+              select: {
+                costPrice: true,
+              },
+            },
           },
         },
       },
@@ -664,11 +670,12 @@ export const getAdminFinancialOverview = async (query: {
   let totalCostOfGoodsSold = 0;
   let totalUnitsSoldAll = 0;
 
-  for (const order of paidOrders) {
+  for (const order of activeOrders) {
     totalRevenue += Number(order.subtotal);
     for (const item of order.items) {
       totalUnitsSoldAll += item.quantity;
-      const unitCost = Number(item.costPriceSnapshot || 0);
+      const productCost = Number(item.product?.costPrice || 0);
+      const unitCost = Number(item.costPriceSnapshot || 0) > 0 ? Number(item.costPriceSnapshot) : productCost;
       totalCostOfGoodsSold += unitCost * item.quantity;
     }
   }
@@ -700,12 +707,10 @@ export const getAdminFinancialOverview = async (query: {
     let realizedCost = 0;
 
     for (const oi of p.orderItems) {
-      if (oi.order?.paymentStatus === 'PAID') {
-        unitsSold += oi.quantity;
-        realizedRevenue += Number(oi.lineTotal);
-        const itemCost = Number(oi.costPriceSnapshot || costPrice);
-        realizedCost += itemCost * oi.quantity;
-      }
+      unitsSold += oi.quantity;
+      realizedRevenue += Number(oi.lineTotal);
+      const itemCost = Number(oi.costPriceSnapshot || 0) > 0 ? Number(oi.costPriceSnapshot) : costPrice;
+      realizedCost += itemCost * oi.quantity;
     }
 
     const realizedProfit = realizedRevenue - realizedCost;
@@ -760,7 +765,7 @@ export const getAdminFinancialOverview = async (query: {
       inventoryTotalCostValue: Math.round(inventoryTotalCostValue * 100) / 100,
       inventoryTotalRetailValue: Math.round(inventoryTotalRetailValue * 100) / 100,
       expectedInventoryProfit: Math.round(expectedInventoryProfit * 100) / 100,
-      totalOrdersCount: paidOrders.length,
+      totalOrdersCount: activeOrders.length,
       totalUnitsSoldAll,
       totalInStockUnits,
       activeProductsCount: products.filter((p) => p.isActive).length,

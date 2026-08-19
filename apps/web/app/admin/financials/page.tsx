@@ -37,8 +37,8 @@ export default function AdminFinancialsPage() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState<'profit' | 'margin' | 'revenue' | 'stock' | 'cost' | 'price' | 'name'>('profit');
 
-  // Inline Editing State: Map<productId, { costPrice: number, price: number }>
-  const [editedPrices, setEditedPrices] = useState<Record<string, { costPrice: number; price: number }>>({});
+  // Inline Editing State: Map<productId, { costPrice: string | number, price: string | number }>
+  const [editedPrices, setEditedPrices] = useState<Record<string, { costPrice: string | number; price: string | number }>>({});
   const [savingProductId, setSavingProductId] = useState<string | null>(null);
 
   const loadFinancials = async (showRefreshToast = false) => {
@@ -59,7 +59,7 @@ export default function AdminFinancialsPage() {
       setCategories(catRes);
 
       // Initialize inline edit state from received products
-      const initialEdits: Record<string, { costPrice: number; price: number }> = {};
+      const initialEdits: Record<string, { costPrice: string | number; price: string | number }> = {};
       for (const p of finRes.products) {
         initialEdits[p.id] = { costPrice: p.costPrice, price: p.price };
       }
@@ -88,22 +88,22 @@ export default function AdminFinancialsPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const handleCostChange = (productId: string, val: number) => {
+  const handleCostChange = (productId: string, val: string | number) => {
     setEditedPrices((prev) => ({
       ...prev,
       [productId]: {
         ...(prev[productId] || { costPrice: 0, price: 0 }),
-        costPrice: Math.max(0, val),
+        costPrice: val === '' ? '' : Number(val) >= 0 ? val : 0,
       },
     }));
   };
 
-  const handlePriceChange = (productId: string, val: number) => {
+  const handlePriceChange = (productId: string, val: string | number) => {
     setEditedPrices((prev) => ({
       ...prev,
       [productId]: {
         ...(prev[productId] || { costPrice: 0, price: 0 }),
-        price: Math.max(0, val),
+        price: val === '' ? '' : Number(val) >= 0 ? val : 0,
       },
     }));
   };
@@ -112,17 +112,20 @@ export default function AdminFinancialsPage() {
     const edit = editedPrices[product.id];
     if (!edit) return;
 
+    const numCost = edit.costPrice === '' ? 0 : Number(edit.costPrice);
+    const numPrice = edit.price === '' ? 0 : Number(edit.price);
+
     setSavingProductId(product.id);
     try {
       await api.adminUpdateProductFinancials(product.id, {
-        costPrice: edit.costPrice,
-        price: edit.price,
+        costPrice: numCost,
+        price: numPrice,
       });
 
       toast.success(
         t(
-          `Updated "${formatProductName(product)}": Cost SAR ${edit.costPrice} | Price SAR ${edit.price}`,
-          `تم تحديث "${formatProductName(product)}": التكلفة ${edit.costPrice} ر.س | البيع ${edit.price} ر.س`
+          `Updated "${formatProductName(product)}": Cost SAR ${numCost} | Price SAR ${numPrice}`,
+          `تم تحديث "${formatProductName(product)}": التكلفة ${numCost} ر.س | البيع ${numPrice} ر.س`
         )
       );
 
@@ -439,12 +442,15 @@ export default function AdminFinancialsPage() {
                     price: product.price,
                   };
 
-                  const isModified =
-                    currentEdit.costPrice !== product.costPrice || currentEdit.price !== product.price;
+                  const numCost = currentEdit.costPrice === '' ? 0 : Number(currentEdit.costPrice);
+                  const numPrice = currentEdit.price === '' ? 0 : Number(currentEdit.price);
 
-                  const liveUnitProfit = currentEdit.price - currentEdit.costPrice;
+                  const isModified =
+                    numCost !== product.costPrice || numPrice !== product.price;
+
+                  const liveUnitProfit = numPrice - numCost;
                   const liveMargin =
-                    currentEdit.price > 0 ? (liveUnitProfit / currentEdit.price) * 100 : 0;
+                    numPrice > 0 ? (liveUnitProfit / numPrice) * 100 : 0;
                   const liveStockProfit = product.stockQuantity * liveUnitProfit;
                   const isSavingThis = savingProductId === product.id;
 
@@ -492,7 +498,17 @@ export default function AdminFinancialsPage() {
                             step="0.01"
                             min="0"
                             value={currentEdit.costPrice}
-                            onChange={(e) => handleCostChange(product.id, Number(e.target.value))}
+                            onFocus={(e) => {
+                              if (e.target.value === '0') {
+                                e.target.select();
+                              }
+                            }}
+                            onBlur={() => {
+                              if (currentEdit.costPrice === '' || isNaN(Number(currentEdit.costPrice))) {
+                                handleCostChange(product.id, 0);
+                              }
+                            }}
+                            onChange={(e) => handleCostChange(product.id, e.target.value)}
                             className="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-mono font-bold text-slate-800 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                           />
                         </div>
@@ -506,7 +522,17 @@ export default function AdminFinancialsPage() {
                             step="0.01"
                             min="0"
                             value={currentEdit.price}
-                            onChange={(e) => handlePriceChange(product.id, Number(e.target.value))}
+                            onFocus={(e) => {
+                              if (e.target.value === '0') {
+                                e.target.select();
+                              }
+                            }}
+                            onBlur={() => {
+                              if (currentEdit.price === '' || isNaN(Number(currentEdit.price))) {
+                                handlePriceChange(product.id, 0);
+                              }
+                            }}
+                            onChange={(e) => handlePriceChange(product.id, e.target.value)}
                             className="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                           />
                         </div>
@@ -515,14 +541,14 @@ export default function AdminFinancialsPage() {
                       {/* Unit Profit */}
                       <td className="px-3 py-3.5 text-center font-mono">
                         <span
-                          className={`inline-flex items-center gap-0.5 font-black text-xs px-2 py-0.5 rounded-md ${
+                          className={`inline-flex items-center gap-1 font-black text-xs px-2.5 py-0.5 rounded-md ${
                             liveUnitProfit >= 0
                               ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/80'
                               : 'bg-rose-50 text-rose-700 border border-rose-200/80'
                           }`}
                         >
-                          {liveUnitProfit >= 0 ? '+' : ''}
-                          {liveUnitProfit.toFixed(2)}
+                          <span>{liveUnitProfit >= 0 ? '+' : ''}{liveUnitProfit.toFixed(2)}</span>
+                          <span className="text-[10px] opacity-80">{t('SAR', 'ر.س')}</span>
                         </span>
                       </td>
 
@@ -554,7 +580,7 @@ export default function AdminFinancialsPage() {
 
                       {/* Stock Asset Cost */}
                       <td className="px-3 py-3.5 font-mono text-slate-700 font-bold whitespace-nowrap">
-                        {formatMoney(product.stockQuantity * currentEdit.costPrice)}
+                        {formatMoney(product.stockQuantity * numCost)}
                       </td>
 
                       {/* Potential Stock Profit */}

@@ -197,8 +197,16 @@ export default function AdminEditProductPage() {
                 type="number"
                 step="0.01"
                 min="0"
-                value={form.costPrice}
-                onChange={(e) => setForm({ ...form, costPrice: Number(e.target.value) })}
+                value={form.costPrice === 0 ? '0' : form.costPrice}
+                onFocus={(e) => {
+                  if (e.target.value === '0') e.target.select();
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '' || isNaN(Number(e.target.value))) {
+                    setForm((prev) => ({ ...prev, costPrice: 0 }));
+                  }
+                }}
+                onChange={(e) => setForm((prev) => ({ ...prev, costPrice: e.target.value === '' ? ('' as any) : Number(e.target.value) }))}
                 placeholder="0.00"
               />
 
@@ -207,8 +215,16 @@ export default function AdminEditProductPage() {
                 type="number"
                 step="0.01"
                 min="0"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                value={form.price === 0 ? '0' : form.price}
+                onFocus={(e) => {
+                  if (e.target.value === '0') e.target.select();
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '' || isNaN(Number(e.target.value))) {
+                    setForm((prev) => ({ ...prev, price: 0 }));
+                  }
+                }}
+                onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value === '' ? ('' as any) : Number(e.target.value) }))}
                 required
                 isRequired
               />
@@ -218,12 +234,12 @@ export default function AdminEditProductPage() {
             <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
               <span className="text-slate-600 font-medium">{t('Expected Unit Profit & Margin:', 'الربح المتوقع للقطعة:')}</span>
               <div className="flex items-center gap-2 font-mono font-bold">
-                <span className={form.price - (form.costPrice || 0) >= 0 ? 'text-emerald-700 font-extrabold' : 'text-rose-600 font-extrabold'}>
-                  {(form.price - (form.costPrice || 0)).toFixed(2)} SAR
+                <span className={(Number(form.price) || 0) - (Number(form.costPrice) || 0) >= 0 ? 'text-emerald-700 font-extrabold' : 'text-rose-600 font-extrabold'}>
+                  {((Number(form.price) || 0) - (Number(form.costPrice) || 0)).toFixed(2)} SAR
                 </span>
                 <span className="text-slate-300">|</span>
                 <span className="text-slate-700 font-bold">
-                  {form.price > 0 ? `${(((form.price - (form.costPrice || 0)) / form.price) * 100).toFixed(1)}% margin` : '0%'}
+                  {Number(form.price) > 0 ? `${((((Number(form.price) || 0) - (Number(form.costPrice) || 0)) / Number(form.price)) * 100).toFixed(1)}% margin` : '0%'}
                 </span>
               </div>
             </div>
@@ -231,8 +247,16 @@ export default function AdminEditProductPage() {
             <Input
               label={t('Stock Quantity', 'الكمية في المخزون')}
               type="number"
-              value={form.stockQuantity}
-              onChange={(e) => setForm({ ...form, stockQuantity: Number(e.target.value) })}
+              value={form.stockQuantity === 0 ? '0' : form.stockQuantity}
+              onFocus={(e) => {
+                if (e.target.value === '0') e.target.select();
+              }}
+              onBlur={(e) => {
+                if (e.target.value === '' || isNaN(Number(e.target.value))) {
+                  setForm((prev) => ({ ...prev, stockQuantity: 0 }));
+                }
+              }}
+              onChange={(e) => setForm((prev) => ({ ...prev, stockQuantity: e.target.value === '' ? ('' as any) : Number(e.target.value) }))}
               required
               isRequired
             />
