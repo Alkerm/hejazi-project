@@ -12,7 +12,6 @@ import {
   PieChart,
   Search,
   RefreshCw,
-  Edit3,
   Save,
   Check,
   RotateCcw,
@@ -625,14 +624,6 @@ export default function AdminFinancialsPage() {
                               <RotateCcw className="w-3.5 h-3.5" />
                             </button>
                           )}
-
-                          <Link
-                            href={`/admin/products/${product.id}`}
-                            className="p-1.5 rounded-xl text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition"
-                            title={t('Full product edit page', 'تعديل كافة بيانات المنتج')}
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </Link>
                         </div>
                       </td>
                     </tr>
