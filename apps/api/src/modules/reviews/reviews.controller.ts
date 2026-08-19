@@ -17,8 +17,9 @@ export const getProductReviewsHandler = async (
   reply: FastifyReply
 ) => {
   const { productId } = req.params;
+  const userId = req.user?.id;
   try {
-    const data = await ReviewsService.getProductReviews(productId);
+    const data = await ReviewsService.getProductReviews(productId, userId);
     return reply.send({ success: true, data });
   } catch (err: any) {
     return reply.status(500).send({ error: err.message || 'Failed to fetch reviews' });

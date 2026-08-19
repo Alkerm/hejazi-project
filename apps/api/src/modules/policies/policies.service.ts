@@ -48,23 +48,22 @@ This store operates under the commercial regulations of the Kingdom of Saudi Ara
     summaryEn: 'How we collect, protect, and process your personal data in full compliance with Saudi Personal Data Protection Law (PDPL).',
     summaryAr: 'كيفية جمع وحماية ومعالجة بياناتك الشخصية بما يتوافق تماماً مع نظام حماية البيانات الشخصية في المملكة.',
     contentEn: `### 1. Personal Data We Collect
-We collect necessary personal information to process orders and provide exceptional delivery service, including: Name, National ID / Iqama (when required for identity validation), Contact Number, Delivery Address with GPS pin, and Email Address.
+We collect necessary personal information to process orders and provide exceptional delivery service, including: Name, Saudi National Address (Building No., Street, District, City, Short Address Code), Contact Phone Number, and Email Address.
 
 ### 2. Purpose of Data Processing
-- Fulfilling orders, managing shipping with authorized delivery drivers, and providing tracking updates.
-- Processing payments securely via licensed payment gateways (we never store raw credit card details).
+- Fulfilling orders, managing shipping with authorized delivery couriers (SPL / SMSA / Aramex), and providing tracking updates.
+- Processing payments securely via licensed Saudi payment gateways (we never store raw card numbers).
 - Providing customer care, warranty service, and optional promotional announcements.
 
 ### 3. Data Protection and Security
-We implement bank-grade encryption protocols (HTTPS/TLS) and strict access control to safeguard your information against unauthorized access or disclosure.
+We implement bank-grade encryption protocols (HTTPS/TLS 1.3) and strict access control to safeguard your information against unauthorized access or disclosure in accordance with SDAIA regulations.
 
 ### 4. Your Rights
-Under the Saudi Personal Data Protection Law, you have the right to access, correct, or request deletion of your personal data at any time through your profile or customer support.`,
+Under the Saudi Personal Data Protection Law (PDPL), you have the right to access, correct, or request deletion of your personal data at any time through your profile or customer support.`,
     contentAr: `### ١. البيانات الشخصية التي نجمعها
-نقوم بجمع البيانات الضرورية لإتمام الطلبات والتوصيل بأعلى معايير الجودة، بما يشمل: الاسم، رقم الهوية الوطنية / الإقامة (عند الحاجة للتحقق)، رقم الجوال، عنوان التوصيل مع إحداثيات الموقع، والبريد الإلكتروني.
+نقوم بجمع البيانات الضرورية لإتمام الطلبات والتوصيل بأعلى معايير الدقة، بما يشمل: الاسم، العنوان الوطني السعودي المعتمد من سبل (رقم المبنى، الشارع، الحي، المدينة، الرمز المختصر)، رقم الجوال، والبريد الإلكتروني.
 
 ### ٢. الغرض من معالجة البيانات
-- تجهيز وشحن الطلبات عبر السائقين المعتمدين وتزويدك بالتحديثات المباشرة للشحنة.
 - معالجة المدفوعات بأمان عبر بوابات الدفع الإلكتروني المرخصة (لا نقوم بحفظ أرقام البطاقات الائتمانية).
 - تقديم خدمات الدعم الفني والضمان والإشعارات العامة للعملاء.
 

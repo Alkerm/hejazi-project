@@ -506,7 +506,7 @@ export const getAdminCustomersOverview = async (query: {
 
   const [topBySpending, topByOrders, { users, total }, totalCustomersCount, marketingCount, revenueAgg] =
     await Promise.all([
-      getTopCustomersRepo(10),
+      getTopCustomersRepo(new Date(0), 10),
       getTopCustomersByOrdersRepo(10),
       listAdminCustomersDirectoryRepo({
         skip,
@@ -520,10 +520,10 @@ export const getAdminCustomersOverview = async (query: {
       getRevenueAggregateRepo(),
     ]);
 
-  const formattedDirectory = users.map((u) => {
-    const totalSpent = u.orders.reduce((sum, ord) => sum + Number(ord.total), 0);
-    const ordersCount = u.orders.length;
-    const defaultAddr = u.addresses[0];
+  const formattedDirectory = (users || []).map((u) => {
+    const totalSpent = (u.orders || []).reduce((sum, ord) => sum + Number(ord.total || 0), 0);
+    const ordersCount = (u.orders || []).length;
+    const defaultAddr = u.addresses?.[0];
 
     return {
       id: u.id,
@@ -532,7 +532,7 @@ export const getAdminCustomersOverview = async (query: {
       email: u.email,
       phone: u.phone,
       role: u.role,
-      marketingConsent: u.marketingConsent,
+      marketingConsent: Boolean(u.marketingConsent),
       createdAt: u.createdAt,
       totalOrders: ordersCount,
       totalSpent: toMoney(totalSpent),

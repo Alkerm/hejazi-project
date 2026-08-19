@@ -87,7 +87,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 glass-panel shadow-sm transition-all duration-300">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3">
         {/* Brand Logo */}
         <div className="flex items-center gap-4">
           <Link href="/" className="group flex items-center gap-2.5">

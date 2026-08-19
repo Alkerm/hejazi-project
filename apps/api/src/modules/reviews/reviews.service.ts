@@ -9,7 +9,7 @@ export interface SubmitReviewInput {
 
 export class ReviewsService {
   /**
-   * Submit a customer review (auto-approves if no moderation queue enabled, or defaults to pending approval)
+   * Submit a customer review - ONLY allowed for verified buyers who ordered this product
    */
   static async submitReview(input: SubmitReviewInput) {
     const { userId, productId, rating, comment } = input;
@@ -26,7 +26,26 @@ export class ReviewsService {
       throw new Error('Product not found');
     }
 
-    // Optional: Check if user already reviewed
+    // Enforce Verified Buyer Verification (Must have ordered this product in confirmed/paid/delivered order)
+    const purchase = await prisma.orderItem.findFirst({
+      where: {
+        productId,
+        order: {
+          userId,
+          status: { not: 'CANCELLED' },
+          OR: [
+            { paymentStatus: 'PAID' },
+            { status: { in: ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'] } },
+          ],
+        },
+      },
+    });
+
+    if (!purchase) {
+      throw new Error('Only verified customers who have purchased this product can submit a review. (فقط المشترون الموثقون الذين أتموا شراء هذا المنتج يمكنهم كتابة تقييم)');
+    }
+
+    // Check if user already reviewed
     const existingReview = await prisma.review.findFirst({
       where: { userId, productId },
     });
@@ -38,7 +57,7 @@ export class ReviewsService {
         data: {
           rating,
           comment,
-          isApproved: true, // Default auto-approve for streamlined demo
+          isApproved: true,
         },
         include: {
           user: {
@@ -65,9 +84,9 @@ export class ReviewsService {
   }
 
   /**
-   * Get approved reviews & average rating score for a product
+   * Get approved reviews & average rating score for a product (includes verified buyer status for logged in user)
    */
-  static async getProductReviews(productId: string) {
+  static async getProductReviews(productId: string, userId?: string) {
     const reviews = await prisma.review.findMany({
       where: {
         productId,
@@ -87,6 +106,27 @@ export class ReviewsService {
       },
     });
 
+    let hasPurchased = false;
+    let userReview = null;
+
+    if (userId) {
+      const purchase = await prisma.orderItem.findFirst({
+        where: {
+          productId,
+          order: {
+            userId,
+            status: { not: 'CANCELLED' },
+            OR: [
+              { paymentStatus: 'PAID' },
+              { status: { in: ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'] } },
+            ],
+          },
+        },
+      });
+      hasPurchased = Boolean(purchase);
+      userReview = reviews.find((r) => r.user.id === userId) || null;
+    }
+
     const totalReviews = reviews.length;
     const averageRating =
       totalReviews > 0
@@ -103,6 +143,8 @@ export class ReviewsService {
 
     return {
       reviews,
+      hasPurchased,
+      userReview,
       summary: {
         totalReviews,
         averageRating,

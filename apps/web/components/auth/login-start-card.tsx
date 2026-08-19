@@ -279,8 +279,9 @@ export function LoginStartCard() {
 
         <Button
           type="submit"
+          variant="dark"
           disabled={loading}
-          className="w-full py-3.5 bg-slate-950 hover:bg-amber-400 hover:text-slate-950 text-amber-400 border border-amber-500/30 font-bold transition shadow-md flex items-center justify-center gap-2"
+          className="w-full py-3.5 font-bold transition shadow-md flex items-center justify-center gap-2 cursor-pointer text-amber-400"
         >
           {loading ? (
             <>
@@ -288,7 +289,7 @@ export function LoginStartCard() {
               <span>{t('Verifying & Logging In...', 'جاري التحقق والدخول...')}</span>
             </>
           ) : (
-            t('Sign In', 'تسجيل الدخول')
+            <span className="text-amber-400 font-bold">{t('Sign In', 'تسجيل الدخول')}</span>
           )}
         </Button>
       </form>

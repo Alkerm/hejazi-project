@@ -9,6 +9,10 @@ const styles: Record<BadgeVariant, string> = {
   danger: 'bg-red-100 text-red-800',
 };
 
-export function Badge({ children, variant = 'default' }: PropsWithChildren<{ variant?: BadgeVariant }>) {
-  return <span className={`rounded-full px-2 py-1 text-xs font-semibold ${styles[variant]}`}>{children}</span>;
+export function Badge({
+  children,
+  variant = 'default',
+  className = '',
+}: PropsWithChildren<{ variant?: BadgeVariant; className?: string }>) {
+  return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${styles[variant]} ${className}`}>{children}</span>;
 }

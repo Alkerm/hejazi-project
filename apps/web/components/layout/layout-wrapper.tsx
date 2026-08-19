@@ -18,7 +18,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col bg-slate-50/30 text-slate-900">
       <AmbientBackground />
       <Navbar />
-      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 sm:px-6 pt-3 pb-8 sm:pt-4 sm:pb-12">{children}</main>
       <Footer />
     </div>
   );

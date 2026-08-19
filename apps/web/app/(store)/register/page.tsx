@@ -405,7 +405,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Marketing Consent */}
+        {/* Marketing Consent (Optional) */}
         <label className="flex items-start gap-2.5 text-xs text-slate-600 cursor-pointer pt-1 select-none">
           <input
             type="checkbox"
@@ -413,19 +413,33 @@ export default function RegisterPage() {
             onChange={(e) => handleChange('marketingConsent', e.target.checked)}
             className="mt-0.5 rounded border-slate-300 text-amber-500 focus:ring-amber-400 w-4 h-4 cursor-pointer"
           />
-          <span>
+          <span className="text-[11px] leading-relaxed">
             {t(
-              'Keep me updated with special offers, solar news, and security deals.',
-              'أرغب في استلام العروض الحصرية، أخبار الطاقة وأنظمة المراقبة.'
+              'Receive exclusive promotional deals, solar energy tips, and security system guides (Optional).',
+              'أرغب في استلام العروض الترويجية الحصرية وأخبار أنظمة الطاقة والمراقبة (اختياري).'
             )}
           </span>
         </label>
 
+        {/* Legal Terms & Privacy Consent Notice (Mandatory under Saudi Law) */}
+        <p className="text-[11px] text-slate-500 leading-relaxed text-center pt-1">
+          {t('By creating an account, you agree to our', 'بإنشائك للحساب، فإنك توافق على')}{' '}
+          <Link href="/terms" target="_blank" className="font-bold text-amber-600 hover:text-amber-700 underline underline-offset-2">
+            {t('Terms & Conditions', 'الشروط والأحكام')}
+          </Link>{' '}
+          {t('and', 'و')}{' '}
+          <Link href="/privacy" target="_blank" className="font-bold text-amber-600 hover:text-amber-700 underline underline-offset-2">
+            {t('Privacy Policy', 'سياسة الخصوصية')}
+          </Link>
+          .
+        </p>
+
         {/* Submit Button */}
         <Button
           type="submit"
+          variant="dark"
           disabled={loading}
-          className="w-full py-3.5 bg-slate-950 hover:bg-amber-400 hover:text-slate-950 text-amber-400 border border-amber-500/30 font-bold transition shadow-md flex items-center justify-center gap-2"
+          className="w-full py-3.5 font-bold transition shadow-md flex items-center justify-center gap-2 cursor-pointer text-amber-400"
         >
           {loading ? (
             <>
@@ -433,7 +447,7 @@ export default function RegisterPage() {
               <span>{t('Creating Account...', 'جاري إنشاء الحساب...')}</span>
             </>
           ) : (
-            t('Create Account', 'إنشاء الحساب')
+            <span className="text-amber-400 font-bold">{t('Create Account', 'إنشاء الحساب')}</span>
           )}
         </Button>
       </form>

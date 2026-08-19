@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Star, ShieldCheck, Heart, Send, ShoppingBag, Check, ArrowRight } from 'lucide-react';
+import { Star, ShieldCheck, Heart, Send, ShoppingBag, Check, ArrowRight, Lock, CheckCircle2, Award, Zap } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 import { api } from '@/lib/api';
 import { Product, ProductReviewsSummaryResponse } from '@/lib/types';
@@ -57,6 +57,10 @@ export default function ProductDetailsPage() {
         try {
           const revs = await api.productReviews(prod.id);
           setReviewsData(revs);
+          if (revs.userReview) {
+            setNewRating(revs.userReview.rating);
+            setNewComment(revs.userReview.comment || '');
+          }
         } catch {}
       })
       .catch((e: Error) => toast.error(e.message))
@@ -107,16 +111,12 @@ export default function ProductDetailsPage() {
         comment: newComment.trim() || undefined,
       });
 
-      toast.success(t('Thank you for your feedback! Review published.', 'شكراً لك على تقييمك! تم نشر التقييم بنجاح.'));
-      setNewComment('');
+      toast.success(t('Thank you! Your verified review has been published.', 'شكراً لك! تم حفظ ونشر تقييمك الموثق بنجاح.'));
       // Reload reviews
       const updatedRevs = await api.productReviews(product.id);
       setReviewsData(updatedRevs);
     } catch (err: any) {
-      toast.error(t('Please log in or create an account to submit a review', 'يرجى تسجيل الدخول أو إنشاء حساب لإضافة تقييم'));
-      setTimeout(() => {
-        router.push('/login');
-      }, 1000);
+      toast.error(err.message || t('Failed to submit review', 'تعذر إرسال التقييم'));
     } finally {
       setSubmittingReview(false);
     }
@@ -124,68 +124,100 @@ export default function ProductDetailsPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 space-y-3">
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
         <Toaster position="top-right" richColors />
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500"></div>
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-widest animate-pulse">
-          {t('Loading product details...', 'جاري تحميل تفاصيل المنتج...')}
-        </p>
+        <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">{t('Loading Product...', 'جاري تحميل تفاصيل المنتج...')}</p>
       </div>
     );
   }
 
-  if (!product) return <p className="text-red-600 text-center py-20">{t('Product not found', 'المنتج غير موجود')}</p>;
+  if (!product) {
+    return (
+      <div className="text-center py-20 space-y-4">
+        <Toaster position="top-right" richColors />
+        <h2 className="text-xl font-bold text-slate-800">{t('Product Not Found', 'المنتج غير موجود')}</h2>
+        <p className="text-xs text-slate-500">{t('The product you are looking for might have been removed.', 'قد يكون المنتج غير متوفر أو تم نقله.')}</p>
+        <Link href="/products">
+          <Button variant="secondary" className="text-xs">
+            {t('Back to Catalog', 'العودة لجميع المنتجات')}
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
-  const stockStatus = getStockStatus(product.stockQuantity, lang);
-  const ratingSummary = reviewsData?.summary || { totalReviews: 0, averageRating: 0, breakdown: {} };
+  const stockInfo = getStockStatus(product.stockQuantity);
   const displayName = formatProductName(product);
+  const displayDescription = formatProductDescription(product);
+  const ratingSummary = reviewsData?.summary || { averageRating: 5.0, totalReviews: 1 };
+  const hasPurchased = Boolean(reviewsData?.hasPurchased);
 
   return (
-    <div className="space-y-12 animate-fade-in max-w-5xl mx-auto pb-16">
+    <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in pb-12">
       <Toaster position="top-right" richColors />
 
       {/* Breadcrumb Navigation */}
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-        <span className="cursor-pointer hover:text-amber-600 transition" onClick={() => router.push('/products')}>
-          {t('Catalog', 'المنتجات')}
-        </span>
+      <nav className="flex items-center gap-2 text-xs font-medium text-slate-500">
+        <Link href="/products" className="hover:text-slate-800 transition">
+          {t('Home', 'الرئيسية')}
+        </Link>
         <span>/</span>
-        <span className="text-amber-500 font-bold">{formatCategoryName(product.category)}</span>
-      </div>
+        <Link href={`/products?category=${product.categoryId}`} className="hover:text-slate-800 transition">
+          {formatCategoryName(product.category || { name: 'Cameras & Energy' })}
+        </Link>
+        <span>/</span>
+        <span className="text-slate-800 font-bold truncate">{displayName}</span>
+      </nav>
 
-      <div className="grid gap-10 md:grid-cols-2">
-        <div className="relative h-[480px] overflow-hidden rounded-2xl bg-slate-50 border border-slate-200/40 shadow-md">
-          <Image src={product.imageUrl} alt={displayName} fill className="object-cover" />
-          
-          {/* Wishlist Heart Button (Shown ONLY when signed in) */}
-          {isSignedIn && (
+      {/* Product Main Hero Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start">
+        {/* Left Column: Product Image Gallery */}
+        <div className="space-y-4">
+          <div className="relative aspect-square rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/60 shadow-sm group">
+            <Image
+              src={product.imageUrl}
+              alt={displayName}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              priority
+            />
+            {product.stockQuantity < 5 && product.stockQuantity > 0 && (
+              <div className="absolute top-4 left-4 z-10">
+                <Badge variant="warning" className="text-[11px] font-bold shadow-xs">
+                  {t(`Only ${product.stockQuantity} Left!`, `متبقي ${product.stockQuantity} قطع فقط!`)}
+                </Badge>
+              </div>
+            )}
             <button
               onClick={toggleWishlist}
-              className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md shadow-md transition-all ${
-                isWishlisted ? 'bg-rose-500 text-white' : 'bg-white/80 text-slate-700 hover:text-rose-500'
-              }`}
+              className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-white/80 backdrop-blur-md text-slate-600 hover:text-rose-500 hover:bg-white transition shadow-sm cursor-pointer"
+              title={isWishlisted ? t('Remove from Wishlist', 'إزالة من المفضلة') : t('Save to Wishlist', 'حفظ في المفضلة')}
             >
-              <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+              <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
             </button>
-          )}
+          </div>
         </div>
 
-        <div className="space-y-6 flex flex-col justify-between py-2">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-500">
-                {formatCategoryName(product.category)}
+        {/* Right Column: Info & Purchase Card */}
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100/80 px-2.5 py-0.5 rounded-md">
+                {product.brand || 'Half Link Pro'}
               </span>
-              <Badge variant={stockStatus.variant}>{stockStatus.label}</Badge>
+              <Badge variant={stockInfo.variant} className="text-[11px] font-bold">
+                {stockInfo.label}
+              </Badge>
             </div>
 
-            <h1 className="serif-font text-3xl md:text-4xl font-black text-black leading-tight">
+            <h1 className="serif-font text-2xl sm:text-3xl font-bold text-slate-800 leading-tight">
               {displayName}
             </h1>
 
-            {/* Rating Stars Header */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center text-amber-400">
+            {/* Rating Stars Quick Summary */}
+            <div className="flex items-center gap-2 pt-1">
+              <div className="flex text-amber-400">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
@@ -196,46 +228,58 @@ export default function ProductDetailsPage() {
                 ))}
               </div>
               <span className="text-xs font-bold text-slate-700">{ratingSummary.averageRating}</span>
-              <span className="text-xs text-slate-400">({ratingSummary.totalReviews} {t('customer reviews', 'تقييمات العملاء')})</span>
-            </div>
-
-            <p className="text-3xl font-black text-black">{formatMoney(product.price)}</p>
-
-            <div className="border-t border-b border-slate-200/50 py-4 my-2">
-              <h2 className="text-xs uppercase tracking-widest font-bold text-slate-700 mb-2">{t('Product Overview', 'نظرة عامة عن المنتج')}</h2>
-              <p className="text-sm text-slate-600 leading-relaxed font-light">{formatProductDescription(product)}</p>
-            </div>
-
-            {/* Quality & Warranty Badge */}
-            <div className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-900 border border-amber-500/30 text-xs px-3.5 py-2 rounded-xl font-bold">
-              <ShieldCheck className="w-4 h-4 text-amber-500" />
-              <span>{t('Half Link 2-Year KSA Official Warranty', 'ضمان هالف لينـك الرسمي لمدة سنتين بالمملكة')}</span>
+              <span className="text-xs text-slate-400">({ratingSummary.totalReviews} {t('verified reviews', 'تقييم موثق')})</span>
             </div>
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-slate-100">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+          {/* Pricing Row */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-slate-900 font-mono">
+                {formatMoney(product.price)}
+              </span>
+              <span className="text-xs font-bold text-slate-500">{t('Includes 15% VAT', 'شامل ضريبة القيمة المضافة 15%')}</span>
+            </div>
+            <p className="text-[11px] text-emerald-700 font-semibold mt-1 flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {t('2-Year Commercial Warranty & Fast SASO Delivery in KSA', 'ضمان سنتين رسمي معتمد وتوصيل سريع لكافة مناطق المملكة')}
+            </p>
+          </div>
+
+          {/* Description */}
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+            {displayDescription}
+          </p>
+
+          {/* Quantity and Actions */}
+          <div className="space-y-4 pt-4 border-t border-slate-200/60">
+            <div className="flex items-center gap-4">
+              <span className="text-xs font-bold text-slate-700">{t('Quantity:', 'الكمية:')}</span>
+              <div className="flex items-center border border-slate-200 rounded-xl bg-white p-1">
                 <button
-                  className="px-3.5 py-2 text-slate-500 hover:bg-slate-50 transition active:scale-95"
+                  type="button"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                  className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 cursor-pointer"
                 >
                   -
                 </button>
-                <span className="px-4 py-2 text-xs font-bold text-slate-700 min-w-[32px] text-center">{quantity}</span>
+                <span className="w-10 text-center text-xs font-bold text-slate-800">{quantity}</span>
                 <button
-                  className="px-3.5 py-2 text-slate-500 hover:bg-slate-50 transition active:scale-95"
+                  type="button"
                   onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
+                  disabled={quantity >= product.stockQuantity}
+                  className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 cursor-pointer"
                 >
                   +
                 </button>
               </div>
+            </div>
 
+            <div className="flex items-center gap-3">
               {addedToCart ? (
                 <Link href="/cart" className="flex-1">
-                  <Button
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cart-added-btn"
-                  >
+                  <Button className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md flex items-center justify-center gap-2">
                     <Check className="w-4 h-4" />
                     {t('Go to Cart', 'الذهاب للسلة')}
                     <ArrowRight className="w-4 h-4" />
@@ -244,7 +288,7 @@ export default function ProductDetailsPage() {
               ) : (
                 <Button
                   disabled={product.stockQuantity < 1 || addingToCart}
-                  className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black shadow-md shadow-amber-500/20 flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer"
                   onClick={addToCart}
                 >
                   {addingToCart ? (
@@ -290,7 +334,7 @@ export default function ProductDetailsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/50 pb-4">
           <div>
             <h3 className="text-lg font-bold text-slate-800">{t('Customer Ratings & Reviews', 'تقييمات وآراء العملاء')}</h3>
-            <p className="text-xs text-slate-500">{t('Verified buyer feedback for', 'آراء موثوقة من المشترين لمنتج')} {displayName}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{t('Customer feedback for', 'آراء وتجارب العملاء لمنتج')} {displayName}</p>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-3xl font-extrabold text-slate-800">{ratingSummary.averageRating}</span>
@@ -310,65 +354,130 @@ export default function ProductDetailsPage() {
           </div>
         </div>
 
-        {/* Submit Review Form */}
-        <form onSubmit={handleReviewSubmit} className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200/60 space-y-4">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">{t('Write a Customer Review', 'أضف تقييمك للمنتج')}</h4>
-          
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-600 font-medium">{t('Your Score:', 'تقييمك:')}</span>
-            <div className="flex gap-1 cursor-pointer">
-              {[1, 2, 3, 4, 5].map((score) => (
-                <button
-                  type="button"
-                  key={score}
-                  onClick={() => setNewRating(score)}
-                  className="p-1 transition transform active:scale-90"
-                >
-                  <Star
-                    className={`w-5 h-5 ${score <= newRating ? 'text-amber-400 fill-amber-400' : 'text-slate-300'}`}
-                  />
-                </button>
-              ))}
+        {/* REVIEW ELIGIBILITY & SUBMIT SECTION */}
+        {!isSignedIn ? (
+          /* Case 1: Visitor NOT logged in */
+          <div className="bg-slate-50/90 rounded-2xl p-6 border border-slate-200/80 text-center space-y-3">
+            <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mx-auto shadow-2xs">
+              <Lock className="w-5 h-5" />
             </div>
-            <span className="text-xs font-semibold text-slate-700 ml-2">{newRating} {t('Stars', 'نجوم')}</span>
+            <div className="space-y-1">
+              <h4 className="text-sm font-bold text-slate-800">
+                {t('Sign in to leave a verified review', 'سجّل الدخول لكتابة تقييم موثق')}
+              </h4>
+              <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                {t(
+                  'To ensure complete transparency and prevent fake reviews, only verified customers who purchased this item can submit feedback.',
+                  'لضمان مصداقية التقييمات ومكافحة المراجعات غير الحقيقية، يقتصر التقييم على العملاء الذين أتموا شراء هذا المنتج من المتجر.'
+                )}
+              </p>
+            </div>
+            <Link href="/login">
+              <Button variant="dark" className="text-xs px-6 py-2 mt-1 cursor-pointer">
+                {t('Sign In to Account', 'تسجيل الدخول')}
+              </Button>
+            </Link>
           </div>
-
-          <div>
-            <textarea
-              rows={3}
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder={t('Share your experience with this energy or camera system', 'شاركنا تجربتك ورأيك عن هذا المنتج والكفاءة')}
-              className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white"
-            />
+        ) : !hasPurchased ? (
+          /* Case 2: User logged in but HAS NOT purchased this product */
+          <div className="bg-gradient-to-br from-amber-50/70 via-slate-50 to-slate-100/60 rounded-2xl p-6 border border-amber-200/80 space-y-3">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 flex items-center justify-center flex-none mt-0.5 shadow-2xs">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider bg-amber-200/70 px-2.5 py-0.5 rounded-md">
+                    {t('Verified Purchases Only 🛡️', 'تقييمات المشترين المعتمدين فقط 🛡️')}
+                  </span>
+                </div>
+                <h4 className="text-sm font-bold text-slate-800">
+                  {t('Have you purchased this product?', 'هل قمت بشراء هذا المنتج؟')}
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  {t(
+                    'In accordance with Saudi Ministry of Commerce consumer protection standards, only customers with a completed order for this item are eligible to submit reviews.',
+                    'تطبيقاً لأنظمة وزارة التجارة وحماية المستهلك ومكافحة التقييمات المضللة، يتاح نشر التقييم فقط للعملاء الذين يملكون طلباً مؤكداً لهذا المنتج.'
+                  )}
+                </p>
+                <div className="pt-2">
+                  <Button
+                    onClick={addToCart}
+                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>{t('Buy Now to Review', 'اشترِ المنتج الآن لتتمكن من تقييمه')}</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
+        ) : (
+          /* Case 3: Verified Buyer - Show Review Form */
+          <form onSubmit={handleReviewSubmit} className="bg-slate-50/80 p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-bold text-slate-800">
+                {reviewsData?.userReview ? t('Update Your Review', 'تعديل تقييمك للمنتج') : t('Write a Review', 'أضف تقييمك وتجربتك')}
+              </h4>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-600 font-medium">{t('Your Score:', 'تقييمك:')}</span>
+              <div className="flex gap-1 cursor-pointer">
+                {[1, 2, 3, 4, 5].map((score) => (
+                  <button
+                    type="button"
+                    key={score}
+                    onClick={() => setNewRating(score)}
+                    className="p-1 transition transform active:scale-90"
+                  >
+                    <Star
+                      className={`w-5 h-5 ${score <= newRating ? 'text-amber-400 fill-amber-400' : 'text-slate-300'}`}
+                    />
+                  </button>
+                ))}
+              </div>
+              <span className="text-xs font-bold text-slate-700 ml-2">{newRating} {t('Stars', 'نجوم')}</span>
+            </div>
 
-          <Button
-            type="submit"
-            disabled={submittingReview}
-            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-5 py-2.5 rounded-xl shadow-md flex items-center gap-2 cursor-pointer"
-          >
-            <Send className="w-3.5 h-3.5 text-slate-950" />
-            <span>{submittingReview ? t('Submitting...', 'جاري النشر...') : t('Post Review', 'نشر التقييم')}</span>
-          </Button>
-        </form>
+            <div>
+              <textarea
+                rows={3}
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={t('Share your experience with this energy or camera system', 'شاركنا تجربتك ورأيك عن كفاءة المنتج وأدائه')}
+                className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={submittingReview}
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-5 py-2.5 rounded-xl shadow-md flex items-center gap-2 cursor-pointer"
+            >
+              <Send className="w-3.5 h-3.5 text-slate-950" />
+              <span>
+                {submittingReview
+                  ? t('Submitting...', 'جاري النشر...')
+                  : reviewsData?.userReview
+                  ? t('Update Review', 'تحديث التقييم')
+                  : t('Post Verified Review', 'نشر التقييم الموثق')}
+              </span>
+            </Button>
+          </form>
+        )}
 
         {/* Reviews List */}
         <div className="space-y-4">
           {reviewsData?.reviews.length === 0 ? (
-            <p className="text-xs text-slate-500 italic text-center py-6">{t('Be the first to review this product!', 'كن أول من يضيف تقييماً لهذا المنتج!')}</p>
+            <p className="text-xs text-slate-500 italic text-center py-6">{t('No reviews yet. Be the first verified buyer to review!', 'لا توجد تقييمات سابقة. كن أول مشتري موثق يشارك تجربته!')}</p>
           ) : (
             reviewsData?.reviews.map((rev) => (
-              <div key={rev.id} className="p-4 rounded-xl border border-slate-200/40 bg-white space-y-2">
+              <div key={rev.id} className="p-4 rounded-xl border border-slate-200/50 bg-white space-y-2.5 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-slate-800">
-                      {rev.user.firstName} {rev.user.lastName}
-                    </span>
-                    <span className="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-medium">
-                      {t('Verified Buyer', 'مشتري موثق')}
-                    </span>
-                  </div>
+                  <span className="font-bold text-xs text-slate-800">
+                    {rev.user.firstName} {rev.user.lastName}
+                  </span>
                   <span className="text-[10px] text-slate-400">
                     {new Date(rev.createdAt).toLocaleDateString()}
                   </span>
@@ -383,7 +492,7 @@ export default function ProductDetailsPage() {
                   ))}
                 </div>
 
-                {rev.comment && <p className="text-xs text-slate-600 leading-relaxed pt-1">{rev.comment}</p>}
+                {rev.comment && <p className="text-xs text-slate-600 leading-relaxed">{rev.comment}</p>}
               </div>
             ))
           )}

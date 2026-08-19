@@ -260,6 +260,8 @@ export interface Review {
 
 export interface ProductReviewsSummaryResponse {
   reviews: Review[];
+  hasPurchased?: boolean;
+  userReview?: Review | null;
   summary: {
     totalReviews: number;
     averageRating: number;

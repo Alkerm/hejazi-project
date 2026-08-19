@@ -392,17 +392,18 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 
           <Button
             type="button"
+            variant="dark"
             onClick={handleConfirmCod}
             disabled={processing}
-            className="w-full py-4 bg-slate-950 hover:bg-slate-900 text-amber-400 font-black text-sm rounded-xl shadow-lg border border-amber-500/30 transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 font-black text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-amber-400"
           >
             {processing ? (
               <span className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
-                {t('Confirming Order...', 'جاري تأكيد الطلب...')}
+                <span>{t('Confirming Order...', 'جاري تأكيد الطلب...')}</span>
               </span>
             ) : (
-              <span>{t('Confirm Order (Pay on Delivery)', 'تأكيد الطلب والدفع عند الاستلام')}</span>
+              <span className="text-amber-400 font-bold">{t('Confirm Order (Pay on Delivery)', 'تأكيد الطلب والدفع عند الاستلام')}</span>
             )}
           </Button>
         </div>

@@ -194,21 +194,54 @@ export default function ComplaintsContactPage() {
               </div>
             </div>
 
-            <div className="text-xs">
-              <label className="font-bold text-slate-700 block mb-1">
+            <div className="text-xs space-y-2">
+              <label className="font-bold text-slate-700 block">
                 {t('Subject / Inquiry Topic:', 'موضوع الشكوى أو الاستفسار:')}
               </label>
+
+              {/* Quick Topic Pills */}
+              <div className="flex flex-wrap gap-1.5 pb-1">
+                {[
+                  { en: 'General Inquiry', ar: 'استفسار عام' },
+                  { en: 'Order & Shipping Tracking', ar: 'متابعة شحنة طلب' },
+                  { en: 'Warranty & Maintenance', ar: 'خدمات الضمان والصيانة' },
+                  { en: '🔒 Account & Data Deletion (PDPL)', ar: '🔒 طلب حذف الحساب والبيانات (سدايا PDPL)' },
+                ].map((item) => (
+                  <button
+                    key={item.en}
+                    type="button"
+                    onClick={() => setSubject(lang === 'ar' ? item.ar : item.en)}
+                    className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition cursor-pointer ${
+                      subject === (lang === 'ar' ? item.ar : item.en)
+                        ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-xs'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {lang === 'ar' ? item.ar : item.en}
+                  </button>
+                ))}
+              </div>
+
               <input
                 type="text"
                 required
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder={t(
-                  'e.g. Order Delivery Status or Warranty Replacement',
-                  'مثال: متابعة شحنة طلب أو استفسار عن الضمان'
+                  'e.g. Order Delivery Status or Account Deletion',
+                  'مثال: متابعة شحنة طلب أو طلب حذف الحساب'
                 )}
                 className="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-xs font-medium"
               />
+
+              {subject.includes('PDPL') || subject.includes('حذف') ? (
+                <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                  💡 {t(
+                    'Note: You can also instantly delete your account self-service from your Profile page anytime.',
+                    'ملاحظة: يمكنك أيضاً حذف حسابك بشكل فوري ومباشر من صفحة الملف الشخصي بنقرة واحدة وفق نظام سدايا.'
+                  )}
+                </div>
+              ) : null}
             </div>
 
             <div className="text-xs">

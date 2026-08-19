@@ -186,19 +186,19 @@ export const getRevenueAggregateRepo = async (startDate?: Date) => {
   ]);
 
   return {
-    ordersCount,
-    totalRevenue: Number(salesAggregate._sum.total ?? 0),
+    ordersCount: ordersCount ?? 0,
+    totalRevenue: Number(salesAggregate?._sum?.total ?? 0),
   };
 };
 
-export const getTopCustomersRepo = async (startDate: Date, take = 5) => {
+export const getTopCustomersRepo = async (startDate: Date = new Date(0), take = 5) => {
   const grouped = await prisma.order.groupBy({
     by: ['userId'],
     where: {
       createdAt: { gte: startDate },
     },
     _sum: { total: true },
-    _count: { _all: true },
+    _count: { id: true },
     orderBy: {
       _sum: {
         total: 'desc',
@@ -206,6 +206,8 @@ export const getTopCustomersRepo = async (startDate: Date, take = 5) => {
     },
     take,
   });
+
+  if (grouped.length === 0) return [];
 
   const users = await prisma.user.findMany({
     where: { id: { in: grouped.map((row) => row.userId) } },
@@ -223,7 +225,7 @@ export const getTopCustomersRepo = async (startDate: Date, take = 5) => {
     userId: row.userId,
     customer: usersById.get(row.userId),
     totalSpent: Number(row._sum.total ?? 0),
-    ordersCount: row._count._all,
+    ordersCount: row._count.id,
   }));
 };
 
@@ -286,14 +288,16 @@ export const getTopCustomersByOrdersRepo = async (take: number) => {
   const grouped = await prisma.order.groupBy({
     by: ['userId'],
     _sum: { total: true },
-    _count: { _all: true },
+    _count: { id: true },
     orderBy: {
       _count: {
-        userId: 'desc',
+        id: 'desc',
       },
     },
     take,
   });
+
+  if (grouped.length === 0) return [];
 
   const users = await prisma.user.findMany({
     where: { id: { in: grouped.map((row) => row.userId) } },
@@ -317,7 +321,7 @@ export const getTopCustomersByOrdersRepo = async (take: number) => {
     userId: row.userId,
     customer: usersById.get(row.userId),
     totalSpent: Number(row._sum.total ?? 0),
-    ordersCount: row._count._all,
+    ordersCount: row._count.id,
   }));
 };
 

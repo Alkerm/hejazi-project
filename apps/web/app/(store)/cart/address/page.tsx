@@ -21,7 +21,6 @@ export default function CartAddressPage() {
   const [country, setCountry] = useState('المملكة العربية السعودية');
   const [city, setCity] = useState('');
   const [addressInfo, setAddressInfo] = useState('');
-  const [nationalId, setNationalId] = useState('');
 
   useEffect(() => {
     api
@@ -33,9 +32,6 @@ export default function CartAddressPage() {
           setCity(nextProfile.defaultAddress.city || '');
           setAddressInfo(nextProfile.defaultAddress.line1 || '');
         }
-        if (nextProfile.nationalId) {
-          setNationalId(nextProfile.nationalId);
-        }
       })
       .catch((e: Error) => toast.error(e.message));
   }, []);
@@ -44,10 +40,6 @@ export default function CartAddressPage() {
     event.preventDefault();
     if (!profile) return;
 
-    if (!nationalId.trim() || nationalId.replace(/\D/g, '').length < 10) {
-      toast.error(t('Please enter a valid 10-digit National ID / Iqama number', 'يرجى إدخال رقم هوية وطنية أو إقامة صحيح (10 أرقام)'));
-      return;
-    }
     if (!country.trim()) {
       toast.error(t('Please specify the Country', 'يرجى تحديد الدولة'));
       return;
@@ -68,13 +60,12 @@ export default function CartAddressPage() {
         firstName: profile.firstName,
         lastName: profile.lastName,
         phone: profile.phone,
-        nationalId: nationalId.trim(),
         marketingConsent: profile.marketingConsent,
         address: {
           line1: addressInfo.trim(),
           city: city.trim(),
           country: country.trim(),
-          postalCode: '00000',
+          postalCode: '13326',
         },
       });
       toast.success(t('Delivery address saved successfully!', 'تم حفظ عنوان التوصيل بنجاح!'));
@@ -105,17 +96,17 @@ export default function CartAddressPage() {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/60 pb-4">
         <div>
           <h1 className="serif-font text-2xl sm:text-3xl font-black text-slate-900">
-            {t('Delivery Address & National ID', 'عنوان التوصيل والهوية الوطنية')}
+            {t('Delivery Address', 'عنوان التوصيل والشحن')}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            {t('Specify your 3 location fields and National ID for order delivery.', 'حدد بيانات الموقع الثلاثة ورقم الهوية الوطنية لشحن وتوصيل الطلبات.')}
+            {t('Specify your delivery address and location for order dispatch.', 'حدد بيانات الموقع وعنوان التوصيل لشحن وتسليم الطلبات.')}
           </p>
         </div>
         <Button
           type="button"
           variant="secondary"
           onClick={() => router.push('/cart')}
-          className="border-slate-200 text-xs flex items-center gap-1.5 font-bold"
+          className="border-slate-200 text-xs flex items-center gap-1.5 font-bold cursor-pointer"
         >
           <ArrowLeft className={`w-3.5 h-3.5 ${lang === 'ar' ? 'rotate-180' : ''}`} />
           {t('Back to Cart', 'العودة إلى السلة')}
@@ -123,25 +114,8 @@ export default function CartAddressPage() {
       </div>
 
       <form onSubmit={submit} className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200/70 bg-white shadow-sm space-y-5">
-        {/* National ID Field */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-slate-700">
-            {t('National ID / Iqama Number *', 'رقم الهوية الوطنية / الإقامة *')}
-          </label>
-          <Input
-            value={nationalId}
-            onChange={(e) => setNationalId(e.target.value.replace(/\D/g, '').substring(0, 10))}
-            placeholder="10XXXXXXXX / 20XXXXXXXX (10 digits)"
-            maxLength={10}
-            required
-          />
-          <p className="text-[10px] text-slate-400">
-            {t('Mandatory for courier verification and Saudi logistics compliance.', 'إلزامي للتحقق من هوية المستلم ومطابقة أنظمة النقل واللوجستيات.')}
-          </p>
-        </div>
-
-        {/* The 3 Location Fields */}
-        <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-slate-100">
+        {/* Location Fields */}
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-700">
               {t('1. Country *', '1. الدولة *')}
@@ -175,7 +149,7 @@ export default function CartAddressPage() {
               <button
                 type="button"
                 onClick={() => setIsMapModalOpen(true)}
-                className="text-[10px] font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1 transition shadow-2xs"
+                className="text-[10px] font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1 transition shadow-2xs cursor-pointer"
               >
                 <Navigation className="w-3 h-3 text-amber-600 animate-pulse" />
                 <span>{t('📍 Pin on Map (GPS)', '📍 تحديد من الخريطة')}</span>
@@ -200,10 +174,10 @@ export default function CartAddressPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button type="button" variant="secondary" onClick={() => router.push('/cart')} disabled={saving} className="text-xs">
+            <Button type="button" variant="secondary" onClick={() => router.push('/cart')} disabled={saving} className="text-xs cursor-pointer">
               {t('Cancel', 'إلغاء')}
             </Button>
-            <Button type="submit" disabled={saving} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-6">
+            <Button type="submit" disabled={saving} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-6 cursor-pointer">
               {saving ? t('Saving...', 'جاري الحفظ...') : t('Save & Continue', 'حفظ ومتابعة')}
             </Button>
           </div>

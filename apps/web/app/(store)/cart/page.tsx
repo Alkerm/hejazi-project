@@ -32,11 +32,10 @@ export default function CartPage() {
   const [placing, setPlacing] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
-  // Required Checkout Fields: 1- Country, 2- City, 3- Address Info + National ID
+  // Required Checkout Fields: 1- Country, 2- City, 3- Address Info
   const [country, setCountry] = useState('المملكة العربية السعودية');
   const [city, setCity] = useState('');
   const [addressInfo, setAddressInfo] = useState('');
-  const [nationalId, setNationalId] = useState('');
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   // Coupon state
@@ -54,9 +53,6 @@ export default function CartPage() {
             setCountry(profileData.defaultAddress.country || 'المملكة العربية السعودية');
             setCity(profileData.defaultAddress.city || '');
             setAddressInfo(profileData.defaultAddress.line1 || '');
-          }
-          if (profileData.nationalId) {
-            setNationalId(profileData.nationalId);
           }
         }
       })
@@ -113,10 +109,6 @@ export default function CartPage() {
     }
 
     // Validation for the required checkout fields
-    if (!nationalId.trim() || nationalId.replace(/\D/g, '').length < 10) {
-      toast.error(t('Please enter a valid 10-digit National ID / Iqama number', 'يرجى إدخال رقم هوية وطنية أو إقامة صحيح (10 أرقام)'));
-      return;
-    }
     if (!country.trim()) {
       toast.error(t('Please specify the Country', 'يرجى تحديد الدولة'));
       return;
@@ -133,17 +125,16 @@ export default function CartPage() {
     setPlacing(true);
 
     try {
-      // Save address & national ID to profile in background
+      // Save address to profile in background
       api.updateProfile({
         firstName: profile.firstName,
         lastName: profile.lastName,
         phone: profile.phone,
-        nationalId: nationalId.trim(),
         address: {
           line1: addressInfo.trim(),
           city: city.trim(),
           country: country.trim(),
-          postalCode: '00000',
+          postalCode: '13326',
         },
       }).catch(() => {});
 
@@ -375,13 +366,13 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Required Checkout Delivery & National ID Block */}
+            {/* Required Checkout Delivery Block */}
             <div className="glass-card rounded-2xl p-6 border border-slate-200/40 space-y-4 bg-white shadow-xs">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
                   <h2 className="text-xs uppercase tracking-widest font-bold text-slate-800 flex items-center gap-1.5">
                     <MapPin className="w-4 h-4 text-amber-500" />
-                    {t('Delivery Location & National ID', 'بيانات التوصيل والهوية الوطنية')}
+                    {t('Delivery Location', 'بيانات التوصيل')}
                   </h2>
                   <p className="text-[10px] text-slate-400 mt-0.5">
                     {t('All fields below are required for Saudi shipping compliance.', 'كافة الحقول أدناه مطلوبة لضمان دقة الشحن والتوصيل.')}
@@ -393,22 +384,6 @@ export default function CartPage() {
               </div>
 
               <div className="space-y-3.5 text-xs">
-                {/* National ID */}
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-slate-700">
-                    {t('National ID / Iqama Number *', 'رقم الهوية الوطنية / الإقامة *')}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={10}
-                    placeholder="10XXXXXXXX / 20XXXXXXXX (10 digits)"
-                    value={nationalId}
-                    onChange={(e) => setNationalId(e.target.value.replace(/\D/g, '').substring(0, 10))}
-                    className="w-full text-xs font-mono font-bold px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-slate-50/50"
-                  />
-                </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* 1. Country */}
                   <div className="space-y-1">

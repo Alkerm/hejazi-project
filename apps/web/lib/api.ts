@@ -125,6 +125,11 @@ export const api = {
 
   profile: () => request<UserProfile>('/users/me'),
 
+  deleteAccount: () =>
+    request<{ success: boolean; message: string }>('/users/me', {
+      method: 'DELETE',
+    }),
+
   updateProfile: (payload: {
     firstName: string;
     lastName: string;

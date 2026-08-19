@@ -5,6 +5,9 @@ vi.mock('../../prisma/client', () => ({
     product: {
       findUnique: vi.fn(),
     },
+    orderItem: {
+      findFirst: vi.fn(),
+    },
     review: {
       findFirst: vi.fn(),
       create: vi.fn(),
@@ -29,15 +32,25 @@ describe('ReviewsService Unit Tests', () => {
     ).rejects.toThrow('Rating must be an integer between 1 and 5');
   });
 
-  it('submitReview creates a new review', async () => {
-    vi.mocked(prisma.product.findUnique).mockResolvedValue({ id: 'p1', name: 'Creams' } as any);
+  it('submitReview rejects unverified buyer who did not purchase product', async () => {
+    vi.mocked(prisma.product.findUnique).mockResolvedValue({ id: 'p1', name: '4G Camera' } as any);
+    vi.mocked(prisma.orderItem.findFirst).mockResolvedValue(null);
+
+    await expect(
+      ReviewsService.submitReview({ userId: 'u1', productId: 'p1', rating: 5 })
+    ).rejects.toThrow('Only verified customers who have purchased this product can submit a review');
+  });
+
+  it('submitReview creates a new review for verified buyer', async () => {
+    vi.mocked(prisma.product.findUnique).mockResolvedValue({ id: 'p1', name: '4G Solar Camera' } as any);
+    vi.mocked(prisma.orderItem.findFirst).mockResolvedValue({ id: 'oi1', orderId: 'o1', productId: 'p1' } as any);
     vi.mocked(prisma.review.findFirst).mockResolvedValue(null);
     vi.mocked(prisma.review.create).mockResolvedValue({
       id: 'r1',
       userId: 'u1',
       productId: 'p1',
       rating: 5,
-      comment: 'Awesome hair oil!',
+      comment: 'Excellent solar power battery life!',
       isApproved: true,
     } as any);
 
@@ -45,7 +58,7 @@ describe('ReviewsService Unit Tests', () => {
       userId: 'u1',
       productId: 'p1',
       rating: 5,
-      comment: 'Awesome hair oil!',
+      comment: 'Excellent solar power battery life!',
     });
 
     expect(prisma.review.create).toHaveBeenCalled();
