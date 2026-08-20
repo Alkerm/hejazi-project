@@ -69,11 +69,11 @@ export default function InterestPage() {
           <CheckCircle2 className="w-10 h-10 text-emerald-500" />
         </div>
         <h1 className="serif-font text-3xl font-black text-slate-900">
-          {t('You're on the list!', 'تم تسجيلك بنجاح!')}
+          {t("You're on the list!", 'تم تسجيلك بنجاح!')}
         </h1>
         <p className="text-sm text-slate-600 max-w-md leading-relaxed">
           {t(
-            'Thank you for your interest! We'll reach out to you on WhatsApp as soon as the store launches.',
+            "Thank you for your interest! We'll reach out to you on WhatsApp as soon as the store launches.",
             'شكراً لاهتمامك! سنتواصل معك عبر الواتساب فور إطلاق المتجر.'
           )}
         </p>
