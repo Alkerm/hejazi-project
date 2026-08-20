@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
-import { Globe, Shield, ShoppingBag, Heart, User, LogOut, Grid } from 'lucide-react';
+import { Globe, Shield, ShoppingBag, Heart, User, LogOut, Grid, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { useLanguage } from '@/lib/language-context';
@@ -197,16 +197,15 @@ export function Navbar() {
             >
               <LogOut className="w-5 h-5 stroke-[1.75]" />
             </button>
-          ) : !isLoginPage ? (
-            <div className="flex items-center gap-3">
-              <Link href="/login" className="text-xs font-bold text-slate-700 hover:text-amber-600 transition-colors">
-                {t('Login', 'دخول')}
-              </Link>
-              <Link href="/register" className="rounded-full bg-slate-950 px-4 py-1.5 text-xs font-bold text-amber-400 border border-amber-500/30 shadow-sm transition hover:bg-amber-400 hover:text-slate-950">
-                {t('Register', 'تسجيل حساب')}
-              </Link>
-            </div>
-          ) : null}
+          ) : (
+            <Link
+              href="/interest"
+              className="rounded-full bg-slate-950 px-4 py-1.5 text-xs font-bold text-amber-400 border border-amber-500/30 shadow-sm transition hover:bg-amber-400 hover:text-slate-950 flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              {t('Early Access', 'الوصول المبكر')}
+            </Link>
+          )}
         </nav>
       </div>
     </header>

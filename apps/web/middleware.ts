@@ -3,23 +3,41 @@ import type { NextRequest } from 'next/server';
 
 const SESSION_COOKIE_HINT = 'cosmetics_sid_hint';
 
-// Only redirect admin routes at the middleware level.
-// Protected user pages (wishlist, profile, orders, cart) handle
-// auth checks client-side via Bearer token in api.ts — the hint cookie
-// may not survive cross-subdomain restrictions.
-const protectedPrefixes = ['/admin'];
+// Admin-only routes — unauthenticated → /login
+const adminPrefixes = ['/admin'];
+
+// Soft-launch: these routes redirect to /interest for unauthenticated users
+const softLockedPrefixes = [
+  '/register',
+  '/login',
+  '/forgot-password',
+  '/reset-password',
+  '/orders',
+  '/profile',
+  '/wishlist',
+];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasSession = Boolean(request.cookies.get(SESSION_COOKIE_HINT)?.value);
 
-  const isProtected = protectedPrefixes.some(
+  // Admin protection → /login
+  const isAdmin = adminPrefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
-
-  if (isProtected && !hasSession) {
+  if (isAdmin && !hasSession) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  // Soft-launch protection → /interest
+  const isSoftLocked = softLockedPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+  if (isSoftLocked && !hasSession) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/interest';
     return NextResponse.redirect(url);
   }
 
@@ -27,5 +45,14 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    '/admin/:path*',
+    '/register',
+    '/login',
+    '/forgot-password',
+    '/reset-password/:path*',
+    '/orders/:path*',
+    '/profile/:path*',
+    '/wishlist',
+  ],
 };

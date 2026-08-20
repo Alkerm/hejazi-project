@@ -3,11 +3,66 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, ShieldCheck, ScrollText, Calendar, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShieldCheck, Calendar } from 'lucide-react';
 import { api } from '@/lib/api';
 import { StorePolicy } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
 import { Button } from '@/components/ui/button';
+
+/** Lightweight inline markdown renderer — handles ###/## headings, **bold**, and - bullet lists */
+function renderPolicyContent(text: string) {
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let bulletBuffer: string[] = [];
+
+  const flushBullets = (key: string) => {
+    if (bulletBuffer.length === 0) return;
+    elements.push(
+      <ul key={key} className="list-disc list-outside ps-5 space-y-1 text-slate-700">
+        {bulletBuffer.map((b, i) => (
+          <li key={i} className="leading-relaxed">{renderInline(b)}</li>
+        ))}
+      </ul>
+    );
+    bulletBuffer = [];
+  };
+
+  const renderInline = (str: string): React.ReactNode => {
+    // Handle **bold**
+    const parts = str.split(/\*\*(.+?)\*\*/);
+    return parts.map((part, i) =>
+      i % 2 === 1 ? <strong key={i} className="font-bold text-slate-900">{part}</strong> : part
+    );
+  };
+
+  lines.forEach((line, idx) => {
+    const h3 = line.match(/^###\s+(.+)/);
+    const h2 = line.match(/^##\s+(.+)/);
+    const bullet = line.match(/^[-*]\s+(.+)/);
+
+    if (h3 || h2) {
+      flushBullets(`bullets-${idx}`);
+      const headingText = (h3 || h2)![1];
+      elements.push(
+        <h3 key={idx} className="text-base font-black text-slate-900 mt-6 mb-2 border-b border-slate-100 pb-1.5">
+          {renderInline(headingText)}
+        </h3>
+      );
+    } else if (bullet) {
+      bulletBuffer.push(bullet[1]);
+    } else if (line.trim() === '') {
+      flushBullets(`bullets-${idx}`);
+    } else {
+      flushBullets(`bullets-${idx}`);
+      elements.push(
+        <p key={idx} className="text-slate-700 leading-relaxed">{renderInline(line)}</p>
+      );
+    }
+  });
+
+  flushBullets('bullets-end');
+  return elements;
+}
 
 interface PolicyPageTemplateProps {
   slug: string;
@@ -109,8 +164,8 @@ export function PolicyPageTemplate({
             <p className="text-xs text-slate-400 animate-pulse">{t('Loading policy...', 'جاري تحميل نص السياسة...')}</p>
           </div>
         ) : (
-          <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm whitespace-pre-line space-y-4 font-sans">
-            {content}
+          <div className="max-w-none text-sm space-y-2 font-sans">
+            {renderPolicyContent(content)}
           </div>
         )}
       </div>
