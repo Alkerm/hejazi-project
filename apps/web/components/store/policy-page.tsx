@@ -42,14 +42,17 @@ function renderPolicyContent(text: string) {
 
     if (h3 || h2) {
       flushBullets(`bullets-${idx}`);
-      const headingText = (h3 || h2)![1];
+      const headingMatch = h3 || h2;
+      const headingText = (headingMatch && headingMatch[1]) ? headingMatch[1] : '';
       elements.push(
         <h3 key={idx} className="text-base font-black text-slate-900 mt-6 mb-2 border-b border-slate-100 pb-1.5">
           {renderInline(headingText)}
         </h3>
       );
     } else if (bullet) {
-      bulletBuffer.push(bullet[1]);
+      if (bullet[1]) {
+        bulletBuffer.push(bullet[1]);
+      }
     } else if (line.trim() === '') {
       flushBullets(`bullets-${idx}`);
     } else {
