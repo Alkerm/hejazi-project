@@ -68,6 +68,11 @@ export default function ProductDetailsPage() {
   }, [params.slug]);
 
   const addToCart = async () => {
+    if (!isSignedIn) {
+      toast.info(t('Store opening soon! Register for early access.', 'المتجر يفتح قريباً! سجّل اهتمامك لتصلك رسالة فور الإطلاق.'));
+      router.push('/interest');
+      return;
+    }
     if (!product || addingToCart) return;
     const displayName = formatProductName(product);
     setAddingToCart(true);
@@ -86,6 +91,11 @@ export default function ProductDetailsPage() {
   };
 
   const toggleWishlist = async () => {
+    if (!isSignedIn) {
+      toast.info(t('Store opening soon! Register for early access.', 'المتجر يفتح قريباً! سجّل اهتمامك لتصلك رسالة فور الإطلاق.'));
+      router.push('/interest');
+      return;
+    }
     if (!product) return;
     try {
       const res = await api.toggleWishlist(product.id);
@@ -94,7 +104,7 @@ export default function ProductDetailsPage() {
     } catch (e: any) {
       toast.error(t('Please log in or create an account to save items to your wishlist', 'يرجى تسجيل الدخول أو إنشاء حساب لحفظ المنتجات في المفضلة'));
       setTimeout(() => {
-        router.push('/login');
+        router.push('/interest');
       }, 1000);
     }
   };

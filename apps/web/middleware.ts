@@ -15,6 +15,7 @@ const softLockedPrefixes = [
   '/orders',
   '/profile',
   '/wishlist',
+  '/cart',
 ];
 
 export function middleware(request: NextRequest) {
@@ -54,5 +55,7 @@ export const config = {
     '/orders/:path*',
     '/profile/:path*',
     '/wishlist',
+    '/cart',
+    '/cart/:path*',
   ],
 };

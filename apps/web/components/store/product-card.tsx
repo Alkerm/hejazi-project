@@ -49,9 +49,9 @@ export function ProductCard({ product, initialWishlisted = false }: { product: P
         toast.info(t(`Removed "${displayName}" from Wishlist`, `تم حذف "${displayName}" من المفضلة`));
       }
     } catch (err: any) {
-      toast.error(t('Please log in or create an account to save items to your wishlist', 'يرجى تسجيل الدخول أو إنشاء حساب لحفظ المنتجات في المفضلة'));
+      toast.info(t('Store opening soon! Register for early access.', 'المتجر يفتح قريباً! سجّل اهتمامك لتصلك رسالة فور الإطلاق.'));
       setTimeout(() => {
-        window.location.href = '/login';
+        window.location.href = '/interest';
       }, 1000);
     } finally {
       setIsToggling(false);

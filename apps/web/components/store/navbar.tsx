@@ -142,22 +142,24 @@ export function Navbar() {
 
           {!isDriverSection && (
             <>
-              {/* Cart Icon */}
-              <Link
-                ref={cartRef}
-                href="/cart"
-                className={`relative p-2 text-slate-700 hover:text-amber-600 transition-colors rounded-full hover:bg-amber-50/60 ${
-                  currentPath.startsWith('/cart') ? 'text-amber-600 bg-amber-50/80' : ''
-                }`}
-                title={t('Cart', 'السلة')}
-              >
-                <ShoppingBag className="w-5 h-5 stroke-[1.75]" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-slate-950 shadow-xs cart-badge-pop">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
+              {/* Cart Icon (Shown ONLY when signed in) */}
+              {isSignedIn && (
+                <Link
+                  ref={cartRef}
+                  href="/cart"
+                  className={`relative p-2 text-slate-700 hover:text-amber-600 transition-colors rounded-full hover:bg-amber-50/60 ${
+                    currentPath.startsWith('/cart') ? 'text-amber-600 bg-amber-50/80' : ''
+                  }`}
+                  title={t('Cart', 'السلة')}
+                >
+                  <ShoppingBag className="w-5 h-5 stroke-[1.75]" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-slate-950 shadow-xs cart-badge-pop">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               {/* Wishlist Icon (Shown ONLY when signed in) */}
               {isSignedIn && (
