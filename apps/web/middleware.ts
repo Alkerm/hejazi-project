@@ -32,14 +32,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Soft-launch protection → /interest
-  const isSoftLocked = softLockedPrefixes.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
-  if (isSoftLocked && !hasSession) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/interest';
-    return NextResponse.redirect(url);
+  // Soft-launch protection → /interest (Enabled ONLY when NEXT_PUBLIC_EARLY_ACCESS_MODE is 'true')
+  const isEarlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
+  if (isEarlyAccessMode) {
+    const isSoftLocked = softLockedPrefixes.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    );
+    if (isSoftLocked && !hasSession) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/interest';
+      return NextResponse.redirect(url);
+    }
   }
 
   return NextResponse.next();

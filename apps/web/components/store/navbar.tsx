@@ -85,6 +85,8 @@ export function Navbar() {
   const isDriverSection = currentPath === '/driver' || currentPath.startsWith('/driver/');
   const isLoginPage = currentPath === '/login' || currentPath === '/register';
 
+  const isEarlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
+
   return (
     <header className="sticky top-0 z-50 glass-panel shadow-sm transition-all duration-300">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3">
@@ -142,8 +144,8 @@ export function Navbar() {
 
           {!isDriverSection && (
             <>
-              {/* Cart Icon (Shown ONLY when signed in) */}
-              {isSignedIn && (
+              {/* Cart Icon (Shown for all users in normal mode, or only when signed in in early access mode) */}
+              {(!isEarlyAccessMode || isSignedIn) && (
                 <Link
                   ref={cartRef}
                   href="/cart"
@@ -189,7 +191,7 @@ export function Navbar() {
             </>
           )}
 
-          {/* Conditional Login / Logout Buttons */}
+          {/* Conditional Login / Logout / Early Access Buttons */}
           {isSignedIn ? (
             <button
               type="button"
@@ -199,7 +201,7 @@ export function Navbar() {
             >
               <LogOut className="w-5 h-5 stroke-[1.75]" />
             </button>
-          ) : (
+          ) : isEarlyAccessMode ? (
             <Link
               href="/interest"
               className="rounded-full bg-slate-950 px-4 py-1.5 text-xs font-bold text-amber-400 border border-amber-500/30 shadow-sm transition hover:bg-amber-400 hover:text-slate-950 flex items-center gap-1.5"
@@ -207,7 +209,16 @@ export function Navbar() {
               <Sparkles className="w-3.5 h-3.5" />
               {t('Early Access', 'الوصول المبكر')}
             </Link>
-          )}
+          ) : !isLoginPage ? (
+            <div className="flex items-center gap-3">
+              <Link href="/login" className="text-xs font-bold text-slate-700 hover:text-amber-600 transition-colors">
+                {t('Login', 'دخول')}
+              </Link>
+              <Link href="/register" className="rounded-full bg-slate-950 px-4 py-1.5 text-xs font-bold text-amber-400 border border-amber-500/30 shadow-sm transition hover:bg-amber-400 hover:text-slate-950">
+                {t('Register', 'تسجيل حساب')}
+              </Link>
+            </div>
+          ) : null}
         </nav>
       </div>
     </header>

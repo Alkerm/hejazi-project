@@ -15,6 +15,9 @@ COPY apps/web ./apps/web
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 
+ARG NEXT_PUBLIC_EARLY_ACCESS_MODE
+ENV NEXT_PUBLIC_EARLY_ACCESS_MODE=${NEXT_PUBLIC_EARLY_ACCESS_MODE}
+
 RUN npm run build --workspace=@cosmetics/web && rm -rf /app/apps/web/.next/cache
 
 FROM node:20-alpine AS runner

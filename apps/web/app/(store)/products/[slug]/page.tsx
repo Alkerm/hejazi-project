@@ -67,8 +67,10 @@ export default function ProductDetailsPage() {
       .finally(() => setLoading(false));
   }, [params.slug]);
 
+  const isEarlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
+
   const addToCart = async () => {
-    if (!isSignedIn) {
+    if (isEarlyAccessMode && !isSignedIn) {
       toast.info(t('Store opening soon! Register for early access.', 'المتجر يفتح قريباً! سجّل اهتمامك لتصلك رسالة فور الإطلاق.'));
       router.push('/interest');
       return;
@@ -91,7 +93,7 @@ export default function ProductDetailsPage() {
   };
 
   const toggleWishlist = async () => {
-    if (!isSignedIn) {
+    if (isEarlyAccessMode && !isSignedIn) {
       toast.info(t('Store opening soon! Register for early access.', 'المتجر يفتح قريباً! سجّل اهتمامك لتصلك رسالة فور الإطلاق.'));
       router.push('/interest');
       return;

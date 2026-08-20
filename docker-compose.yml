@@ -55,6 +55,7 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        NEXT_PUBLIC_EARLY_ACCESS_MODE: ${NEXT_PUBLIC_EARLY_ACCESS_MODE:-true}
     container_name: hejazi-web
     restart: always
     depends_on:
@@ -64,6 +65,7 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+      NEXT_PUBLIC_EARLY_ACCESS_MODE: ${NEXT_PUBLIC_EARLY_ACCESS_MODE:-true}
 
 volumes:
   postgres_data:
