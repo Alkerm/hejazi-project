@@ -185,11 +185,10 @@ export default function InterestPage() {
                   key={item.en}
                   type="button"
                   onClick={() => toggleInterest(label)}
-                  className={`text-xs px-3 py-1.5 rounded-xl border font-semibold transition cursor-pointer ${
-                    active
+                  className={`text-xs px-3 py-1.5 rounded-xl border font-semibold transition cursor-pointer ${active
                       ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-sm'
                       : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   {label}
                 </button>
