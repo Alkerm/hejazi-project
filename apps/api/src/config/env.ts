@@ -69,6 +69,9 @@ const envSchema = z
     GLOBAL_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(150),
     AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20),
     TRUST_PROXY: z.preprocess(parseBooleanEnv, z.boolean()).default(false),
+    MOYASAR_SECRET_KEY: z.string().optional(),
+    MOYASAR_PUBLISHABLE_KEY: z.string().optional(),
+    MOYASAR_WEBHOOK_SECRET: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.USE_IN_MEMORY_STORE && !data.REDIS_URL) {

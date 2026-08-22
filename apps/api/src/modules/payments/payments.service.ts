@@ -2,6 +2,7 @@ import { prisma } from '../../prisma/client';
 import { PaymentStatus } from '@prisma/client';
 import { PaymentMethodType } from './payments.types';
 import { generateTransactionReference, generateRefundNoteNumber } from '../../utils/generators';
+import { MoyasarClient } from './moyasar.service';
 
 export interface CreatePaymentIntentInput {
   orderId: string;
@@ -116,6 +117,22 @@ export class PaymentsService {
   }) {
     const { orderId, userId, paymentMethod, transactionId, gateway = 'MOYASAR', status, rawResponse } = input;
 
+    let finalStatus = status;
+    let finalRawResponse = rawResponse || {};
+
+    // If transactionId is provided and we can verify with Moyasar directly
+    if (transactionId && (gateway.includes('MOYASAR') || gateway === 'MOYASAR')) {
+      const moyasarTx = await MoyasarClient.getPayment(transactionId);
+      if (moyasarTx) {
+        finalRawResponse = { ...finalRawResponse, moyasarVerified: true, moyasarStatus: moyasarTx.status, moyasarData: moyasarTx };
+        if (moyasarTx.status === 'paid') {
+          finalStatus = 'PAID';
+        } else if (moyasarTx.status === 'failed') {
+          finalStatus = 'FAILED';
+        }
+      }
+    }
+
     return await prisma.$transaction(async (tx) => {
       const order = await tx.order.findFirst({
         where: { id: orderId, userId },
@@ -126,7 +143,7 @@ export class PaymentsService {
       }
 
       const txnId = transactionId || generateTransactionReference('txn');
-      const targetPaymentStatus = status === 'PAID' ? PaymentStatus.PAID : PaymentStatus.FAILED;
+      const targetPaymentStatus = finalStatus === 'PAID' ? PaymentStatus.PAID : PaymentStatus.FAILED;
 
       const transaction = await tx.paymentTransaction.create({
         data: {
@@ -136,7 +153,7 @@ export class PaymentsService {
           amount: order.total,
           currency: order.currency,
           status: targetPaymentStatus,
-          rawResponse: rawResponse as any,
+          rawResponse: finalRawResponse as any,
         },
       });
 
