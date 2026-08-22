@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CreditCard, Smartphone, Banknote, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '@/lib/language-context';
 
-export type PaymentMethod = 'COD' | 'CREDIT_CARD' | 'MADA' | 'APPLE_PAY';
+export type PaymentMethod = 'MADA' | 'APPLE_PAY' | 'STC_PAY' | 'CREDIT_CARD' | 'AMEX' | 'SAMSUNG_PAY' | 'COD';
 
 interface PaymentSelectorProps {
   selectedMethod: PaymentMethod;
@@ -14,35 +14,86 @@ interface PaymentSelectorProps {
 
 export const PaymentSelector: React.FC<PaymentSelectorProps> = ({ selectedMethod, onSelectMethod }) => {
   const { t } = useLanguage();
+  const [isAppleDevice, setIsAppleDevice] = useState(false);
+  const [isSamsungDevice, setIsSamsungDevice] = useState(false);
 
-  const options: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string; badge?: string }[] = [
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const ua = navigator.userAgent || '';
+
+    // Detect iPhone, iPad, or Mac Safari with Apple Pay support
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isMacSafari = /Macintosh/i.test(ua) && /Safari/i.test(ua) && !/Chrome|Chromium|Edg|OPR/i.test(ua);
+    const hasApplePay = Boolean((window as any).ApplePaySession);
+    const appleSupported = isIOS || (isMacSafari && hasApplePay);
+    setIsAppleDevice(appleSupported);
+
+    // Detect Samsung Galaxy devices / Samsung Browser (excluding iPhone / Desktop)
+    const samsungSupported = !appleSupported && /SamsungBrowser|SAMSUNG|SM-[A-Z0-9]+/i.test(ua);
+    setIsSamsungDevice(samsungSupported);
+
+    // If current selectedMethod is not supported on this device, fallback to MADA
+    if (selectedMethod === 'APPLE_PAY' && !appleSupported) {
+      onSelectMethod('MADA');
+    } else if (selectedMethod === 'SAMSUNG_PAY' && !samsungSupported) {
+      onSelectMethod('MADA');
+    }
+  }, []);
+
+  const rawOptions: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string; badge?: string }[] = [
     {
       id: 'MADA',
       label: t('Mada Debit Card (مدى)', 'بطاقة مدى (Mada)'),
-      icon: <CreditCard className="w-5 h-5 text-emerald-600" />,
-      description: t('Pay instantly using your Saudi Mada card.', 'الدفع الفوري باستخدام بطاقة مدى السعودية.'),
-      badge: t('Popular in KSA', 'الأكثر شعبية بالمملكة'),
+      icon: <div className="w-5 h-5 rounded-md bg-emerald-600 text-white font-black text-[9px] flex items-center justify-center">مدى</div>,
+      description: t('Instant payment with any Saudi bank Mada card.', 'الدفع الفوري ببطاقات مدى من كافة البنوك السعودية.'),
+      badge: t('Popular in KSA', 'الأكثر استخداماً بالمملكة'),
     },
     {
       id: 'APPLE_PAY',
       label: t('Apple Pay', 'أبل باي (Apple Pay)'),
       icon: <Smartphone className="w-5 h-5 text-slate-900" />,
-      description: t('One-touch secure payment via Apple Pay.', 'دفع آمن بلمسة واحدة عبر Apple Pay.'),
-      badge: t('Fastest', 'الأسرع'),
+      description: t('One-touch secure payment via Face ID / Touch ID.', 'دفع فوري وآمن بلمسة واحدة عبر Face ID.'),
+      badge: t('Instant', 'فوري'),
+    },
+    {
+      id: 'STC_PAY',
+      label: t('STC Pay', 'اس تي سي باي (STC Pay)'),
+      icon: <div className="w-5 h-5 rounded-md bg-purple-700 text-white font-bold text-[9px] flex items-center justify-center">stc</div>,
+      description: t('Direct payment from your STC Pay digital wallet.', 'خصم مباشر وسريع من محفظة STC Pay الرقمية.'),
+      badge: t('Wallet', 'محفظة رقمية'),
     },
     {
       id: 'CREDIT_CARD',
-      label: t('Credit / Debit Card', 'البطاقة الائتمانية'),
-      icon: <CreditCard className="w-5 h-5 text-indigo-600" />,
-      description: t('Visa and Mastercard accepted.', 'مقبولة عبر فيزا وماستركارد.'),
+      label: t('Visa / Mastercard', 'فيزا وماستركارد (Credit Card)'),
+      icon: <CreditCard className="w-5 h-5 text-blue-600" />,
+      description: t('Worldwide Visa and Mastercard accepted.', 'مقبولة عبر بطاقات فيزا وماستركارد العالمية.'),
+    },
+    {
+      id: 'AMEX',
+      label: t('American Express (Amex)', 'أمريكان إكسبريس (Amex)'),
+      icon: <div className="w-5 h-5 rounded-md bg-sky-700 text-white font-black text-[8px] flex items-center justify-center">AMEX</div>,
+      description: t('American Express corporate & personal cards.', 'بطاقات أمريكان إكسبريس للشركات والأفراد.'),
+    },
+    {
+      id: 'SAMSUNG_PAY',
+      label: t('Samsung Pay', 'سامسونج باي (Samsung Pay)'),
+      icon: <Smartphone className="w-5 h-5 text-blue-800" />,
+      description: t('Quick biometric checkout on Galaxy devices.', 'دفع سريع ببصمة الإصبع لأجهزة سامسونج جالاكسي.'),
     },
     {
       id: 'COD',
-      label: t('Cash on Delivery (الدفع عند الاستلام)', 'الدفع عند الاستلام (نقداً)'),
+      label: t('Cash on Delivery (COD)', 'الدفع عند الاستلام (نقداً)'),
       icon: <Banknote className="w-5 h-5 text-amber-600" />,
-      description: t('Pay in SAR cash when your courier arrives.', 'الدفع نقداً بالريال عند وصول مندوب التوصيل.'),
+      description: t('Pay in SAR cash when your courier arrives.', 'السداد نقداً بالريال لمندوب التوصيل عند الاستلام.'),
     },
   ];
+
+  // Smart Filter: Only show Apple Pay on Apple devices & Samsung Pay on Samsung devices
+  const options = rawOptions.filter((opt) => {
+    if (opt.id === 'APPLE_PAY') return isAppleDevice;
+    if (opt.id === 'SAMSUNG_PAY') return isSamsungDevice;
+    return true;
+  });
 
   return (
     <div className="space-y-4">

@@ -51,10 +51,15 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
   const [otpCode, setOtpCode] = useState('');
   const [otpError, setOtpError] = useState('');
   const [applePayAuthenticating, setApplePayAuthenticating] = useState(false);
+  const [samsungPayAuthenticating, setSamsungPayAuthenticating] = useState(false);
   const [moyasarTxId, setMoyasarTxId] = useState<string | null>(null);
 
+  // STC Pay State
+  const [stcPhone, setStcPhone] = useState('0501234567');
+  const [showStcOtpModal, setShowStcOtpModal] = useState(false);
+
   // Quick Test Auto-Fill Helpers
-  const fillTestCard = (type: 'MADA' | 'VISA' | 'MASTER' | 'FAIL') => {
+  const fillTestCard = (type: 'MADA' | 'VISA' | 'MASTER' | 'AMEX' | 'FAIL') => {
     setCardHolder('Abdulaziz Al-Hejazi');
     setExpiry('12/28');
     setCvv('123');
@@ -65,6 +70,8 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
       setCardNumber('4111 1111 1111 1111');
     } else if (type === 'MASTER') {
       setCardNumber('5555 5555 5555 4444');
+    } else if (type === 'AMEX') {
+      setCardNumber('3700 0000 0000 004');
     } else if (type === 'FAIL') {
       setCardNumber('4000 0000 0000 0002');
     }
@@ -90,7 +97,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     setCvv(raw);
   };
 
-  // Submit Card Payment
+  // Submit Card Payment (Mada / Visa / Master / Amex)
   const handlePayWithCard = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cardNumber || !cardHolder || !expiry || !cvv) {
@@ -192,7 +199,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     }
   };
 
-  // Apple Pay Simulation
+  // Apple Pay
   const handleApplePay = async () => {
     setApplePayAuthenticating(true);
 
@@ -216,6 +223,83 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
         onPaymentFailure(err.message || t('Apple Pay failed', 'فشلت عملية Apple Pay'));
       }
     }, 1500);
+  };
+
+  // Samsung Pay
+  const handleSamsungPay = async () => {
+    setSamsungPayAuthenticating(true);
+
+    setTimeout(async () => {
+      try {
+        const res = await api.verifyPayment({
+          orderId,
+          paymentMethod: 'SAMSUNG_PAY',
+          transactionId: `samsung_pay_${Date.now()}`,
+          gateway: 'MOYASAR_SAMSUNG_PAY',
+          status: 'PAID',
+          rawResponse: {
+            cardType: 'SAMSUNG_PAY',
+            token: 'samsung_device_token_simulated',
+          },
+        });
+        setSamsungPayAuthenticating(false);
+        onPaymentSuccess(res.order);
+      } catch (err: any) {
+        setSamsungPayAuthenticating(false);
+        onPaymentFailure(err.message || t('Samsung Pay failed', 'فشلت عملية Samsung Pay'));
+      }
+    }, 1500);
+  };
+
+  // STC Pay Submit
+  const handleStcPaySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stcPhone || stcPhone.length < 9) {
+      onPaymentFailure(t('Please enter a valid Saudi phone number', 'يرجى إدخال رقم جوال سعودي صحيح'));
+      return;
+    }
+
+    setProcessing(true);
+    setTimeout(() => {
+      setProcessing(false);
+      setShowStcOtpModal(true);
+    }, 1000);
+  };
+
+  // STC Pay Verify OTP
+  const handleVerifyStcOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setOtpError('');
+
+    if (otpCode !== '1234' && otpCode !== '0000' && otpCode.length < 4) {
+      setOtpError(t('Invalid OTP. Use test code 1234.', 'رمز التحقق غير صحيح. استخدم الرمز التجريبي 1234.'));
+      return;
+    }
+
+    setProcessing(true);
+
+    try {
+      const res = await api.verifyPayment({
+        orderId,
+        paymentMethod: 'STC_PAY',
+        transactionId: `stcpay_test_${Date.now()}`,
+        gateway: 'MOYASAR_STCPAY',
+        status: 'PAID',
+        rawResponse: {
+          wallet: 'STC_PAY',
+          mobile: stcPhone,
+          verifiedVia: 'STC Pay Sandbox OTP',
+        },
+      });
+
+      setShowStcOtpModal(false);
+      onPaymentSuccess(res.order);
+    } catch (err: any) {
+      setShowStcOtpModal(false);
+      onPaymentFailure(err.message || t('STC Pay failed to process', 'فشلت معالجة عملية الدفع عبر STC Pay'));
+    } finally {
+      setProcessing(false);
+    }
   };
 
   // Cash on Delivery
@@ -253,21 +337,28 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
           </div>
         </div>
 
-        {selectedMethod !== 'COD' && selectedMethod !== 'APPLE_PAY' && (
+        {selectedMethod !== 'COD' && (
           <div className="flex flex-wrap items-center gap-1.5 self-stretch sm:self-auto">
             <button
               type="button"
               onClick={() => fillTestCard('MADA')}
               className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white shadow-2xs transition-all"
             >
-              🇸🇦 {t('Fill Mada', 'بطاقة مدى')}
+              🇸🇦 {t('Mada Test', 'بطاقة مدى')}
             </button>
             <button
               type="button"
               onClick={() => fillTestCard('VISA')}
               className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-blue-700 hover:bg-blue-800 text-white shadow-2xs transition-all"
             >
-              💳 {t('Fill Visa', 'بطاقة فيزا')}
+              💳 {t('Visa Test', 'بطاقة فيزا')}
+            </button>
+            <button
+              type="button"
+              onClick={() => fillTestCard('AMEX')}
+              className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-sky-700 hover:bg-sky-800 text-white shadow-2xs transition-all"
+            >
+              💳 {t('Amex Test', 'أمريكان إكسبريس')}
             </button>
             <button
               type="button"
@@ -282,8 +373,8 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 
       {/* RENDER BY METHOD */}
 
-      {/* 1. MADA / CREDIT CARD FORM */}
-      {(selectedMethod === 'MADA' || selectedMethod === 'CREDIT_CARD') && (
+      {/* 1. MADA / VISA / MASTERCARD / AMEX CARD FORM */}
+      {(selectedMethod === 'MADA' || selectedMethod === 'CREDIT_CARD' || selectedMethod === 'AMEX') && (
         <form onSubmit={handlePayWithCard} className="space-y-4">
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -373,7 +464,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
         </form>
       )}
 
-      {/* 2. APPLE PAY BUTTON */}
+      {/* 2. APPLE PAY */}
       {selectedMethod === 'APPLE_PAY' && (
         <div className="space-y-4 text-center py-4">
           <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-4">
@@ -412,7 +503,98 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
         </div>
       )}
 
-      {/* 3. CASH ON DELIVERY (COD) */}
+      {/* 3. SAMSUNG PAY */}
+      {selectedMethod === 'SAMSUNG_PAY' && (
+        <div className="space-y-4 text-center py-4">
+          <div className="p-6 rounded-2xl border border-blue-100 bg-blue-50/40 space-y-4">
+            <div className="w-12 h-12 rounded-full bg-blue-900 text-white flex items-center justify-center mx-auto shadow-md">
+              <Smartphone className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">{t('Samsung Pay Instant Checkout', 'دفع فوري عبر Samsung Pay')}</h3>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                {t(
+                  'Authorize your payment securely with fingerprint authentication on your Samsung device.',
+                  'أكّد عملية الشراء عبر بصمة الإصبع لجهاز سامسونج الخاص بك.'
+                )}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSamsungPay}
+              disabled={samsungPayAuthenticating}
+              className="w-full max-w-xs mx-auto py-3.5 px-6 rounded-xl bg-blue-800 text-white hover:bg-blue-900 font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-98"
+            >
+              {samsungPayAuthenticating ? (
+                <span className="flex items-center gap-2">
+                  <Fingerprint className="w-5 h-5 animate-pulse text-sky-300" />
+                  {t('Authenticating Biometrics...', 'جاري التحقق من البصمة...')}
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <span>Samsung Pay</span>
+                  <span>({formatMoney(orderTotal)} {currency})</span>
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 4. STC PAY */}
+      {selectedMethod === 'STC_PAY' && (
+        <form onSubmit={handleStcPaySubmit} className="space-y-4">
+          <div className="p-5 rounded-2xl border border-purple-200 bg-purple-50/50 space-y-3">
+            <div className="flex items-center gap-2 text-purple-950 font-bold text-sm">
+              <div className="w-6 h-6 rounded-md bg-purple-700 text-white font-bold text-[10px] flex items-center justify-center">stc</div>
+              <span>{t('STC Pay Digital Wallet', 'محفظة STC Pay الرقمية')}</span>
+            </div>
+            <p className="text-xs text-purple-900/80 leading-relaxed">
+              {t(
+                'Enter your Saudi phone number registered with STC Pay. We will send an SMS OTP to authorize the payment.',
+                'أدخل رقم جوالك المسجل في STC Pay وسيصلك رمز تحقق عبر الرسائل النصية لتأكيد الخصم.'
+              )}
+            </p>
+
+            <div className="space-y-1.5 pt-2">
+              <label className="block text-xs font-bold text-purple-950">
+                {t('STC Pay Mobile Number', 'رقم الجوال المسجل في STC Pay')}
+              </label>
+              <div className="relative">
+                <input
+                  type="tel"
+                  required
+                  placeholder="0501234567"
+                  value={stcPhone}
+                  onChange={(e) => setStcPhone(e.target.value)}
+                  className="w-full text-sm font-mono px-4 py-3 rounded-xl border border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 tracking-wider font-semibold bg-white"
+                />
+                <span className="absolute right-3 top-3 text-xs text-purple-700 font-bold">🇸🇦 +966</span>
+              </div>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={processing}
+            className="w-full py-4 bg-purple-700 hover:bg-purple-800 text-white font-bold text-sm rounded-xl shadow-lg shadow-purple-700/20 transition-all flex items-center justify-center gap-2 mt-4"
+          >
+            {processing ? (
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                {t('Connecting to STC Pay...', 'جاري الاتصال بـ STC Pay...')}
+              </span>
+            ) : (
+              <span>
+                {t('Pay with STC Pay', 'سداد عبر STC Pay')} ({formatMoney(orderTotal)} {currency})
+              </span>
+            )}
+          </Button>
+        </form>
+      )}
+
+      {/* 5. CASH ON DELIVERY (COD) */}
       {selectedMethod === 'COD' && (
         <div className="space-y-4">
           <div className="p-5 rounded-2xl border border-amber-200 bg-amber-50/60 space-y-2">
@@ -452,7 +634,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
         <span>{t('256-Bit SSL Encrypted & Saudi Payment Gateway Compliant', 'مشفر باتصال آمن 256 بت ومتوافق مع بوابات الدفع السعودية')}</span>
       </div>
 
-      {/* 3D-SECURE OTP SIMULATION MODAL */}
+      {/* 3D-SECURE OTP MODAL (Cards) */}
       <AnimatePresence>
         {showOtpModal && (
           <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -469,7 +651,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-800 text-sm">3D-Secure 2.0 Verification</h3>
-                    <p className="text-[10px] text-slate-400">Saudi National Payment Switch (MADA)</p>
+                    <p className="text-[10px] text-slate-400">Saudi National Payment Switch (MADA / Visa)</p>
                   </div>
                 </div>
                 <Lock className="w-4 h-4 text-emerald-600" />
@@ -531,6 +713,89 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                     className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md"
                   >
                     {processing ? t('Verifying...', 'جاري التحقق...') : t('Submit & Pay', 'تأكيد وسداد')}
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* STC PAY OTP MODAL */}
+      <AnimatePresence>
+        {showStcOtpModal && (
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-purple-100 space-y-5"
+            >
+              <div className="flex items-center justify-between border-b border-purple-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-purple-700 text-white font-bold text-xs flex items-center justify-center">
+                    stc
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm">STC Pay Wallet Verification</h3>
+                    <p className="text-[10px] text-purple-700">Digital Direct Deduction</p>
+                  </div>
+                </div>
+                <Lock className="w-4 h-4 text-purple-700" />
+              </div>
+
+              <div className="bg-purple-50/50 p-4 rounded-2xl space-y-1.5 text-xs text-purple-900">
+                <div className="flex justify-between">
+                  <span>{t('Mobile Number:', 'رقم الجوال:')}</span>
+                  <strong className="text-purple-950 font-mono">{stcPhone}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('Amount to Deduct:', 'المبلغ المطلوب خصمه:')}</span>
+                  <strong className="text-purple-950">{formatMoney(orderTotal)} {currency}</strong>
+                </div>
+              </div>
+
+              <form onSubmit={handleVerifyStcOtp} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700">
+                    {t('Enter STC Pay SMS OTP Code', 'أدخل رمز التحقق المرسل إلى تطبيقك')}
+                  </label>
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="1234"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    maxLength={6}
+                    className="w-full text-center text-xl tracking-widest font-mono font-black py-3 rounded-xl border border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 bg-white"
+                  />
+                  <p className="text-[11px] text-purple-700 font-medium text-center">
+                    {t('💡 Test Sandbox OTP: Enter 1234 to approve', '💡 رمز الاختبار التجريبي: اكتب 1234 للموافقة')}
+                  </p>
+                </div>
+
+                {otpError && (
+                  <div className="p-2.5 rounded-xl bg-red-50 text-red-600 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-none" />
+                    <span>{otpError}</span>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowStcOtpModal(false)}
+                    className="w-1/3 py-2.5 text-xs border-slate-200"
+                  >
+                    {t('Cancel', 'إلغاء')}
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={processing}
+                    className="flex-1 py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-md"
+                  >
+                    {processing ? t('Confirming...', 'جاري الخصم...') : t('Authorize & Pay', 'تأكيد السداد')}
                   </Button>
                 </div>
               </form>
